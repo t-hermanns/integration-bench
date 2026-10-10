@@ -1,8 +1,8 @@
 # integration-bench
 
-MCP-Integrationen für Jira Cloud, GitHub, Google Drive und Slack: anlegen, bauen, testen, mit Evals messen, verbessern und überwachen.
+MCP integrations for Jira Cloud, GitHub, Google Drive and Slack: scaffold, build, test, measure with evals, improve and monitor.
 
-## Entwicklung
+## Development
 
 ```bash
 python -m uv sync
