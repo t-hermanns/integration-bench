@@ -18,8 +18,8 @@ from bench_core.sandbox import SandboxError
 from bench_slack.auth import LOGIN as LOGIN_SPEC
 from bench_slack.auth import user_token
 from bench_slack.client import SlackClient, make_api
-from bench_slack.fake.seed import MESSAGES, SANDBOX
-from bench_slack.sandbox import SETTINGS, bot_api, sandbox_channel, threads
+from bench_slack.fake.seed import SANDBOX
+from bench_slack.sandbox import EXPECTED, SETTINGS, bot_api, sandbox_channel, threads
 
 BOT = "slack bot"
 LOGIN = "slack login"
@@ -52,7 +52,7 @@ async def _bot(
             channel = await sandbox_channel(client)
         except SandboxError as exc:
             return fail(BOT, f"{who.get('user')}@{who.get('team')}: {exc}")
-        seeded = await threads(client, channel.id) == [(m.text, m.replies) for m in MESSAGES]
+        seeded = await threads(client, channel.id) == EXPECTED
     state = "seeded" if seeded else "not seeded (run `bench sandbox seed slack`)"
     detail = f"{who.get('user')}@{who.get('team')}; #{SANDBOX} {state}"
     return ok(BOT, detail) if seeded else fail(BOT, detail)

@@ -42,10 +42,6 @@ def credential(token: str) -> StaticToken:
     return StaticToken("slack", token)
 
 
-def _oauth_error(error: str) -> httpx2.Response:
-    return httpx2.Response(200, json={"ok": False, "error": error})
-
-
 @dataclass
 class SlackFake(FakeBackend):
     clock: Clock = field(default_factory=FakeClock)
@@ -190,12 +186,12 @@ class SlackFake(FakeBackend):
         """refresh_token grant of a PKCE app; every refresh token works once (rotation)."""
         form = r.form()
         if form.get("client_id", "") not in self.oauth_clients:
-            return _oauth_error("invalid_client_id")
+            return self._error("invalid_client_id")
         if form.get("grant_type") != "refresh_token":
-            return _oauth_error("unsupported_grant_type")
+            return self._error("unsupported_grant_type")
         scopes = self.refresh_tokens.pop(form.get("refresh_token", ""), None)
         if scopes is None:
-            return _oauth_error("invalid_refresh_token")
+            return self._error("invalid_refresh_token")
         access, refresh = self.user_tokens(sorted(scopes))
         return self._ok(
             {

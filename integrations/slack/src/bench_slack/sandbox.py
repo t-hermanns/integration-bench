@@ -7,7 +7,7 @@ A rerun reads the channel and only checks it: Slack's join notices are ignored, 
 other difference is an error (delete the extra messages in Slack, then seed again).
 """
 
-from collections.abc import AsyncIterator, Mapping
+from collections.abc import AsyncIterator, Awaitable, Callable, Mapping
 from contextlib import asynccontextmanager
 
 import httpx2
@@ -19,9 +19,11 @@ from bench_core.sandbox import Echo, SandboxError, require
 from bench_slack.auth import bot_token
 from bench_slack.client import SlackClient, make_api
 from bench_slack.fake.seed import MESSAGES, SANDBOX
-from bench_slack.models import Channel, Message
+from bench_slack.models import Channel, Message, Page
 
 SETTINGS = ("SLACK_BOT_TOKEN",)
+EXPECTED = [(m.text, m.replies) for m in MESSAGES]
+"""What `threads` reads from a seeded sandbox."""
 
 
 def bot_api(
@@ -34,28 +36,30 @@ def bot_api(
     return make_api(credential=bot_token(env["SLACK_BOT_TOKEN"]), transport=transport, clock=clock)
 
 
-async def find_sandbox(client: SlackClient) -> Channel | None:
+async def _all[T](fetch: Callable[[str | None], Awaitable[Page[T]]]) -> AsyncIterator[T]:
+    """Every item of a cursor-paginated listing; `fetch(cursor)` returns one page."""
     cursor: str | None = None
     while True:
-        page = await client.list_channels(cursor=cursor, page_size=100)
-        for channel in page.items:
-            if channel.name == SANDBOX:
-                return channel
+        page = await fetch(cursor)
+        for item in page.items:
+            yield item
         if page.next_cursor is None:
-            return None
+            return
         cursor = page.next_cursor
+
+
+async def find_sandbox(client: SlackClient) -> Channel | None:
+    async for channel in _all(lambda cursor: client.list_channels(cursor=cursor, page_size=100)):
+        if channel.name == SANDBOX:
+            return channel
+    return None
 
 
 async def threads(client: SlackClient, channel: str) -> list[tuple[str, tuple[str, ...]]]:
     """(text, reply texts) per top-level message, oldest first, like `MESSAGES`."""
-    top: list[Message] = []
-    cursor: str | None = None
-    while True:
-        page = await client.read_history(channel, cursor=cursor, page_size=100)
-        top += page.items
-        if page.next_cursor is None:
-            break
-        cursor = page.next_cursor
+    top: list[Message] = [
+        m async for m in _all(lambda c: client.read_history(channel, cursor=c, page_size=100))
+    ]
     result = []
     for message in reversed(top):
         replies: tuple[str, ...] = ()
@@ -84,9 +88,8 @@ async def seed(
     async with bot_api(env, transport=transport) as api:
         client = SlackClient(api)
         channel = await sandbox_channel(client)
-        expected = [(m.text, m.replies) for m in MESSAGES]
         actual = await threads(client, channel.id)
-        if actual == expected:
+        if actual == EXPECTED:
             echo(f"slack: #{SANDBOX} already holds the {len(MESSAGES)} seed messages")
             return
         if actual:
