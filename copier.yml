@@ -1,0 +1,9 @@
+# copier entry point for templates/integration (questions in questions.yml there).
+# It sits at the repo root because copier only records a template version (`_commit`)
+# for a git repository root, and `copier update` diffs against that version.
+# Use `bench new <name>` / `bench update <name>` (they run copier from this directory).
+_min_copier_version: "9.10"
+_subdirectory: templates/integration/template
+_answers_file: .copier-answers.yml
+---
+!include templates/integration/questions.yml

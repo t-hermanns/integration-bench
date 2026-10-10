@@ -10,3 +10,10 @@ python -m uv run ruff check
 python -m uv run pyright
 python -m uv run pytest
 ```
+
+New integrations come from the copier template in `templates/integration`
+(see its README):
+
+```bash
+python -m uv run bench new <name>
+```

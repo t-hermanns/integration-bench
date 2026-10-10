@@ -2,7 +2,23 @@
 
 [Copier](https://copier.readthedocs.io) template for one integration package under
 `integrations/<name>`, extracted from the hand-built GitHub integration. Only the
-`template/` directory is copied; this README and `copier.yml` stay here.
+`template/` directory is copied; the questions are in `questions.yml`.
+
+```bash
+uv run bench new jira -d auth=oauth_refresh -d pagination=next_page_token  # asks the rest
+uv run bench update jira  # later: merge template changes into integrations/jira
+```
+
+`bench new` renders the package, adds it to the root `pyproject.toml`, runs `uv sync` and
+writes the synthetic cassettes (`bench synth`). `--defaults` skips the questions that
+`-d KEY=VALUE` does not answer.
+
+The copier entry point is `copier.yml` in the repo root, which includes `questions.yml`:
+copier records the template version (`_commit` in `.copier-answers.yml`) only for a git
+repository root, and `bench update` (`copier update`) merges the changes since that commit,
+keeping local edits. Both commands render from the committed `HEAD`, so commit template
+changes first (`bench new --allow-dirty` renders the working tree, but the result cannot
+be updated later).
 
 ## Questions
 
@@ -27,7 +43,9 @@ After `bench synth <name>` the package is green; then replace "items" with the r
 
 ## Checking template changes
 
-Render each answer combination into `integrations/`, then run ruff (check and format),
-pyright, `bench synth` and pytest on the result. The template must render code that is
-already formatted, so keep lines whose length depends on `name` or `provider` well
-under the limit (test with a 15-character name and a 30-character provider).
+The `generator` CI job renders four combinations that together use every answer, then
+runs ruff (check and format), pyright and pytest on each. Locally: commit, render into
+`integrations/` with `bench new`, check, then remove the package and reset `pyproject.toml`
+and `uv.lock`. The template must render code that is already formatted, so keep lines
+whose length depends on `name` or `provider` well under the limit (CI tests a
+15-character name and a 30-character provider).

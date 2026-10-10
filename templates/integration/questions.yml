@@ -1,14 +1,11 @@
-# Template for one integration package (integrations/<name>), extracted from the
-# hand-built GitHub integration. `bench new <name>` runs it; `copier update` pulls later
-# template changes into generated integrations.
+# Questions for the integration template (integrations/<name>), extracted from the
+# hand-built GitHub integration. The copier entry point is copier.yml in the repo root:
+# copier only versions templates at a git repository root, and `copier update` needs that
+# version. `bench new <name>` and `bench update <name>` run it.
 #
 # The generated package is green out of the box: an example resource ("items") with a
 # list, a get and a create tool, a fake backend in the chosen API style, cassette
 # scenarios and tests. Replace the example resource with the real API afterwards.
-
-_min_copier_version: "9.10"
-_subdirectory: template
-_answers_file: .copier-answers.yml
 
 name:
   type: str
@@ -97,10 +94,3 @@ bare_list:
   type: bool
   default: "{{ pagination == 'link_header' and error_format != 'slack' }}"
   when: false
-
-_message_after_copy: |
-  Generated integrations/{{ name }}. Next steps (`bench new` does the first two):
-    1. Add bench-{{ name }} to the root pyproject.toml and run `uv sync`.
-    2. `uv run bench synth {{ name }}` writes the synthetic cassettes.
-    3. `uv run pytest integrations/{{ name }}` should be green; then replace the example
-       "items" resource with the real API (client, models, fake, scenarios, tools).

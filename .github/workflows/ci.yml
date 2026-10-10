@@ -50,6 +50,42 @@ jobs:
       - run: uv sync --locked
       - run: uv run pytest
 
+  generator:
+    # `bench new` must render an integration that passes lint, types and its own tests.
+    # Together the combinations use every template answer at least once.
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: dummy
+            args: ""
+          - name: oauthcursor
+            args: -d auth=oauth_refresh -d pagination=cursor -d retry=gdrive -d error_format=slack
+          - name: basicjira
+            args: >-
+              -d auth=basic -d pagination=next_page_token -d retry=jira -d error_format=jira
+              -d base_url=https://bench.example.com/rest/api/3
+          - name: longnameclient1
+            args: >-
+              -d auth=client_credentials -d pagination=page_token -d retry=github
+              -d error_format=google -d "provider=Very Long Provider Name Thirty"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # copier clones the repo as its template; shallow clones warn
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: "3.14"
+      - run: uv sync --locked
+      - name: bench new (also runs uv sync and bench synth)
+        run: uv run bench new ${{ matrix.name }} --defaults ${{ matrix.args }}
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run pyright
+      - run: uv run pytest integrations/${{ matrix.name }}
+
   gitleaks:
     runs-on: ubuntu-latest
     steps:
