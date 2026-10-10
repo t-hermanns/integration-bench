@@ -1,0 +1,81 @@
+# Baseline tool descriptions (v1). The description experiment compares this against v2.
+# Only text lives here; behaviour and argument types are in tools.py.
+instructions: >-
+  Tools for GitHub issues, pull requests and repository files. Repositories are
+  addressed by owner and repo name separately (owner "octocat", repo "hello-world").
+  List results come one page at a time; pass next_cursor back to get the next page.
+
+tools:
+  github_search_issues:
+    title: Search issues
+    description: >-
+      Search issues across GitHub with GitHub search syntax and return matching issues.
+      Only issues are returned unless the query contains is:pr.
+    params:
+      query: >-
+        GitHub search query, e.g. "repo:octocat/hello-world is:open label:bug crash".
+      cursor: next_cursor from a previous call to get the next page; omit for page one.
+      per_page: Results per page (1-50).
+      response_format: >-
+        "concise" (default) for number, title, state and labels; "detailed" adds
+        author, comment count, timestamps and URL.
+
+  github_get_issue:
+    title: Get issue
+    description: >-
+      Get one issue (or pull request) by number, including its body.
+    params:
+      owner: Repository owner (user or organization login).
+      repo: Repository name without the owner.
+      number: Issue number.
+      response_format: >-
+        "concise" (default) for the issue itself; "detailed" adds author, timestamps,
+        milestone and the first comments.
+
+  github_create_issue:
+    title: Create issue
+    description: >-
+      Create a new issue in a repository.
+    params:
+      owner: Repository owner (user or organization login).
+      repo: Repository name without the owner.
+      title: Issue title.
+      body: Issue description in Markdown.
+      labels: Label names to add.
+      assignees: Logins of users to assign.
+
+  github_add_issue_comment:
+    title: Comment on issue
+    description: >-
+      Add a comment to an issue or pull request.
+    params:
+      owner: Repository owner (user or organization login).
+      repo: Repository name without the owner.
+      number: Issue or pull request number.
+      body: Comment text in Markdown.
+
+  github_list_pull_requests:
+    title: List pull requests
+    description: >-
+      List pull requests of a repository, most recently updated first.
+    params:
+      owner: Repository owner (user or organization login).
+      repo: Repository name without the owner.
+      state: open (default), closed or all.
+      cursor: next_cursor from a previous call to get the next page; omit for page one.
+      per_page: Results per page (1-50).
+      response_format: >-
+        "concise" (default) or "detailed" (adds creation time, labels and URL).
+
+  github_get_file_contents:
+    title: Get file contents
+    description: >-
+      Read a file from a repository, or list a directory.
+    params:
+      owner: Repository owner (user or organization login).
+      repo: Repository name without the owner.
+      path: Path inside the repository, e.g. "src/main.py"; empty for the root directory.
+      ref: Branch, tag or commit SHA; omit for the default branch.
+      response_format: >-
+        "concise" (default) returns up to 4,000 characters; "detailed" up to 40,000
+        plus size, SHA and URL.

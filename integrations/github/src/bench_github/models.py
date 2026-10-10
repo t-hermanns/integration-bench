@@ -122,6 +122,7 @@ class FileContent(GitHubModel):
     """
 
     path: str
+    type: Literal["file", "symlink", "submodule"] = "file"
     sha: str
     size: int
     text: str | None = None

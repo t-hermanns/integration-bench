@@ -213,9 +213,11 @@ def _decode_file(data: Mapping[str, Any]) -> FileContent:
     }
     kind = data.get("type")
     if kind == "symlink":
-        return FileContent(**common, note=f"Symlink to {data.get('target')!r}.")
+        return FileContent(**common, type="symlink", note=f"Symlink to {data.get('target')!r}.")
     if kind == "submodule":
-        return FileContent(**common, note=f"Git submodule ({data.get('submodule_git_url')}).")
+        return FileContent(
+            **common, type="submodule", note=f"Git submodule ({data.get('submodule_git_url')})."
+        )
     if data.get("encoding") != "base64":
         # Files over 1 MB come back with encoding "none" and no content.
         return FileContent(**common, note="File is too large for the contents API (over 1 MB).")
