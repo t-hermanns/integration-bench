@@ -1,0 +1,86 @@
+name: eval
+
+# Manual eval run: integration, model, descriptions, split and k are chosen at the start.
+# The JSONL log is uploaded as an artifact; Cohere runs count against the monthly call
+# budget kept in the bench-results branch.
+on:
+  workflow_dispatch:
+    inputs:
+      provider:
+        description: Model provider
+        type: choice
+        options: [gemini, cohere, groq]
+        default: gemini
+      integration:
+        description: Only tasks that use this integration
+        type: choice
+        options: [all, jira, github, gdrive, slack]
+        default: all
+      descriptions:
+        description: Tool descriptions variant
+        default: v2
+      split:
+        description: Task split
+        type: choice
+        options: [dev, test, all]
+        default: dev
+      k:
+        description: Runs per task
+        default: "1"
+
+permissions:
+  contents: write # Cohere call budget in bench-results
+
+concurrency:
+  group: live-sandbox
+  cancel-in-progress: false
+
+env:
+  UV_VERSION: "0.13.0"
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      JIRA_SITE: ${{ secrets.JIRA_SITE }}
+      JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+      JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+      # Secret names may not start with GITHUB_, hence GH_.
+      GITHUB_APP_ID: ${{ secrets.GH_APP_ID }}
+      GITHUB_INSTALLATION_ID: ${{ secrets.GH_INSTALLATION_ID }}
+      GITHUB_PRIVATE_KEY: ${{ secrets.GH_PRIVATE_KEY }}
+      GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}
+      GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
+      GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      COHERE_API_KEY: ${{ secrets.COHERE_API_KEY }}
+      GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: "3.14"
+      - run: uv sync --locked
+      - run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: bench eval
+        env:
+          PROVIDER: ${{ inputs.provider }}
+          INTEGRATION: ${{ inputs.integration }}
+          DESCRIPTIONS: ${{ inputs.descriptions }}
+          SPLIT: ${{ inputs.split }}
+          K: ${{ inputs.k }}
+        run: |
+          args=("$PROVIDER" --descriptions "$DESCRIPTIONS" --split "$SPLIT" --k "$K")
+          if [ "$INTEGRATION" != all ]; then args+=(--integration "$INTEGRATION"); fi
+          uv run bench eval "${args[@]}"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: eval-${{ inputs.provider }}-${{ inputs.descriptions }}-${{ inputs.split }}
+          path: .bench/results/
+          if-no-files-found: ignore

@@ -3,13 +3,15 @@
 import json
 import os
 from pathlib import Path
+from typing import ClassVar
 
 import httpx2
 import pytest
-from typer.testing import CliRunner
+from typer.testing import CliRunner, Result
 
-from bench_cli import doctor
+from bench_cli import doctor, main
 from bench_cli.main import app
+from bench_evals.tasks import load_tasks, task_files
 
 runner = CliRunner()
 
@@ -230,3 +232,128 @@ def test_eval_usage_errors(args: list[str], message: str) -> None:
     result = runner.invoke(app, args)
     assert result.exit_code == 2
     assert message in result.output
+
+
+def test_eval_integration_filter_needs_known_tasks() -> None:
+    result = runner.invoke(app, ["eval", "gemini", "--integration", "nope"])
+    assert result.exit_code == 2
+    assert "no tasks for integration 'nope'" in result.output
+
+
+# --- bench regress -------------------------------------------------------------------------
+
+DEV_JIRA = [
+    t.id
+    for t in load_tasks(task_files(Path(__file__).parents[3]))
+    if t.split == "dev" and t.integrations == ("jira",)
+][:8]
+
+
+class FakeIssues:
+    filed: ClassVar[list[tuple[str, str, str]]] = []
+
+    def __init__(self, repo: str, token: str):
+        assert (repo, token) == ("me/bench", "t0ken")
+
+    def find_open(self, label: str, fingerprint_: str) -> int | None:
+        return 7 if self.filed else None
+
+    def create(self, title: str, body: str, labels: list[str]) -> int:
+        self.filed.append(("create", title, body))
+        return 8
+
+    def comment(self, number: int, body: str) -> None:
+        self.filed.append((f"comment #{number}", "", body))
+
+
+@pytest.fixture
+def results(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> tuple[Path, list[str]]:
+    """bench-results as a plain directory; publish only records the commit messages."""
+    tree, published = tmp_path / "tree", []
+    tree.mkdir()
+    monkeypatch.setattr(main.results_branch, "checkout", lambda root: tree)
+    monkeypatch.setattr(main.results_branch, "publish", lambda t, paths, msg: published.append(msg))
+    for var in ("GITHUB_SERVER_URL", "GITHUB_REPOSITORY", "GITHUB_TOKEN", "GITHUB_RUN_ID"):
+        monkeypatch.delenv(var, raising=False)
+    (tmp_path / "empty.env").write_text("", encoding="utf-8")
+    return tree, published
+
+
+def regress(tmp_path: Path, log: Path, *extra: str) -> Result:
+    env = str(tmp_path / "empty.env")
+    args = ["regress", "gemini", "--split", "dev", "--log", str(log), "--env-file", env]
+    return runner.invoke(app, [*args, *extra])
+
+
+def test_regress_first_run_becomes_the_baseline(
+    tmp_path: Path, results: tuple[Path, list[str]]
+) -> None:
+    tree, published = results
+    log = eval_log(tmp_path / "a.jsonl", dict.fromkeys(DEV_JIRA, "No idea."))
+    result = regress(tmp_path, log)
+    assert result.exit_code == 0, result.output
+    assert "new baseline baselines/gemini-v2.json" in result.output
+    baseline = json.loads((tree / "baselines" / "gemini-v2.json").read_text(encoding="utf-8"))
+    assert baseline["model"] == main.PROVIDERS["gemini"].default_model
+    assert baseline["outcomes"] == dict.fromkeys(DEV_JIRA, False)
+    assert len((tree / "history" / "gemini-v2.jsonl").read_text().splitlines()) == 1
+    assert published[0].startswith("baseline: gemini v2 at ")
+
+
+def test_regress_confirms_then_files_and_later_comments(
+    tmp_path: Path, results: tuple[Path, list[str]], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    tree, published = results
+    head = main.results_branch.git("rev-parse", "HEAD", cwd=Path.cwd()).strip()
+    baseline = {
+        "commit": head,
+        "date": "x",
+        "model": "m0",
+        "outcomes": dict.fromkeys(DEV_JIRA, True),
+    }
+    (tree / "baselines").mkdir()
+    (tree / "baselines" / "gemini-v2.json").write_text(json.dumps(baseline), encoding="utf-8")
+    log = eval_log(tmp_path / "a.jsonl", dict.fromkeys(DEV_JIRA, "No idea."))
+    reruns: list[list[str]] = []
+
+    async def rerun(provider, tasks, env, variant, k, out):
+        reruns.append([t.id for t in tasks])
+        eval_log(out, {t.id: "Still no idea." for t in tasks})
+
+    monkeypatch.setattr(main, "eval_run", rerun)
+    result = regress(tmp_path, log)
+    assert result.exit_code == 1, result.output
+    assert reruns == [sorted(DEV_JIRA)]
+    assert "would file [eval-regression] Eval regression: gemini v2 (jira)" in result.output
+    assert f"model drift (m0 -> {main.PROVIDERS['gemini'].default_model})" in result.output
+    assert published[0].startswith("nightly: gemini v2")
+
+    monkeypatch.setenv("GITHUB_SERVER_URL", "https://github.com")
+    monkeypatch.setenv("GITHUB_REPOSITORY", "me/bench")
+    monkeypatch.setenv("GITHUB_TOKEN", "t0ken")
+    monkeypatch.setattr(main, "GitHubIssues", FakeIssues)
+    FakeIssues.filed = []
+    for _ in range(2):
+        assert regress(tmp_path, log).exit_code == 1
+    assert [f[0] for f in FakeIssues.filed] == ["create", "comment #7"]
+    assert f"https://github.com/me/bench/compare/{head[:7]}...{head[:7]}" in FakeIssues.filed[0][2]
+
+
+def test_regress_reports_model_errors_as_infra(
+    tmp_path: Path, results: tuple[Path, list[str]]
+) -> None:
+    tree, _ = results
+    log = tmp_path / "a.jsonl"
+    record = {
+        "run_id": "r",
+        "outcome": "model_error",
+        "error": "boom",
+        "turns": [],
+        "tool_calls": 0,
+    }
+    log.write_text("".join(json.dumps({**record, "task": t}) + "\n" for t in DEV_JIRA), "utf-8")
+    result = regress(tmp_path, log)
+    assert result.exit_code == 1
+    assert "would file [eval-infra]" in result.output
+    assert "8 of 8 runs are invalid" in result.output
+    assert not (tree / "history").exists()

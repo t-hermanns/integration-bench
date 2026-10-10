@@ -95,3 +95,11 @@ the same fingerprint exists, the run comments there instead of opening a duplica
 lost tasks, transcript excerpts, the commit range since the baseline and the cause: "code changed" if
 the range touches `integrations/`, `packages/` or `evals/`, otherwise "model drift". A run where more
 than half of the runs are invalid is not judged; it files an `eval-infra` issue instead.
+
+`bench regress gemini` does all of this (`.github/workflows/nightly.yml`, Gemini over all tasks with
+k=1). A failing `bench doctor` or a crashed run also files an `eval-infra` issue. The baseline is
+`baselines/<provider>-<variant>.json` in the `bench-results` branch (outcomes, commit, model ID); the
+first run sets it and it only moves with `--set-baseline`, so slow drift adds up instead of hiding.
+Every judged run is appended to `history/<provider>-<variant>.jsonl` there; the full logs are workflow
+artifacts. The schedule only runs while the repo variable `NIGHTLY_ENABLED` is `true`.
+`.github/workflows/eval.yml` runs `bench eval` by hand (provider, integration, variant, split, k).

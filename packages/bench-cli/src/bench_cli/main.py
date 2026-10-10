@@ -3,6 +3,7 @@
 import importlib
 import json
 import logging
+import os
 import shutil
 import subprocess
 import sys
@@ -13,7 +14,7 @@ import webbrowser
 from datetime import UTC, datetime
 from pathlib import Path
 from types import ModuleType
-from typing import Annotated
+from typing import Annotated, NoReturn
 
 import anyio
 import typer
@@ -37,8 +38,23 @@ from bench_cli import scaffold
 from bench_evals import results_branch
 from bench_evals.budget import BUDGETS, BudgetedModel, BudgetExhausted, CallBudget
 from bench_evals.models.providers import PROVIDERS
+from bench_evals.regression import (
+    INFRA_LABEL,
+    REGRESSION_LABEL,
+    GitHubIssues,
+    changed_files,
+    check,
+    classify,
+    confirm,
+    file_issue,
+    fingerprint,
+    infra_body,
+    infra_problem,
+    regression_body,
+    regression_fingerprint,
+)
 from bench_evals.runner import live_servers, run_tasks
-from bench_evals.scorer import score_run
+from bench_evals.scorer import Score, score_run
 from bench_evals.stats import Rate, compare, rate, task_outcomes
 from bench_evals.tasks import EvalTask, load_tasks, task_files
 
@@ -284,7 +300,13 @@ def all_tasks() -> list[EvalTask]:
     return load_tasks(task_files(repo_root()))
 
 
-def pick_tasks(tasks: list[EvalTask], split: str, ids: list[str] | None) -> list[EvalTask]:
+def pick_tasks(
+    tasks: list[EvalTask], split: str, ids: list[str] | None, integration: str | None = None
+) -> list[EvalTask]:
+    if integration:
+        tasks = [t for t in tasks if integration in t.integrations]
+        if not tasks:
+            raise typer.BadParameter(f"no tasks for integration {integration!r}")
     if ids:
         unknown = sorted(set(ids) - {t.id for t in tasks})
         if unknown:
@@ -353,6 +375,9 @@ def eval_(
     descriptions: Annotated[str, typer.Option(help="Tool descriptions variant")] = "v1",
     k: Annotated[int, typer.Option(min=1, help="Runs per task")] = 1,
     task: Annotated[list[str] | None, typer.Option(help="Only these task ids")] = None,
+    integration: Annotated[
+        str | None, typer.Option(help="Only tasks that use this integration")
+    ] = None,
     out: Annotated[Path | None, typer.Option(help="JSONL log (default: .bench/results/)")] = None,
     env_file: EnvFile = None,
 ) -> None:
@@ -362,7 +387,7 @@ def eval_(
     if split not in ("dev", "test", "all"):
         raise typer.BadParameter(f"unknown split {split!r}")
     logging.getLogger("httpx2").setLevel(logging.WARNING)
-    tasks = pick_tasks(all_tasks(), split, task)
+    tasks = pick_tasks(all_tasks(), split, task, integration)
     if out is None:
         stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
         out = (
@@ -423,6 +448,158 @@ def score(
             f"only a {c.only_a}, only b {c.only_b}, McNemar p={c.p_value:.3f}"
             + (f", {c.unpaired} unpaired" if c.unpaired else "")
         )
+
+
+def results_file(kind: str, provider: str, variant: str, ext: str) -> str:
+    return f"{kind}/{provider}-{variant}.{ext}"
+
+
+def github_env() -> tuple[str, str] | None:
+    """(server, owner/repo) inside GitHub Actions, else None."""
+    server, repo = os.environ.get("GITHUB_SERVER_URL"), os.environ.get("GITHUB_REPOSITORY")
+    return (server, repo) if server and repo else None
+
+
+def run_url() -> str:
+    gh, run = github_env(), os.environ.get("GITHUB_RUN_ID")
+    return f"{gh[0]}/{gh[1]}/actions/runs/{run}" if gh and run else "(local run)"
+
+
+def report(label: str, fingerprint_: str, title: str, body: str) -> None:
+    """File the issue with GITHUB_TOKEN in GitHub Actions; elsewhere only print it."""
+    gh, token = github_env(), os.environ.get("GITHUB_TOKEN")
+    if gh is None or not token:
+        typer.echo(f"not in GitHub Actions, would file [{label}] {title}:\n{body}")
+        return
+    filed = file_issue(GitHubIssues(gh[1], token), label, fingerprint_, title, body)
+    typer.echo(f"{'opened' if filed.created else 'commented on'} issue #{filed.number}")
+
+
+def infra_issue(provider: str, variant: str, problem: str, env: dict[str, str]) -> NoReturn:
+    for value in env.values():
+        if len(value) >= 8:  # never echo a secret into a public issue
+            problem = problem.replace(value, "***")
+    fp = fingerprint("infra", provider, variant)
+    title = f"Eval infrastructure problem ({provider}, {variant})"
+    report(INFRA_LABEL, fp, title, infra_body(fp, provider, problem[:2000], run_url()))
+    raise typer.Exit(1)
+
+
+async def failed_checks(env: dict[str, str], targets: list[str]) -> list[str]:
+    checks = await doctor_checks.run(env, targets)
+    return [f"{c.target}: {c.detail}" for c in checks if c.status == "fail"]
+
+
+def run_or_report(
+    provider: str, tasks: list[EvalTask], env: dict[str, str], variant: str, out: Path
+) -> list[Score]:
+    """Run the tasks once and score them; any crash becomes an eval-infra issue."""
+    try:
+        anyio.run(eval_run, provider, tasks, env, variant, 1, out)
+    except Exception as exc:  # the nightly reports a crash, it does not raise it
+        infra_issue(provider, variant, f"the run failed: {type(exc).__name__}: {exc}", env)
+    return score_run(tasks, read_records(out))
+
+
+@app.command()
+def regress(
+    provider: Annotated[str, typer.Argument(help="Model provider")] = "gemini",
+    descriptions: Annotated[str, typer.Option(help="Tool descriptions variant")] = "v2",
+    split: Annotated[str, typer.Option(help="dev, test or all")] = "all",
+    log: Annotated[
+        Path | None, typer.Option(help="Judge this JSONL log instead of running the tasks")
+    ] = None,
+    set_baseline: Annotated[bool, typer.Option(help="Make this run the new baseline")] = False,
+    env_file: EnvFile = None,
+) -> None:
+    """Nightly check: run the tasks once, compare with the baseline, file an issue on a drop.
+
+    Baseline and history live in the bench-results branch. A regression (rule in
+    docs/EVALS.md) gets a confirmation round of the lost tasks before the issue is filed.
+    """
+    if provider not in PROVIDERS:
+        raise typer.BadParameter(f"unknown provider {provider!r}")
+    if split not in ("dev", "test", "all"):
+        raise typer.BadParameter(f"unknown split {split!r}")
+    logging.getLogger("httpx2").setLevel(logging.WARNING)
+    root = repo_root()
+    tasks = pick_tasks(all_tasks(), split, None)
+    by_id = {t.id: t for t in tasks}
+    env = env_settings(env_file)
+    stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+    if log is None:
+        names = sorted({i for t in tasks for i in t.integrations})
+        failed = anyio.run(failed_checks, env, [*names, provider])
+        if failed:
+            infra_issue(provider, descriptions, "bench doctor failed: " + "; ".join(failed), env)
+        log = root / ".bench" / "results" / f"regress-{provider}-{descriptions}-{stamp}.jsonl"
+        scores = run_or_report(provider, tasks, env, descriptions, log)
+    else:
+        scores = score_run(tasks, read_records(log))
+    problem = infra_problem(scores)
+    if problem:
+        infra_issue(provider, descriptions, problem, env)
+    current = task_outcomes(scores)
+    typer.echo(f"solved: {show_rate(rate(current))}")
+
+    head = results_branch.git("rev-parse", "HEAD", cwd=root).strip()
+    model = PROVIDERS[provider].model_id(env)
+    entry = {"date": stamp, "commit": head, "model": model, "split": split, "outcomes": current}
+    tree = results_branch.checkout(root)
+    history = results_file("history", provider, descriptions, "jsonl")
+    baseline_path = results_file("baselines", provider, descriptions, "json")
+    (tree / history).parent.mkdir(parents=True, exist_ok=True)
+    with (tree / history).open("a", encoding="utf-8", newline="\n") as f:
+        f.write(json.dumps(entry, sort_keys=True) + "\n")
+    if set_baseline or not (tree / baseline_path).exists():
+        (tree / baseline_path).parent.mkdir(parents=True, exist_ok=True)
+        (tree / baseline_path).write_text(
+            json.dumps(entry, indent=2, sort_keys=True) + "\n", encoding="utf-8", newline="\n"
+        )
+        results_branch.publish(
+            tree, [history, baseline_path], f"baseline: {provider} {descriptions} at {head[:7]}"
+        )
+        typer.echo(f"new baseline {baseline_path} at {head[:7]}")
+        return
+    results_branch.publish(tree, [history], f"nightly: {provider} {descriptions} at {head[:7]}")
+
+    baseline = json.loads((tree / baseline_path).read_text(encoding="utf-8"))
+    verdict = check(baseline["outcomes"], current)
+    typer.echo(
+        f"baseline {baseline['commit'][:7]} ({baseline['date']}): lost {len(verdict.lost)}, "
+        f"gained {len(verdict.gained)}, McNemar p={verdict.paired.p_value:.3f}"
+    )
+    if verdict.regressed:
+        typer.echo(f"confirmation round: {', '.join(verdict.lost)}")
+        again = log.with_name(f"{log.stem}-confirm.jsonl")
+        lost = [by_id[t] for t in verdict.lost]
+        rerun = task_outcomes(run_or_report(provider, lost, env, descriptions, again))
+        verdict = confirm(baseline["outcomes"], current, rerun)
+    if not verdict.regressed:
+        typer.echo("no regression")
+        return
+
+    try:
+        cause = classify(changed_files(root, baseline["commit"], head), baseline["model"], model)
+    except results_branch.ResultsBranchError:
+        cause = "unknown (baseline commit not in this clone)"
+    gh = github_env()
+    span = f"{baseline['commit'][:7]}...{head[:7]}"
+    fp = regression_fingerprint(provider, descriptions, verdict.lost, by_id)
+    integrations = sorted({i for t in verdict.lost for i in by_id[t].integrations})
+    body = regression_body(
+        verdict,
+        fingerprint_=fp,
+        provider=provider,
+        variant=descriptions,
+        cause=cause,
+        compare_url=f"{gh[0]}/{gh[1]}/compare/{span}" if gh else span,
+        scores=scores,
+        records=read_records(log),
+    )
+    title = f"Eval regression: {provider} {descriptions} ({', '.join(integrations)})"
+    report(REGRESSION_LABEL, fp, title, body)
+    raise typer.Exit(1)
 
 
 def load_login(name: str) -> LoginSpec:
