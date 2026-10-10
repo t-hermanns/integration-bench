@@ -51,6 +51,8 @@ dependencies = [
     { name = "httpx2" },
     { name = "keyring" },
     { name = "mcp" },
+    { name = "pydantic" },
+    { name = "pyyaml" },
 ]
 
 [package.metadata]
@@ -58,6 +60,8 @@ requires-dist = [
     { name = "httpx2", specifier = ">=2.13.1" },
     { name = "keyring", specifier = ">=25" },
     { name = "mcp", specifier = ">=2.3,<3" },
+    { name = "pydantic", specifier = ">=2.14" },
+    { name = "pyyaml", specifier = ">=6" },
 ]
 
 [[package]]
