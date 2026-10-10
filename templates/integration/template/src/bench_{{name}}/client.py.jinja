@@ -44,7 +44,6 @@ def make_api(
     base_url: str = BASE_URL,
     transport: httpx2.AsyncBaseTransport | None = None,
     clock: Clock | None = None,
-    default_wait_budget: float = 30.0,
 ) -> ApiClient:
     return ApiClient(
         base_url,
@@ -53,7 +52,6 @@ def make_api(
         transport=transport,
         headers={"Accept": "application/json", "User-Agent": USER_AGENT},
         auth=CredentialAuth(credential) if credential else None,
-        default_wait_budget=default_wait_budget,
     )
 
 

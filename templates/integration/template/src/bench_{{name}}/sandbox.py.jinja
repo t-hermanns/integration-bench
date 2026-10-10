@@ -5,8 +5,7 @@ already seeded sandbox is left alone, anything else that differs is an error. Un
 written, it refuses to run.
 """
 
-from collections.abc import AsyncIterator, Mapping
-from contextlib import asynccontextmanager
+from collections.abc import Mapping
 
 import httpx2
 
@@ -82,8 +81,6 @@ async def seed(
     raise SandboxError("{{ name }}: seeding is not written yet (see sandbox.py)")
 
 
-@asynccontextmanager
-async def live_api(env: Mapping[str, str]) -> AsyncIterator[ApiClient]:
+def live_api(env: Mapping[str, str]) -> ApiClient:
     """`bench record {{ name }}`: the live account that holds the sandbox."""
-    async with make_api(credential=live_credential(env)) as api:
-        yield api
+    return make_api(credential=live_credential(env))
