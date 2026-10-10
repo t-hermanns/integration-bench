@@ -1,0 +1,12 @@
+# Changes here will be overwritten by Copier; do not edit manually.
+_commit: b31be82
+_src_path: .
+auth: oauth_refresh
+authorize_url: https://accounts.google.com/o/oauth2/v2/auth
+base_url: https://www.googleapis.com
+error_format: google
+name: gdrive
+pagination: page_token
+provider: Google Drive
+retry: gdrive
+token_url: https://oauth2.googleapis.com/token

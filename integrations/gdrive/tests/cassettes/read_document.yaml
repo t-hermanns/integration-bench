@@ -1,0 +1,152 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      host:
+      - www.googleapis.com
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://www.googleapis.com/drive/v3/files?q=%28name+contains+%27checklist%27+or+fullText+contains+%27checklist%27%29+and+trashed+%3D+false&fields=nextPageToken%2Cfiles%28id%2Cname%2CmimeType%2Cparents%2CmodifiedTime%2CcreatedTime%2Csize%2Cdescription%2CwebViewLink%29&orderBy=modifiedTime+desc&pageSize=1
+  response:
+    body:
+      string: "{\n  \"files\": [\n    {\n      \"mimeType\": \"application/vnd.google-apps.document\",\n
+        \     \"parents\": [\n        \"1o62GkCmTuQnJ3ezbP0YN-qTbipoUh_vU\"\n      ],\n
+        \     \"webViewLink\": \"https://docs.google.com/document/d/1WP5cuYScYARJBATWi4FpaG4LOjaHiI9YYzl_1DpUGQI/edit?usp=drivesdk\",\n
+        \     \"size\": \"1024\",\n      \"id\": \"1WP5cuYScYARJBATWi4FpaG4LOjaHiI9YYzl_1DpUGQI\",\n
+        \     \"name\": \"Release checklist\",\n      \"createdTime\": \"2026-10-10T17:07:31.177Z\",\n
+        \     \"modifiedTime\": \"2026-10-10T17:07:33.183Z\"\n    }\n  ]\n}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      cache-control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      content-length:
+      - '500'
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Sat, 10 Oct 2026 17:08:09 GMT
+      expires:
+      - Mon, 01 Jan 1990 00:00:00 GMT
+      pragma:
+      - no-cache
+      server:
+      - ESF
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin, X-Origin
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-xss-protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      host:
+      - www.googleapis.com
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://www.googleapis.com/drive/v3/files/1WP5cuYScYARJBATWi4FpaG4LOjaHiI9YYzl_1DpUGQI?fields=id%2Cname%2CmimeType%2Cparents%2CmodifiedTime%2CcreatedTime%2Csize%2Cdescription%2CwebViewLink
+  response:
+    body:
+      string: "{\n  \"id\": \"1WP5cuYScYARJBATWi4FpaG4LOjaHiI9YYzl_1DpUGQI\",\n  \"name\":
+        \"Release checklist\",\n  \"mimeType\": \"application/vnd.google-apps.document\",\n
+        \ \"parents\": [\n    \"1o62GkCmTuQnJ3ezbP0YN-qTbipoUh_vU\"\n  ],\n  \"webViewLink\":
+        \"https://docs.google.com/document/d/1WP5cuYScYARJBATWi4FpaG4LOjaHiI9YYzl_1DpUGQI/edit?usp=drivesdk\",\n
+        \ \"createdTime\": \"2026-10-10T17:07:31.177Z\",\n  \"modifiedTime\": \"2026-10-10T17:07:33.183Z\",\n
+        \ \"size\": \"1024\"\n}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      cache-control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      content-length:
+      - '431'
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Sat, 10 Oct 2026 17:08:10 GMT
+      expires:
+      - Mon, 01 Jan 1990 00:00:00 GMT
+      pragma:
+      - no-cache
+      server:
+      - ESF
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin, X-Origin
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-xss-protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      host:
+      - www.googleapis.com
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://www.googleapis.com/drive/v3/files/1WP5cuYScYARJBATWi4FpaG4LOjaHiI9YYzl_1DpUGQI/export?mimeType=text%2Fplain
+  response:
+    body:
+      string: "\uFEFFRelease checklist\r\n1. Freeze the main branch\r\n2. Run the
+        export tests with 10k rows\r\n3. Update the changelog\r\n4. Tag the release
+        and announce it"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      cache-control:
+      - private, max-age=0, must-revalidate
+      content-disposition:
+      - attachment
+      content-length:
+      - '147'
+      content-type:
+      - text/plain
+      date:
+      - Sat, 10 Oct 2026 17:08:10 GMT
+      expires:
+      - Sat, 10 Oct 2026 17:08:10 GMT
+      server:
+      - ESF
+      vary:
+      - Origin, X-Origin
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-guploader-uploadid:
+      - AP6rU83umUMrWw3asyn1itlGzMO-504NZpNfJvo1QnOzJUztOJwkm1bJPhFqef8Fo_bh61NypDiUkVM
+      x-xss-protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

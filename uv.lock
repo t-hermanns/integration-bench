@@ -10,6 +10,7 @@ resolution-markers = [
 members = [
     "bench-cli",
     "bench-core",
+    "bench-gdrive",
     "bench-github",
     "bench-jira",
     "integration-bench",
@@ -94,6 +95,17 @@ requires-dist = [
     { name = "pyyaml", specifier = ">=6" },
     { name = "vcrpy", specifier = ">=8.3" },
 ]
+
+[[package]]
+name = "bench-gdrive"
+version = "0.1.0"
+source = { editable = "integrations/gdrive" }
+dependencies = [
+    { name = "bench-core" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "bench-core", editable = "packages/bench-core" }]
 
 [[package]]
 name = "bench-github"
@@ -388,6 +400,7 @@ source = { virtual = "." }
 dependencies = [
     { name = "bench-cli" },
     { name = "bench-core" },
+    { name = "bench-gdrive" },
     { name = "bench-github" },
     { name = "bench-jira" },
 ]
@@ -405,6 +418,7 @@ dev = [
 requires-dist = [
     { name = "bench-cli", editable = "packages/bench-cli" },
     { name = "bench-core", editable = "packages/bench-core" },
+    { name = "bench-gdrive", editable = "integrations/gdrive" },
     { name = "bench-github", editable = "integrations/github" },
     { name = "bench-jira", editable = "integrations/jira" },
 ]

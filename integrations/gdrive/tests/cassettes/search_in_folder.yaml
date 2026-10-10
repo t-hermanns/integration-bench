@@ -1,0 +1,180 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      host:
+      - www.googleapis.com
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://www.googleapis.com/drive/v3/files?q=%27root%27+in+parents+and+trashed+%3D+false&fields=nextPageToken%2Cfiles%28id%2Cname%2CmimeType%2Cparents%2CmodifiedTime%2CcreatedTime%2Csize%2Cdescription%2CwebViewLink%29&orderBy=folder%2Cname&pageSize=50
+  response:
+    body:
+      string: "{\n  \"files\": [\n    {\n      \"mimeType\": \"application/vnd.google-apps.folder\",\n
+        \     \"parents\": [\n        \"0APNkQ6Tx4kJkUk9PVA\"\n      ],\n      \"webViewLink\":
+        \"https://drive.google.com/drive/folders/11pxf6okfQE2AZtbOXFwdBt5ACw456F7T\",\n
+        \     \"id\": \"11pxf6okfQE2AZtbOXFwdBt5ACw456F7T\",\n      \"name\": \"bench-sandbox\",\n
+        \     \"createdTime\": \"2026-10-10T17:07:26.266Z\",\n      \"modifiedTime\":
+        \"2026-10-10T17:07:26.266Z\"\n    }\n  ]\n}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      cache-control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      content-length:
+      - '422'
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Sat, 10 Oct 2026 17:08:12 GMT
+      expires:
+      - Mon, 01 Jan 1990 00:00:00 GMT
+      pragma:
+      - no-cache
+      server:
+      - ESF
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin, X-Origin
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-xss-protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      host:
+      - www.googleapis.com
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://www.googleapis.com/drive/v3/files?q=%2711pxf6okfQE2AZtbOXFwdBt5ACw456F7T%27+in+parents+and+trashed+%3D+false&fields=nextPageToken%2Cfiles%28id%2Cname%2CmimeType%2Cparents%2CmodifiedTime%2CcreatedTime%2Csize%2Cdescription%2CwebViewLink%29&orderBy=folder%2Cname&pageSize=50
+  response:
+    body:
+      string: "{\n  \"files\": [\n    {\n      \"mimeType\": \"application/vnd.google-apps.folder\",\n
+        \     \"parents\": [\n        \"11pxf6okfQE2AZtbOXFwdBt5ACw456F7T\"\n      ],\n
+        \     \"webViewLink\": \"https://drive.google.com/drive/folders/1twkftfPtFboxgaT-v0ZoLR9820KqeojI\",\n
+        \     \"id\": \"1twkftfPtFboxgaT-v0ZoLR9820KqeojI\",\n      \"name\": \"Meeting
+        notes\",\n      \"createdTime\": \"2026-10-10T17:07:27.351Z\",\n      \"modifiedTime\":
+        \"2026-10-10T17:07:27.351Z\"\n    },\n    {\n      \"mimeType\": \"application/vnd.google-apps.folder\",\n
+        \     \"parents\": [\n        \"11pxf6okfQE2AZtbOXFwdBt5ACw456F7T\"\n      ],\n
+        \     \"webViewLink\": \"https://drive.google.com/drive/folders/1o62GkCmTuQnJ3ezbP0YN-qTbipoUh_vU\",\n
+        \     \"id\": \"1o62GkCmTuQnJ3ezbP0YN-qTbipoUh_vU\",\n      \"name\": \"Projects\",\n
+        \     \"createdTime\": \"2026-10-10T17:07:26.736Z\",\n      \"modifiedTime\":
+        \"2026-10-10T17:07:26.736Z\"\n    },\n    {\n      \"mimeType\": \"text/plain\",\n
+        \     \"parents\": [\n        \"11pxf6okfQE2AZtbOXFwdBt5ACw456F7T\"\n      ],\n
+        \     \"webViewLink\": \"https://drive.google.com/file/d/1blAvCa0MlN0UiANfLvQfAIPRcSj0n-oF/view?usp=drivesdk\",\n
+        \     \"size\": \"73\",\n      \"id\": \"1blAvCa0MlN0UiANfLvQfAIPRcSj0n-oF\",\n
+        \     \"name\": \"glossary.txt\",\n      \"createdTime\": \"2026-10-10T17:07:46.642Z\",\n
+        \     \"modifiedTime\": \"2026-10-10T17:07:46.642Z\"\n    },\n    {\n      \"mimeType\":
+        \"application/vnd.google-apps.document\",\n      \"parents\": [\n        \"11pxf6okfQE2AZtbOXFwdBt5ACw456F7T\"\n
+        \     ],\n      \"webViewLink\": \"https://docs.google.com/document/d/11bVm3uyDF12Mm-n-ajWlqCOnyC9i4xzJ8j0YaXvnQWI/edit?usp=drivesdk\",\n
+        \     \"size\": \"1024\",\n      \"id\": \"11bVm3uyDF12Mm-n-ajWlqCOnyC9i4xzJ8j0YaXvnQWI\",\n
+        \     \"name\": \"Onboarding guide\",\n      \"createdTime\": \"2026-10-10T17:07:44.121Z\",\n
+        \     \"modifiedTime\": \"2026-10-10T17:07:45.693Z\"\n    }\n  ]\n}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      cache-control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      content-length:
+      - '1748'
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Sat, 10 Oct 2026 17:08:13 GMT
+      expires:
+      - Mon, 01 Jan 1990 00:00:00 GMT
+      pragma:
+      - no-cache
+      server:
+      - ESF
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin, X-Origin
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-xss-protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      host:
+      - www.googleapis.com
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://www.googleapis.com/drive/v3/files?q=%28name+contains+%27weekly%27+or+fullText+contains+%27weekly%27%29+and+trashed+%3D+false+and+%271twkftfPtFboxgaT-v0ZoLR9820KqeojI%27+in+parents&fields=nextPageToken%2Cfiles%28id%2Cname%2CmimeType%2Cparents%2CmodifiedTime%2CcreatedTime%2Csize%2Cdescription%2CwebViewLink%29&orderBy=modifiedTime+desc&pageSize=20
+  response:
+    body:
+      string: "{\n  \"files\": [\n    {\n      \"mimeType\": \"application/vnd.google-apps.document\",\n
+        \     \"parents\": [\n        \"1twkftfPtFboxgaT-v0ZoLR9820KqeojI\"\n      ],\n
+        \     \"webViewLink\": \"https://docs.google.com/document/d/10Z4WtDYB8ZcT9vhvBip_UB0ecPGOp4jlPkU0YP3p6OA/edit?usp=drivesdk\",\n
+        \     \"size\": \"1024\",\n      \"id\": \"10Z4WtDYB8ZcT9vhvBip_UB0ecPGOp4jlPkU0YP3p6OA\",\n
+        \     \"name\": \"Weekly sync 2026-09-21\",\n      \"createdTime\": \"2026-10-10T17:07:39.904Z\",\n
+        \     \"modifiedTime\": \"2026-10-10T17:07:40.030Z\"\n    },\n    {\n      \"mimeType\":
+        \"application/vnd.google-apps.document\",\n      \"parents\": [\n        \"1twkftfPtFboxgaT-v0ZoLR9820KqeojI\"\n
+        \     ],\n      \"webViewLink\": \"https://docs.google.com/document/d/1K544T7O_aRKsOECP0E32TH0hSmYMIudaBj-YJEycVMo/edit?usp=drivesdk\",\n
+        \     \"size\": \"1024\",\n      \"id\": \"1K544T7O_aRKsOECP0E32TH0hSmYMIudaBj-YJEycVMo\",\n
+        \     \"name\": \"Weekly sync 2026-09-14\",\n      \"createdTime\": \"2026-10-10T17:07:36.795Z\",\n
+        \     \"modifiedTime\": \"2026-10-10T17:07:38.589Z\"\n    },\n    {\n      \"mimeType\":
+        \"application/vnd.google-apps.document\",\n      \"parents\": [\n        \"1twkftfPtFboxgaT-v0ZoLR9820KqeojI\"\n
+        \     ],\n      \"webViewLink\": \"https://docs.google.com/document/d/1pacV2KtlsqFAmbARJqvTB-TqcKkBO6W5GjZ6x2vEX8E/edit?usp=drivesdk\",\n
+        \     \"size\": \"1024\",\n      \"id\": \"1pacV2KtlsqFAmbARJqvTB-TqcKkBO6W5GjZ6x2vEX8E\",\n
+        \     \"name\": \"Weekly sync 2026-09-07\",\n      \"createdTime\": \"2026-10-10T17:07:34.181Z\",\n
+        \     \"modifiedTime\": \"2026-10-10T17:07:35.566Z\"\n    }\n  ]\n}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      cache-control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      content-length:
+      - '1475'
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Sat, 10 Oct 2026 17:08:13 GMT
+      expires:
+      - Mon, 01 Jan 1990 00:00:00 GMT
+      pragma:
+      - no-cache
+      server:
+      - ESF
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin, X-Origin
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-xss-protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

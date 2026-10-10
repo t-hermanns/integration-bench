@@ -1,0 +1,60 @@
+# Baseline tool descriptions (v1). The description experiment compares this against v2.
+# Only text lives here; behaviour and argument types are in tools.py.
+instructions: >-
+  Tools for Google Drive. The app only sees files it created or that the user opened
+  with it. List results come one page at a time; pass next_cursor back to get the next
+  page.
+
+tools:
+  gdrive_search_files:
+    title: Search files
+    description: >-
+      Search files and folders whose name or text contains a search text, newest first.
+    params:
+      query: Text to look for in file names and contents.
+      folder_id: Only search directly inside this folder; omit to search everywhere.
+      cursor: next_cursor from a previous call to get the next page; omit for page one.
+      page_size: Results per page (1-50).
+      response_format: >-
+        "concise" (default) for id, name and kind; "detailed" adds modified time, size,
+        parent folder and link.
+
+  gdrive_get_file_metadata:
+    title: Get file metadata
+    description: >-
+      Get the metadata of one file or folder by id: name, kind, parent folder and
+      modified time.
+    params:
+      file_id: File id from a search or folder listing.
+      response_format: >-
+        "concise" (default) for the essentials; "detailed" adds MIME type, created time,
+        size, description and link.
+
+  gdrive_read_file_content:
+    title: Read file content
+    description: >-
+      Read the text of a Google Doc, Sheet (as CSV), Slides deck or plain text file.
+    params:
+      file_id: File id from a search or folder listing.
+      max_chars: Return at most this many characters (100-50000); longer texts are cut.
+
+  gdrive_list_folder:
+    title: List folder
+    description: >-
+      List the files and folders directly inside a folder, folders first.
+    params:
+      folder_id: Folder id from a search or listing; "root" (default) for My Drive.
+      cursor: next_cursor from a previous call to get the next page; omit for page one.
+      page_size: Results per page (1-50).
+      response_format: >-
+        "concise" (default) for id, name and kind; "detailed" adds modified time, size,
+        parent folder and link.
+
+  gdrive_create_document:
+    title: Create document
+    description: >-
+      Create a new Google Doc with the given plain text as its content.
+    params:
+      name: Document name (at most 200 characters).
+      content: Document text in plain text; line breaks are kept.
+      folder_id: Folder to create the document in; omit for My Drive.

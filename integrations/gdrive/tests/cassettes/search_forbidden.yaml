@@ -1,0 +1,27 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      host:
+      - www.googleapis.com
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://www.googleapis.com/drive/v3/files?q=%28name+contains+%27roadmap%27+or+fullText+contains+%27roadmap%27%29+and+trashed+%3D+false&fields=nextPageToken%2Cfiles%28id%2Cname%2CmimeType%2Cparents%2CmodifiedTime%2CcreatedTime%2Csize%2Cdescription%2CwebViewLink%29&orderBy=modifiedTime+desc&pageSize=20
+  response:
+    body:
+      string: '{"error":{"code":403,"message":"Request had insufficient authentication
+        scopes.","errors":[{"message":"Insufficient Permission","domain":"global","reason":"insufficientPermissions"}],"status":"PERMISSION_DENIED","details":[{"@type":"type.googleapis.com/google.rpc.ErrorInfo","reason":"ACCESS_TOKEN_SCOPE_INSUFFICIENT","domain":"googleapis.com"}]}}'
+    headers:
+      content-length:
+      - '347'
+      content-type:
+      - application/json
+    status:
+      code: 403
+      message: Forbidden
+version: 1

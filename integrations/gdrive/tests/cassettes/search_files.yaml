@@ -1,0 +1,58 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      host:
+      - www.googleapis.com
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://www.googleapis.com/drive/v3/files?q=%28name+contains+%27roadmap%27+or+fullText+contains+%27roadmap%27%29+and+trashed+%3D+false&fields=nextPageToken%2Cfiles%28id%2Cname%2CmimeType%2Cparents%2CmodifiedTime%2CcreatedTime%2Csize%2Cdescription%2CwebViewLink%29&orderBy=modifiedTime+desc&pageSize=20
+  response:
+    body:
+      string: "{\n  \"files\": [\n    {\n      \"mimeType\": \"application/vnd.google-apps.document\",\n
+        \     \"parents\": [\n        \"11pxf6okfQE2AZtbOXFwdBt5ACw456F7T\"\n      ],\n
+        \     \"webViewLink\": \"https://docs.google.com/document/d/11bVm3uyDF12Mm-n-ajWlqCOnyC9i4xzJ8j0YaXvnQWI/edit?usp=drivesdk\",\n
+        \     \"size\": \"1024\",\n      \"id\": \"11bVm3uyDF12Mm-n-ajWlqCOnyC9i4xzJ8j0YaXvnQWI\",\n
+        \     \"name\": \"Onboarding guide\",\n      \"createdTime\": \"2026-10-10T17:07:44.121Z\",\n
+        \     \"modifiedTime\": \"2026-10-10T17:07:45.693Z\"\n    },\n    {\n      \"mimeType\":
+        \"application/vnd.google-apps.document\",\n      \"parents\": [\n        \"1o62GkCmTuQnJ3ezbP0YN-qTbipoUh_vU\"\n
+        \     ],\n      \"webViewLink\": \"https://docs.google.com/document/d/1gNI8wtfLOq7xukFiLCPdM4xWqXvKOknJWFZ0s0B85ZM/edit?usp=drivesdk\",\n
+        \     \"size\": \"1024\",\n      \"id\": \"1gNI8wtfLOq7xukFiLCPdM4xWqXvKOknJWFZ0s0B85ZM\",\n
+        \     \"name\": \"Roadmap 2026\",\n      \"createdTime\": \"2026-10-10T17:07:28.552Z\",\n
+        \     \"modifiedTime\": \"2026-10-10T17:07:29.969Z\"\n    }\n  ]\n}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      cache-control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      content-length:
+      - '974'
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Sat, 10 Oct 2026 17:08:12 GMT
+      expires:
+      - Mon, 01 Jan 1990 00:00:00 GMT
+      pragma:
+      - no-cache
+      server:
+      - ESF
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin, X-Origin
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-xss-protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

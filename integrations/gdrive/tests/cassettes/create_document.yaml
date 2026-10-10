@@ -1,0 +1,113 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      host:
+      - www.googleapis.com
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://www.googleapis.com/drive/v3/files?q=%27root%27+in+parents+and+trashed+%3D+false&fields=nextPageToken%2Cfiles%28id%2Cname%2CmimeType%2Cparents%2CmodifiedTime%2CcreatedTime%2Csize%2Cdescription%2CwebViewLink%29&orderBy=folder%2Cname&pageSize=50
+  response:
+    body:
+      string: "{\n  \"files\": [\n    {\n      \"mimeType\": \"application/vnd.google-apps.folder\",\n
+        \     \"parents\": [\n        \"0APNkQ6Tx4kJkUk9PVA\"\n      ],\n      \"webViewLink\":
+        \"https://drive.google.com/drive/folders/11pxf6okfQE2AZtbOXFwdBt5ACw456F7T\",\n
+        \     \"id\": \"11pxf6okfQE2AZtbOXFwdBt5ACw456F7T\",\n      \"name\": \"bench-sandbox\",\n
+        \     \"createdTime\": \"2026-10-10T17:07:26.266Z\",\n      \"modifiedTime\":
+        \"2026-10-10T17:07:26.266Z\"\n    }\n  ]\n}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      cache-control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      content-length:
+      - '422'
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Sat, 10 Oct 2026 17:08:03 GMT
+      expires:
+      - Mon, 01 Jan 1990 00:00:00 GMT
+      pragma:
+      - no-cache
+      server:
+      - ESF
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin, X-Origin
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-xss-protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: "--bench-4231fe862a5a8a91c5de1c7f\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n{\"name\":\"Retro
+      notes\",\"mimeType\":\"application/vnd.google-apps.document\",\"parents\":[\"11pxf6okfQE2AZtbOXFwdBt5ACw456F7T\"]}\r\n--bench-4231fe862a5a8a91c5de1c7f\r\nContent-Type:
+      text/plain; charset=UTF-8\r\n\r\nWent well: the importer.\nTo improve: export
+      speed.\r\n--bench-4231fe862a5a8a91c5de1c7f--\r\n"
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      content-length:
+      - '370'
+      content-type:
+      - multipart/related; boundary=bench-4231fe862a5a8a91c5de1c7f
+      host:
+      - www.googleapis.com
+      user-agent:
+      - integration-bench
+    method: POST
+    uri: https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id%2Cname%2CmimeType%2Cparents%2CmodifiedTime%2CcreatedTime%2Csize%2Cdescription%2CwebViewLink
+  response:
+    body:
+      string: "{\n  \"id\": \"1T-5lthhTF3-t6fwdyDO4xA1ISy4GtKM8SI3s_wZ012c\",\n  \"name\":
+        \"Retro notes\",\n  \"mimeType\": \"application/vnd.google-apps.document\",\n
+        \ \"parents\": [\n    \"11pxf6okfQE2AZtbOXFwdBt5ACw456F7T\"\n  ],\n  \"webViewLink\":
+        \"https://docs.google.com/document/d/1T-5lthhTF3-t6fwdyDO4xA1ISy4GtKM8SI3s_wZ012c/edit?usp=drivesdk\",\n
+        \ \"createdTime\": \"2026-10-10T17:08:03.843Z\",\n  \"modifiedTime\": \"2026-10-10T17:08:03.968Z\",\n
+        \ \"size\": \"1\"\n}\n"
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      alt-svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      cache-control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      content-length:
+      - '422'
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Sat, 10 Oct 2026 17:08:06 GMT
+      expires:
+      - Mon, 01 Jan 1990 00:00:00 GMT
+      pragma:
+      - no-cache
+      server:
+      - ESF
+      vary:
+      - Origin, X-Origin
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-guploader-uploadid:
+      - AP6rU823vy7HFzbYEwONunRNMO82kOgtqACxvOxXKxNOJYKs471VWOZzN9vo4qB1RW0bsHkPS88rQt8
+      x-xss-protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

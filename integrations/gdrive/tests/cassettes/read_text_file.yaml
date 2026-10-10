@@ -1,0 +1,159 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      host:
+      - www.googleapis.com
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://www.googleapis.com/drive/v3/files?q=%28name+contains+%27glossary%27+or+fullText+contains+%27glossary%27%29+and+trashed+%3D+false&fields=nextPageToken%2Cfiles%28id%2Cname%2CmimeType%2Cparents%2CmodifiedTime%2CcreatedTime%2Csize%2Cdescription%2CwebViewLink%29&orderBy=modifiedTime+desc&pageSize=1
+  response:
+    body:
+      string: "{\n  \"files\": [\n    {\n      \"mimeType\": \"text/plain\",\n      \"parents\":
+        [\n        \"11pxf6okfQE2AZtbOXFwdBt5ACw456F7T\"\n      ],\n      \"webViewLink\":
+        \"https://drive.google.com/file/d/1blAvCa0MlN0UiANfLvQfAIPRcSj0n-oF/view?usp=drivesdk\",\n
+        \     \"size\": \"73\",\n      \"id\": \"1blAvCa0MlN0UiANfLvQfAIPRcSj0n-oF\",\n
+        \     \"name\": \"glossary.txt\",\n      \"createdTime\": \"2026-10-10T17:07:46.642Z\",\n
+        \     \"modifiedTime\": \"2026-10-10T17:07:46.642Z\"\n    }\n  ]\n}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      cache-control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      content-length:
+      - '442'
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Sat, 10 Oct 2026 17:08:11 GMT
+      expires:
+      - Mon, 01 Jan 1990 00:00:00 GMT
+      pragma:
+      - no-cache
+      server:
+      - ESF
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin, X-Origin
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-xss-protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      host:
+      - www.googleapis.com
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://www.googleapis.com/drive/v3/files/1blAvCa0MlN0UiANfLvQfAIPRcSj0n-oF?fields=id%2Cname%2CmimeType%2Cparents%2CmodifiedTime%2CcreatedTime%2Csize%2Cdescription%2CwebViewLink
+  response:
+    body:
+      string: "{\n  \"id\": \"1blAvCa0MlN0UiANfLvQfAIPRcSj0n-oF\",\n  \"name\": \"glossary.txt\",\n
+        \ \"mimeType\": \"text/plain\",\n  \"parents\": [\n    \"11pxf6okfQE2AZtbOXFwdBt5ACw456F7T\"\n
+        \ ],\n  \"webViewLink\": \"https://drive.google.com/file/d/1blAvCa0MlN0UiANfLvQfAIPRcSj0n-oF/view?usp=drivesdk\",\n
+        \ \"createdTime\": \"2026-10-10T17:07:46.642Z\",\n  \"modifiedTime\": \"2026-10-10T17:07:46.642Z\",\n
+        \ \"size\": \"73\"\n}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      cache-control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      content-length:
+      - '373'
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Sat, 10 Oct 2026 17:08:11 GMT
+      expires:
+      - Mon, 01 Jan 1990 00:00:00 GMT
+      pragma:
+      - no-cache
+      server:
+      - ESF
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin, X-Origin
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-xss-protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      host:
+      - www.googleapis.com
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://www.googleapis.com/drive/v3/files/1blAvCa0MlN0UiANfLvQfAIPRcSj0n-oF?alt=media
+  response:
+    body:
+      string: 'SSO: single sign-on
+
+        IdP: identity provider
+
+        ETL: extract, transform, load
+
+        '
+    headers:
+      access-control-allow-credentials:
+      - 'true'
+      alt-svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      cache-control:
+      - private, max-age=0, must-revalidate
+      content-disposition:
+      - attachment
+      content-length:
+      - '73'
+      content-type:
+      - text/plain
+      date:
+      - Sat, 10 Oct 2026 17:08:12 GMT
+      expires:
+      - Sat, 10 Oct 2026 17:08:12 GMT
+      server:
+      - ESF
+      vary:
+      - Origin, X-Origin
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-goog-hash:
+      - crc32c=C3nIqg==
+      x-guploader-uploadid:
+      - AP6rU82IjRzaQqzi5I_HTWxdgrGH4SNkLg1WyZfZ4_pXkrQZGvuYGgRH2-dZ5hRlU6P8WKDKT6pZArw
+      x-xss-protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

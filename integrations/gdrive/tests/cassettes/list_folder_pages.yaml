@@ -1,0 +1,166 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      host:
+      - www.googleapis.com
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://www.googleapis.com/drive/v3/files?q=%27root%27+in+parents+and+trashed+%3D+false&fields=nextPageToken%2Cfiles%28id%2Cname%2CmimeType%2Cparents%2CmodifiedTime%2CcreatedTime%2Csize%2Cdescription%2CwebViewLink%29&orderBy=folder%2Cname&pageSize=50
+  response:
+    body:
+      string: "{\n  \"files\": [\n    {\n      \"mimeType\": \"application/vnd.google-apps.folder\",\n
+        \     \"parents\": [\n        \"0APNkQ6Tx4kJkUk9PVA\"\n      ],\n      \"webViewLink\":
+        \"https://drive.google.com/drive/folders/11pxf6okfQE2AZtbOXFwdBt5ACw456F7T\",\n
+        \     \"id\": \"11pxf6okfQE2AZtbOXFwdBt5ACw456F7T\",\n      \"name\": \"bench-sandbox\",\n
+        \     \"createdTime\": \"2026-10-10T17:07:26.266Z\",\n      \"modifiedTime\":
+        \"2026-10-10T17:07:26.266Z\"\n    }\n  ]\n}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      cache-control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      content-length:
+      - '422'
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Sat, 10 Oct 2026 17:08:08 GMT
+      expires:
+      - Mon, 01 Jan 1990 00:00:00 GMT
+      pragma:
+      - no-cache
+      server:
+      - ESF
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin, X-Origin
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-xss-protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      host:
+      - www.googleapis.com
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://www.googleapis.com/drive/v3/files?q=%2711pxf6okfQE2AZtbOXFwdBt5ACw456F7T%27+in+parents+and+trashed+%3D+false&fields=nextPageToken%2Cfiles%28id%2Cname%2CmimeType%2Cparents%2CmodifiedTime%2CcreatedTime%2Csize%2Cdescription%2CwebViewLink%29&orderBy=folder%2Cname&pageSize=3
+  response:
+    body:
+      string: "{\n  \"files\": [\n    {\n      \"mimeType\": \"application/vnd.google-apps.folder\",\n
+        \     \"parents\": [\n        \"11pxf6okfQE2AZtbOXFwdBt5ACw456F7T\"\n      ],\n
+        \     \"webViewLink\": \"https://drive.google.com/drive/folders/1twkftfPtFboxgaT-v0ZoLR9820KqeojI\",\n
+        \     \"id\": \"1twkftfPtFboxgaT-v0ZoLR9820KqeojI\",\n      \"name\": \"Meeting
+        notes\",\n      \"createdTime\": \"2026-10-10T17:07:27.351Z\",\n      \"modifiedTime\":
+        \"2026-10-10T17:07:27.351Z\"\n    },\n    {\n      \"mimeType\": \"application/vnd.google-apps.folder\",\n
+        \     \"parents\": [\n        \"11pxf6okfQE2AZtbOXFwdBt5ACw456F7T\"\n      ],\n
+        \     \"webViewLink\": \"https://drive.google.com/drive/folders/1o62GkCmTuQnJ3ezbP0YN-qTbipoUh_vU\",\n
+        \     \"id\": \"1o62GkCmTuQnJ3ezbP0YN-qTbipoUh_vU\",\n      \"name\": \"Projects\",\n
+        \     \"createdTime\": \"2026-10-10T17:07:26.736Z\",\n      \"modifiedTime\":
+        \"2026-10-10T17:07:26.736Z\"\n    },\n    {\n      \"mimeType\": \"text/plain\",\n
+        \     \"parents\": [\n        \"11pxf6okfQE2AZtbOXFwdBt5ACw456F7T\"\n      ],\n
+        \     \"webViewLink\": \"https://drive.google.com/file/d/1blAvCa0MlN0UiANfLvQfAIPRcSj0n-oF/view?usp=drivesdk\",\n
+        \     \"size\": \"73\",\n      \"id\": \"1blAvCa0MlN0UiANfLvQfAIPRcSj0n-oF\",\n
+        \     \"name\": \"glossary.txt\",\n      \"createdTime\": \"2026-10-10T17:07:46.642Z\",\n
+        \     \"modifiedTime\": \"2026-10-10T17:07:46.642Z\"\n    }\n  ],\n  \"nextPageToken\":
+        \"~!!~AAfjczeY4uQmgUKjZtIfvU6CT_SdnzsziAEAGZ0Alit9hZYZoR1TywRO-VLeAC1fbyoSepkANBHROWUYZmAgLgWfw0xidm1qOpwogy8uwzd0-0C3PwfPrnXpFk0oXNAwxO8Mf0vXA5QpgQeJfdq2rzMRcfjBftMqzpnyh3iF63Rf33WaDc7KnWfwk9lh4cHORHQ765OG5-7QMWcLlEuu4d6wVsIBoNm_nAxuxmhXCxqMGPskEOnTkzTjmXPj_ySLcmDmEJipKArAnEs_tVpFf7034bCJBcKHDwrKwrHU79ScnBsqJUPVyNQAf3URzYCX0T8cusDjEA5OfwtdZygDrEzucf3o5qKx096V3qXsTUY5C4DJFMaidLq44zpNkJqB3P-QER4FV9R2mH1i9GLHote-Fk-AI17rLU6VGmVorhmL4xp-T9nH-ZsxBGXdN9yHyn2oWFpp12g1\"\n}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      cache-control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      content-length:
+      - '1756'
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Sat, 10 Oct 2026 17:08:08 GMT
+      expires:
+      - Mon, 01 Jan 1990 00:00:00 GMT
+      pragma:
+      - no-cache
+      server:
+      - ESF
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin, X-Origin
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-xss-protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      host:
+      - www.googleapis.com
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://www.googleapis.com/drive/v3/files?q=%2711pxf6okfQE2AZtbOXFwdBt5ACw456F7T%27+in+parents+and+trashed+%3D+false&fields=nextPageToken%2Cfiles%28id%2Cname%2CmimeType%2Cparents%2CmodifiedTime%2CcreatedTime%2Csize%2Cdescription%2CwebViewLink%29&orderBy=folder%2Cname&pageSize=3&pageToken=~%21%21~AAfjczeY4uQmgUKjZtIfvU6CT_SdnzsziAEAGZ0Alit9hZYZoR1TywRO-VLeAC1fbyoSepkANBHROWUYZmAgLgWfw0xidm1qOpwogy8uwzd0-0C3PwfPrnXpFk0oXNAwxO8Mf0vXA5QpgQeJfdq2rzMRcfjBftMqzpnyh3iF63Rf33WaDc7KnWfwk9lh4cHORHQ765OG5-7QMWcLlEuu4d6wVsIBoNm_nAxuxmhXCxqMGPskEOnTkzTjmXPj_ySLcmDmEJipKArAnEs_tVpFf7034bCJBcKHDwrKwrHU79ScnBsqJUPVyNQAf3URzYCX0T8cusDjEA5OfwtdZygDrEzucf3o5qKx096V3qXsTUY5C4DJFMaidLq44zpNkJqB3P-QER4FV9R2mH1i9GLHote-Fk-AI17rLU6VGmVorhmL4xp-T9nH-ZsxBGXdN9yHyn2oWFpp12g1
+  response:
+    body:
+      string: "{\n  \"files\": [\n    {\n      \"mimeType\": \"application/vnd.google-apps.document\",\n
+        \     \"parents\": [\n        \"11pxf6okfQE2AZtbOXFwdBt5ACw456F7T\"\n      ],\n
+        \     \"webViewLink\": \"https://docs.google.com/document/d/11bVm3uyDF12Mm-n-ajWlqCOnyC9i4xzJ8j0YaXvnQWI/edit?usp=drivesdk\",\n
+        \     \"size\": \"1024\",\n      \"id\": \"11bVm3uyDF12Mm-n-ajWlqCOnyC9i4xzJ8j0YaXvnQWI\",\n
+        \     \"name\": \"Onboarding guide\",\n      \"createdTime\": \"2026-10-10T17:07:44.121Z\",\n
+        \     \"modifiedTime\": \"2026-10-10T17:07:45.693Z\"\n    }\n  ]\n}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      cache-control:
+      - no-cache, no-store, max-age=0, must-revalidate
+      content-length:
+      - '499'
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Sat, 10 Oct 2026 17:08:09 GMT
+      expires:
+      - Mon, 01 Jan 1990 00:00:00 GMT
+      pragma:
+      - no-cache
+      server:
+      - ESF
+      transfer-encoding:
+      - chunked
+      vary:
+      - Origin, X-Origin
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-xss-protection:
+      - '0'
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -1,0 +1,15 @@
+# Kind of every cassette in this directory. `bench synth` writes `synthetic` ones from
+# the in-memory fake; `bench record` replaces them with `recorded` ones from the sandbox.
+cassettes:
+  create_document: recorded
+  create_document_bad_folder: recorded
+  get_file_metadata: recorded
+  get_file_not_found: recorded
+  list_folder_pages: recorded
+  list_root: recorded
+  read_document: recorded
+  read_text_file: recorded
+  search_files: recorded
+  search_forbidden: synthetic
+  search_in_folder: recorded
+  search_no_results: recorded

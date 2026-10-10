@@ -1,0 +1,55 @@
+interactions:
+- request:
+    body: "--bench-f0dee0456c6cbcf9d8a3f5dc\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n{\"name\":\"Orphan\",\"mimeType\":\"application/vnd.google-apps.document\",\"parents\":[\"1AbCdEfGhIjKlMnOpQrStUvWxYz0123456789\"]}\r\n--bench-f0dee0456c6cbcf9d8a3f5dc\r\nContent-Type:
+      text/plain; charset=UTF-8\r\n\r\ntext\r\n--bench-f0dee0456c6cbcf9d8a3f5dc--\r\n"
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      content-length:
+      - '323'
+      content-type:
+      - multipart/related; boundary=bench-f0dee0456c6cbcf9d8a3f5dc
+      host:
+      - www.googleapis.com
+      user-agent:
+      - integration-bench
+    method: POST
+    uri: https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id%2Cname%2CmimeType%2Cparents%2CmodifiedTime%2CcreatedTime%2Csize%2Cdescription%2CwebViewLink
+  response:
+    body:
+      string: "{\n  \"error\": {\n    \"code\": 404,\n    \"message\": \"File not
+        found: 1AbCdEfGhIjKlMnOpQrStUvWxYz0123456789.\",\n    \"errors\": [\n      {\n
+        \       \"message\": \"File not found: 1AbCdEfGhIjKlMnOpQrStUvWxYz0123456789.\",\n
+        \       \"domain\": \"global\",\n        \"reason\": \"notFound\",\n        \"location\":
+        \"fileId\",\n        \"locationType\": \"parameter\"\n      }\n    ]\n  }\n}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+      cache-control:
+      - private, max-age=0
+      content-length:
+      - '350'
+      content-type:
+      - application/json; charset=UTF-8
+      date:
+      - Sat, 10 Oct 2026 17:08:07 GMT
+      expires:
+      - Sat, 10 Oct 2026 17:08:07 GMT
+      server:
+      - ESF
+      vary:
+      - Origin, X-Origin
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-guploader-uploadid:
+      - AP6rU80GA0X2_TMrKfmv8mD2xoCEdsTgoJO81lYzdzf4N9MpeBpPXxPJP6-dlixABLIUspj3T05DDc4
+      x-xss-protection:
+      - '0'
+    status:
+      code: 404
+      message: Not Found
+version: 1

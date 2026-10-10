@@ -51,10 +51,11 @@ def test_doctor_without_settings_skips_everything(tmp_path: Path) -> None:
     result = runner.invoke(app, ["doctor", "--env-file", str(tmp_path / "absent.env")])
     assert result.exit_code == 0, result.output
     lines = result.output.splitlines()
-    assert lines[0].startswith("SKIP  github app")
+    assert lines[0].startswith("SKIP  gdrive login")
+    assert any(line.startswith("SKIP  github app") for line in lines)
     assert any(line.startswith("SKIP  jira api token") for line in lines)
     assert any(line.startswith("SKIP  groq model") and "GROQ_API_KEY" in line for line in lines)
-    assert lines[-1] == "0 ok, 0 failed, 7 skipped"
+    assert lines[-1] == "0 ok, 0 failed, 8 skipped"
 
 
 @pytest.mark.usefixtures("clean_env")
