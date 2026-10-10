@@ -108,6 +108,7 @@ dependencies = [
     { name = "bench-core" },
     { name = "httpx2" },
     { name = "mcp" },
+    { name = "pyyaml" },
 ]
 
 [package.metadata]
@@ -115,6 +116,7 @@ requires-dist = [
     { name = "bench-core", editable = "packages/bench-core" },
     { name = "httpx2", specifier = ">=2.13.1" },
     { name = "mcp", specifier = ">=2.3,<3" },
+    { name = "pyyaml", specifier = ">=6" },
 ]
 
 [[package]]

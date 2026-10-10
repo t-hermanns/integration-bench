@@ -51,7 +51,7 @@ LOGGED_RESULT_CHARS = 2000
 
 @dataclass(frozen=True)
 class Task:
-    """What the runner needs of a task; the YAML format and expectations come in step 36."""
+    """What the runner needs of a task; format and expectations: `bench_evals.tasks.EvalTask`."""
 
     id: str
     integrations: tuple[str, ...]
