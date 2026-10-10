@@ -16,3 +16,7 @@ class FakeClock:
 
     def random(self) -> float:
         return self.rand
+
+    def advance(self, seconds: float) -> None:
+        """Let time pass without recording a sleep (e.g. to make a token expire)."""
+        self.now += seconds
