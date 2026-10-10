@@ -46,3 +46,7 @@ split. With k > 1 runs, a task counts as solved if it was solved in more than ha
 its valid runs. v1 and v2 are compared with the exact McNemar test on the paired tasks,
 with 95 % Wilson intervals for each rate. `right_tool` and `calls` are reported but not
 tested.
+
+Implementation: `bench_evals.stats` (`task_outcomes` → `rate` / `compare`). Ties (1 of 2
+runs) count as not solved; tasks with no valid run, or with an outcome in only one
+variant, are left out of the comparison and counted as `unpaired`.
