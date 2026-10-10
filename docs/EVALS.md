@@ -81,3 +81,17 @@ as a worktree in `.bench/bench-results` and pushed after each run. `bench budget
 `bench budget --add N` records calls made elsewhere (the remaining 100 cover `bench doctor` and manual
 checks). Whether the cap is per endpoint and when it resets is not documented; the counter assumes
 one shared cap that resets with the calendar month.
+
+## Regression rule (nightly, fixed before the first nightly run)
+
+`bench_evals.regression` compares tonight's per-task outcomes with the baseline, paired by task. It is
+a regression if the solved rate dropped by at least 5 percentage points **and** the exact McNemar test
+gives p < 0.05. The lost tasks are then run once more; a lost task that passes in this confirmation
+round counts as flaky and the rule is applied again. No trend analysis: one baseline, one run.
+
+A confirmed regression files a GitHub issue labelled `eval-regression`. Its fingerprint (provider,
+description variant, affected integrations) sits in a hidden marker in the body; if an open issue with
+the same fingerprint exists, the run comments there instead of opening a duplicate. The body has the
+lost tasks, transcript excerpts, the commit range since the baseline and the cause: "code changed" if
+the range touches `integrations/`, `packages/` or `evals/`, otherwise "model drift". A run where more
+than half of the runs are invalid is not judged; it files an `eval-infra` issue instead.
