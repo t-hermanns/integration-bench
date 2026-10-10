@@ -13,7 +13,7 @@ import httpx2
 
 from bench_core.auth import default_store
 from bench_core.http import ApiClient
-from bench_core.sandbox import Echo, SandboxError, require
+from bench_core.sandbox import Echo, SandboxError, SmokeCall, require
 
 from bench_gdrive.auth import LOGIN, user_token
 from bench_gdrive.client import (
@@ -113,3 +113,10 @@ async def live_api(env: Mapping[str, str]) -> AsyncIterator[ApiClient]:
     """`bench record gdrive`: the signed-in user's Drive, where the sandbox lives."""
     async with _api(env, None) as api:
         yield api
+
+
+SMOKE = [
+    SmokeCall("gdrive_search_files", {"query": "glossary"}),
+    SmokeCall("gdrive_read_file_content", lambda found: {"file_id": found["files"][0]["id"]}),
+    SmokeCall("gdrive_list_folder", {}),
+]

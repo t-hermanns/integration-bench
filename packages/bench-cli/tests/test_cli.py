@@ -148,6 +148,21 @@ def test_record_only_against_the_site_the_cassettes_replay(tmp_path: Path) -> No
     assert "cassettes replay against https://bench-sandbox.atlassian.net" in result.output
 
 
+@pytest.mark.usefixtures("clean_env")
+def test_smoke_reports_each_failing_integration(tmp_path: Path) -> None:
+    result = runner.invoke(app, ["smoke", "jira", "slack", "--env-file", str(tmp_path / "x.env")])
+    assert result.exit_code == 1
+    assert "FAIL set JIRA_SITE, JIRA_EMAIL, JIRA_API_TOKEN" in result.output
+    assert "FAIL set SLACK_BOT_TOKEN" in result.output
+    assert "smoke failed: jira, slack" in result.output
+
+
+def test_smoke_rejects_unknown_integrations() -> None:
+    result = runner.invoke(app, ["smoke", "nope"])
+    assert result.exit_code == 2
+    assert "no integration 'nope'" in result.output
+
+
 def test_record_rejects_unknown_integrations() -> None:
     result = runner.invoke(app, ["record", "nope"])
     assert result.exit_code == 2

@@ -14,7 +14,7 @@ import httpx2
 
 from bench_core.clock import Clock
 from bench_core.http import ApiClient
-from bench_core.sandbox import Echo, SandboxError, require
+from bench_core.sandbox import Echo, SandboxError, SmokeCall, require
 
 from bench_slack.auth import bot_token
 from bench_slack.client import SlackClient, make_api
@@ -110,3 +110,14 @@ async def live_api(env: Mapping[str, str]) -> AsyncIterator[ApiClient]:
     """`bench record slack`: the bot token, which can read and post in the sandbox."""
     async with bot_api(env) as api:
         yield api
+
+
+SMOKE = [
+    SmokeCall("slack_list_channels", {}),
+    SmokeCall(
+        "slack_read_channel_history",
+        lambda listed: {
+            "channel_id": next(c["id"] for c in listed["channels"] if c["name"] == SANDBOX)
+        },
+    ),
+]

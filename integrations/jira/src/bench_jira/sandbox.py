@@ -13,7 +13,7 @@ from typing import Any
 import httpx2
 
 from bench_core.http import ApiClient
-from bench_core.sandbox import Echo, SandboxError, require
+from bench_core.sandbox import Echo, SandboxError, SmokeCall, require
 
 from bench_jira.adf import text_to_adf
 from bench_jira.auth import api_token
@@ -129,3 +129,9 @@ async def live_api(env: Mapping[str, str]) -> AsyncIterator[ApiClient]:
     credential = api_token("jira-record", email=env["JIRA_EMAIL"], token=env["JIRA_API_TOKEN"])
     async with make_api(credential=credential, base_url=base_url) as api:
         yield api
+
+
+SMOKE = [
+    SmokeCall("jira_search_issues", {"jql": "project = BENCH ORDER BY key"}),
+    SmokeCall("jira_get_issue", lambda found: {"issue_key": found["issues"][0]["key"]}),
+]

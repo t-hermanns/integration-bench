@@ -19,7 +19,7 @@ import httpx2
 
 from bench_core.auth import TokenStore, default_store
 from bench_core.http import ApiClient
-from bench_core.sandbox import Echo, SandboxError, require
+from bench_core.sandbox import Echo, SandboxError, SmokeCall, require
 
 from bench_github.auth import LOGIN, installation, user_token
 from bench_github.client import make_api, raise_for_status, repo_path
@@ -256,3 +256,12 @@ async def live_api(env: Mapping[str, str]) -> AsyncIterator[ApiClient]:
     await bot.authorization()  # fetch the installation token now, not inside a cassette
     async with make_api(credential=bot) as api:
         yield api
+
+
+_REPO = {"owner": OWNER, "repo": REPO}
+SMOKE = [
+    SmokeCall("github_search_issues", {"query": f"repo:{OWNER}/{REPO} is:issue"}),
+    SmokeCall("github_get_issue", lambda found: {**_REPO, "number": found["items"][0]["number"]}),
+    SmokeCall("github_list_pull_requests", _REPO),
+    SmokeCall("github_get_file_contents", {**_REPO, "path": "README.md"}),
+]

@@ -1,6 +1,7 @@
 """`bench` command line. Integrations are found by convention: `bench_<name>.scenarios`."""
 
 import importlib
+import logging
 import shutil
 import subprocess
 import sys
@@ -18,6 +19,7 @@ from mcp.server.mcpserver.exceptions import ToolError
 from bench_core.auth import LoginError, LoginSpec, OAuthError, default_store, login
 from bench_core.doctor import load_env, missing
 from bench_core.sandbox import SandboxError
+from bench_core.sandbox import smoke as smoke_live
 from bench_core.testing import (
     CassetteSuite,
     RecordResult,
@@ -225,6 +227,40 @@ def record(
     else:
         typer.echo("gitleaks not found; only the built-in secret patterns were checked")
     typer.echo(f"next: `uv run pytest integrations/{name}`, review the diff, commit")
+
+
+async def smoke_one(sandbox: ModuleType, server: ModuleType, env: dict[str, str]) -> str | None:
+    async with sandbox.live_api(env) as api:
+        live = server.create_server(api=api, read_only=True)
+        return await smoke_live(live, sandbox.SMOKE, lambda line: typer.echo(f"  {line}"))
+
+
+@app.command()
+def smoke(
+    names: Annotated[list[str], typer.Argument(help="Integrations, e.g. github slack")],
+    env_file: EnvFile = None,
+) -> None:
+    """Call read-only tools through each MCP server against the live sandbox."""
+    logging.getLogger("httpx2").setLevel(logging.WARNING)  # the server logs every request
+    env = env_settings(env_file)
+    failed: list[str] = []
+    for name in names:
+        sandbox = load_sandbox(name)
+        server = load_integration(name, "server", "")
+        typer.echo(f"{name}:")
+        try:
+            failure = anyio.run(smoke_one, sandbox, server, env)
+        except KeyError as exc:
+            raise typer.BadParameter(str(exc.args[0])) from None
+        except (SandboxError, ToolError, OAuthError) as exc:
+            failure = str(exc)
+        if failure:
+            typer.echo(f"  FAIL {failure}", err=True)
+            failed.append(name)
+    if failed:
+        typer.echo(f"smoke failed: {', '.join(failed)}", err=True)
+        raise typer.Exit(1)
+    typer.echo("smoke ok")
 
 
 def load_login(name: str) -> LoginSpec:
