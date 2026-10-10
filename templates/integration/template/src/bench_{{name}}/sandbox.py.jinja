@@ -1,0 +1,88 @@
+"""`bench sandbox seed {{ name }}` and the live API for `bench record {{ name }}`.
+
+`seed` creates the fake's seed data in the live test account. It must be idempotent: an
+already seeded sandbox is left alone, anything else that differs is an error. Until it is
+written, it refuses to run.
+"""
+
+from collections.abc import AsyncIterator, Mapping
+from contextlib import asynccontextmanager
+
+import httpx2
+
+from bench_core.auth import Credential{% if auth == 'oauth_refresh' %}, default_store{% endif %}
+from bench_core.clock import Clock
+from bench_core.http import ApiClient
+from bench_core.sandbox import Echo, SandboxError, require
+{%- if auth == 'oauth_refresh' %}
+
+from bench_{{ name }}.auth import LOGIN, user_token
+{%- elif auth == 'client_credentials' %}
+
+from bench_{{ name }}.auth import service_account
+{%- elif auth == 'bearer' %}
+
+from bench_{{ name }}.auth import static_token
+{%- else %}
+
+from bench_{{ name }}.auth import api_token
+{%- endif %}
+from bench_{{ name }}.client import make_api
+{% if auth in ['oauth_refresh', 'client_credentials'] %}
+SETTINGS = ("{{ env }}_CLIENT_ID", "{{ env }}_CLIENT_SECRET")
+{%- elif auth == 'bearer' %}
+SETTINGS = ("{{ env }}_TOKEN",)
+{%- else %}
+SETTINGS = ("{{ env }}_EMAIL", "{{ env }}_API_TOKEN")
+{%- endif %}
+
+
+def live_credential(
+    env: Mapping[str, str],
+    *,
+    transport: httpx2.AsyncBaseTransport | None = None,
+    clock: Clock | None = None,
+) -> Credential:
+    """The live account from `.env`{% if auth == 'oauth_refresh' %} and `bench auth login {{ name }}`{% endif %}."""
+    require(env, *SETTINGS)
+{%- if auth == 'oauth_refresh' %}
+    store = default_store(env)
+    if store.load(LOGIN.account) is None:
+        raise SandboxError("not signed in; run `bench auth login {{ name }}` first")
+    return user_token(
+        LOGIN.account,
+        store,
+        client_id=env["{{ env }}_CLIENT_ID"],
+        client_secret=env["{{ env }}_CLIENT_SECRET"],
+        transport=transport,
+        clock=clock,
+    )
+{%- elif auth == 'client_credentials' %}
+    return service_account(
+        "{{ name }}",
+        client_id=env["{{ env }}_CLIENT_ID"],
+        client_secret=env["{{ env }}_CLIENT_SECRET"],
+        transport=transport,
+        clock=clock,
+    )
+{%- elif auth == 'bearer' %}
+    return static_token("{{ name }}", env["{{ env }}_TOKEN"])
+{%- else %}
+    return api_token("{{ name }}", email=env["{{ env }}_EMAIL"], token=env["{{ env }}_API_TOKEN"])
+{%- endif %}
+
+
+async def seed(
+    env: Mapping[str, str],
+    *,
+    echo: Echo = print,
+    transport: httpx2.AsyncBaseTransport | None = None,
+) -> None:
+    raise SandboxError("{{ name }}: seeding is not written yet (bench_{{ name }}/sandbox.py)")
+
+
+@asynccontextmanager
+async def live_api(env: Mapping[str, str]) -> AsyncIterator[ApiClient]:
+    """`bench record {{ name }}`: the live account that holds the sandbox."""
+    async with make_api(credential=live_credential(env)) as api:
+        yield api

@@ -2,7 +2,8 @@
 
 Each scenario drives `{{ cls }}Client` against the sandbox. Expected tool errors are caught,
 so the cassette holds the error response the tests then replay. Scenarios with `prepare`
-shape the fake and can only be synthesized.
+shape the fake and can only be synthesized; a `teardown` undoes what a live run created
+(it gets the run's result, e.g. the created item).
 """
 
 from collections.abc import Awaitable, Callable
@@ -35,20 +36,24 @@ def _api(transport: httpx2.AsyncBaseTransport | None, clock: FakeClock | None) -
 
 
 Run = Callable[[{{ cls }}Client], Awaitable[Any]]
+Teardown = Callable[[ApiClient, Any], Awaitable[None]]
 
 
 def _scenario(
-    run: Run, description: str, prepare: Callable[[{{ cls }}Fake], None] | None = None
+    run: Run,
+    description: str,
+    prepare: Callable[[{{ cls }}Fake], None] | None = None,
+    teardown: Teardown | None = None,
 ) -> Scenario:
-    async def drive(api: ApiClient) -> None:
-        await run({{ cls }}Client(api))
+    async def drive(api: ApiClient) -> Any:
+        return await run({{ cls }}Client(api))
 
     def shape(fake: FakeBackend) -> None:
         assert prepare is not None
         assert isinstance(fake, {{ cls }}Fake)
         prepare(fake)
 
-    return Scenario(drive, shape if prepare else None, description)
+    return Scenario(drive, shape if prepare else None, description, teardown)
 
 
 # --- Scenarios ----------------------------------------------------------------------------
