@@ -13,6 +13,7 @@ import httpx2
 from bench_core.auth import AppInstallation, Credential, RotatingRefresh, TokenEndpoint, TokenStore
 from bench_core.clock import Clock
 from bench_core.permissions import Granted
+
 from bench_github.client import BASE_URL
 
 TOKEN_URL = "https://github.com/login/oauth/access_token"

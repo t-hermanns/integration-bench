@@ -3,7 +3,11 @@ name = "bench-cli"
 version = "0.1.0"
 description = "The `bench` command line for integration-bench."
 requires-python = ">=3.13"
-dependencies = ["bench-core", "typer>=0.16"]
+dependencies = [
+    "bench-core",
+    "copier>=9.10",
+    "typer>=0.16",
+]
 
 [project.scripts]
 bench = "bench_cli.main:app"

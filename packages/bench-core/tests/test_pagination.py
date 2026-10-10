@@ -152,6 +152,29 @@ async def test_link_header_to_foreign_host_still_targets_base_url() -> None:
 
 
 @pytest.mark.anyio
+async def test_link_header_with_base_path_does_not_double_it() -> None:
+    def prefixed(request: httpx2.Request) -> httpx2.Response:
+        if request.url.params.get("page") == "2":
+            return httpx2.Response(200, json=["b"])
+        link = '<https://api.example.invalid/rest/api/3/items?page=2>; rel="next"'
+        return httpx2.Response(200, json=["a"], headers={"Link": link})
+
+    seen: list[httpx2.Request] = []
+    api = ApiClient(
+        "https://api.example.invalid/rest/api/3",
+        policy=RetryPolicy(),
+        clock=FakeClock(),
+        transport=httpx2.MockTransport(lambda r: seen.append(r) or prefixed(r)),
+    )
+    first = await fetch_page(api, "/items", link_header())
+    await fetch_page(api, "/items", link_header(), cursor=first.next_cursor)
+    pages = [r async for r in iter_pages(api, "/items", link_header())]
+    assert [r.json() for r in pages] == [["a"], ["b"]]
+    paths = {r.url.path for r in seen}
+    assert paths == {"/rest/api/3/items"}
+
+
+@pytest.mark.anyio
 async def test_repeated_token_ends_pagination() -> None:
     def stuck(_: httpx2.Request) -> httpx2.Response:
         return httpx2.Response(

@@ -9,6 +9,7 @@ from mcp.types import CallToolResult, TextContent
 
 from bench_core.auth import StaticToken
 from bench_core.testing import FakeClock, Fault
+
 from bench_github.fake import OWNER, REPO, GitHubFake, seeded_fake
 from bench_github.server import create_server
 from bench_github.tools import BODY_LIMIT, FILE_LIMIT

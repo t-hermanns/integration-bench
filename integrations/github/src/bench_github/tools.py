@@ -12,14 +12,13 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Annotated, Any
+from typing import Annotated
 
-import httpx2
 from mcp.server.mcpserver import Context
-from mcp.server.mcpserver.exceptions import ToolError
 from pydantic import BaseModel, Field
 
-from bench_core.mcp import ResponseFormat, ToolSpec, lifespan_state
+from bench_core.mcp import ResponseFormat, ToolSpec, clip, lifespan_state, omit, tool_call
+
 from bench_github import scopes
 from bench_github.client import GitHubClient, PullState
 from bench_github.models import (
@@ -44,40 +43,16 @@ class GitHubState:
     gh: GitHubClient
 
 
-def _omit_none(value: Any) -> bool:
-    return value is None
-
-
-def omit() -> Any:
-    """Default for format-dependent fields: None, and left out of the output when None."""
-    return Field(default=None, exclude_if=_omit_none)
-
-
 class Output(BaseModel):
     pass
-
-
-def _clip(text: str | None, limit: int) -> tuple[str | None, bool | None]:
-    """Text cut to `limit` characters, plus `True` if it was cut (else None, omitted)."""
-    if text is None or len(text) <= limit:
-        return text, None
-    return text[:limit], True
 
 
 @contextmanager
 def _github(ctx: Context[GitHubState]) -> Iterator[GitHubClient]:
     """The client for one tool call: one wait budget for all its requests."""
     gh = lifespan_state(ctx).gh
-    with gh.api.wait_budget(TOOL_WAIT_BUDGET):
-        try:
-            yield gh
-        except httpx2.TransportError as exc:
-            # Reads were already retried; writes are not, because the request may have
-            # reached GitHub before the connection broke.
-            raise ToolError(
-                f"Could not reach GitHub ({type(exc).__name__}). Try again later. If this "
-                "call creates something, first check whether it was created."
-            ) from exc
+    with tool_call(gh.api, provider="GitHub", wait_budget=TOOL_WAIT_BUDGET):
+        yield gh
 
 
 # --- Output models ------------------------------------------------------------------------
@@ -218,7 +193,7 @@ def _hit(issue: IssueSummary, fmt: ResponseFormat) -> IssueHit:
 
 
 def _comment(comment: Comment, fmt: ResponseFormat) -> CommentOut:
-    body, clipped = _clip(comment.body, COMMENT_LIMIT)
+    body, clipped = clip(comment.body, COMMENT_LIMIT)
     return CommentOut(
         author=comment.author,
         body=body or "",
@@ -231,7 +206,7 @@ def _comment(comment: Comment, fmt: ResponseFormat) -> CommentOut:
 def _issue(
     issue: Issue, fmt: ResponseFormat, comments: list[Comment] | None, more: bool
 ) -> IssueOut:
-    body, clipped = _clip(issue.body, BODY_LIMIT[fmt])
+    body, clipped = clip(issue.body, BODY_LIMIT[fmt])
     out = IssueOut(
         repository=issue.repository,
         number=issue.number,
@@ -395,7 +370,7 @@ async def get_file_contents(
                 for e in result.entries
             ],
         )
-    text, clipped = _clip(result.text, FILE_LIMIT[response_format])
+    text, clipped = clip(result.text, FILE_LIMIT[response_format])
     note = result.note
     if clipped:
         note = f"Showing the first {len(text or '')} of {len(result.text or '')} characters." + (

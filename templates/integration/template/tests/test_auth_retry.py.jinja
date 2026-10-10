@@ -1,0 +1,283 @@
+"""Auth and retry scenarios against the in-memory fake.
+
+Runs over `httpx2.MockTransport` and never inside a cassette (vcrpy patches MockTransport
+too). Clocks are fake, so waits are recorded instead of slept.
+"""
+
+from collections.abc import AsyncIterator
+from typing import Any
+
+import pytest
+from mcp.client import Client
+{%- if auth in ['bearer', 'basic'] %}
+from mcp.server.mcpserver.exceptions import ToolError
+{%- endif %}
+from mcp.types import CallToolResult, TextContent
+
+from bench_core.auth import {% if auth == 'oauth_refresh' %}AuthError, Credential, MemoryTokenStore, TokenSet{% elif auth == 'client_credentials' %}AuthError, Credential{% else %}Credential{% endif %}
+from bench_core.http import RateLimited
+from bench_core.testing import FakeClock, Fault
+
+{% if auth == 'oauth_refresh' -%}
+from bench_{{ name }}.auth import granted_scopes, user_token
+{% elif auth == 'client_credentials' -%}
+from bench_{{ name }}.auth import granted_scopes, service_account
+{% else -%}
+from bench_{{ name }}.auth import granted_scopes
+{% endif -%}
+from bench_{{ name }}.client import PROVIDER, {{ cls }}Client, make_api
+from bench_{{ name }}.fake import {{ cls }}Fake, credential, seeded_fake
+{%- if auth in ['oauth_refresh', 'client_credentials'] %}
+from bench_{{ name }}.fake.backend import TOKEN_PATH
+{%- endif %}
+from bench_{{ name }}.scopes import READ, WRITE
+from bench_{{ name }}.server import create_server
+from bench_{{ name }}.tools import TOOL_WAIT_BUDGET
+
+pytestmark = pytest.mark.anyio
+
+TOKEN = "retry-token"
+ALL = [READ, WRITE]
+GET = "{{ name }}_get_item"
+CREATE = "{{ name }}_create_item"
+{%- if auth in ['oauth_refresh', 'client_credentials'] %}
+CLIENT_ID = "fake-client"
+CLIENT_SECRET = "fake-client-secret"
+{%- endif %}
+
+
+@pytest.fixture
+def clock() -> FakeClock:
+    return FakeClock()
+
+
+@pytest.fixture
+def fake(clock: FakeClock) -> {{ cls }}Fake:
+    fake = seeded_fake(clock)
+    fake.issue_token(TOKEN, ALL)
+{%- if auth == 'oauth_refresh' %}
+    fake.oauth_clients[CLIENT_ID] = CLIENT_SECRET
+{%- elif auth == 'client_credentials' %}
+    fake.register_client(CLIENT_ID, CLIENT_SECRET, ALL)
+{%- endif %}
+    return fake
+
+
+@pytest.fixture
+async def client_for(fake: {{ cls }}Fake, clock: FakeClock) -> AsyncIterator[Any]:
+    apis = []
+
+    def make(cred: Credential) -> {{ cls }}Client:
+        api = make_api(credential=cred, transport=fake.transport(), clock=clock)
+        apis.append(api)
+        return {{ cls }}Client(api)
+
+    yield make
+    for api in apis:
+        await api.aclose()
+
+
+@pytest.fixture
+def account(request: pytest.FixtureRequest) -> str:
+    # Refresh locks are per account and process-wide; keep tests independent.
+    return f"{{ name }}-{request.node.name}"
+
+
+def text(result: CallToolResult) -> str:
+    return "\n".join(c.text for c in result.content if isinstance(c, TextContent))
+{%- if auth == 'oauth_refresh' %}
+
+
+# --- User tokens (rotating refresh) -------------------------------------------------------
+
+
+def login(
+    fake: {{ cls }}Fake, clock: FakeClock, account: str, *, expires_in: float = 3600
+) -> MemoryTokenStore:
+    """State right after `bench auth login {{ name }}`."""
+    access, refresh = fake.user_tokens(ALL)
+    tokens = TokenSet(access, refresh, expires_at=clock.time() + expires_in, scopes=frozenset(ALL))
+    return MemoryTokenStore({account: tokens})
+
+
+def user_credential(
+    fake: {{ cls }}Fake, clock: FakeClock, account: str, store: MemoryTokenStore
+) -> Credential:
+    return user_token(
+        account,
+        store,
+        client_id=CLIENT_ID,
+        client_secret=CLIENT_SECRET,
+        transport=fake.transport(),
+        clock=clock,
+    )
+
+
+def refreshes(fake: {{ cls }}Fake) -> int:
+    return len(fake.calls("POST", TOKEN_PATH))
+
+
+async def test_expiring_token_is_refreshed_before_the_call(
+    fake: {{ cls }}Fake, clock: FakeClock, account: str, client_for: Any
+) -> None:
+    store = login(fake, clock, account, expires_in=30)  # inside the 60 s skew
+    old = store.load(account)
+    client = client_for(user_credential(fake, clock, account, store))
+    assert (await client.get_item("1001")).id == "1001"
+    assert refreshes(fake) == 1
+    new = store.load(account)
+    assert new is not None
+    assert old is not None
+    assert new.refresh_token != old.refresh_token, "rotated refresh token is stored"
+{%- if error_format != 'slack' %}
+
+
+async def test_401_refreshes_and_retries_once(
+    fake: {{ cls }}Fake, clock: FakeClock, account: str, client_for: Any
+) -> None:
+    store = login(fake, clock, account)
+    tokens = store.load(account)
+    assert tokens is not None
+    assert tokens.access_token is not None
+    fake.expire_token(tokens.access_token)
+    client = client_for(user_credential(fake, clock, account, store))
+    assert (await client.get_item("1001")).id == "1001"
+    assert refreshes(fake) == 1
+{%- endif %}
+
+
+async def test_used_refresh_token_asks_for_login(
+    fake: {{ cls }}Fake, clock: FakeClock, account: str, client_for: Any
+) -> None:
+    store = login(fake, clock, account, expires_in=0)
+    fake.refresh_tokens.clear()  # e.g. another process already rotated it
+    client = client_for(user_credential(fake, clock, account, store))
+    with pytest.raises(AuthError, match=r"bench auth login"):
+        await client.get_item("1001")
+
+
+async def test_granted_scopes_come_from_the_token(
+    fake: {{ cls }}Fake, clock: FakeClock, account: str
+) -> None:
+    store = login(fake, clock, account, expires_in=0)
+    assert await granted_scopes(user_credential(fake, clock, account, store)) == frozenset(ALL)
+{%- elif auth == 'client_credentials' %}
+
+
+# --- Service account (client credentials) -------------------------------------------------
+
+
+def service_credential(
+    fake: {{ cls }}Fake, clock: FakeClock, account: str, *, secret: str = CLIENT_SECRET
+) -> Credential:
+    return service_account(
+        account,
+        client_id=CLIENT_ID,
+        client_secret=secret,
+        transport=fake.transport(),
+        clock=clock,
+    )
+
+
+def token_requests(fake: {{ cls }}Fake) -> int:
+    return len(fake.calls("POST", TOKEN_PATH))
+
+
+async def test_token_is_fetched_once_and_renewed_after_expiry(
+    fake: {{ cls }}Fake, clock: FakeClock, account: str, client_for: Any
+) -> None:
+    client = client_for(service_credential(fake, clock, account))
+    await client.get_item("1001")
+    await client.get_item("1002")
+    assert token_requests(fake) == 1
+    clock.advance(3600)
+    await client.get_item("1001")
+    assert token_requests(fake) == 2
+
+
+async def test_wrong_secret_is_reported(
+    fake: {{ cls }}Fake, clock: FakeClock, account: str, client_for: Any
+) -> None:
+    client = client_for(service_credential(fake, clock, account, secret="wrong"))
+    with pytest.raises(AuthError, match="invalid_client"):
+        await client.get_item("1001")
+
+
+async def test_granted_scopes_come_from_the_token(
+    fake: {{ cls }}Fake, clock: FakeClock, account: str
+) -> None:
+    assert await granted_scopes(service_credential(fake, clock, account)) == frozenset(ALL)
+{%- else %}
+
+
+# --- Static credentials -------------------------------------------------------------------
+
+
+async def test_revoked_token_is_reported(fake: {{ cls }}Fake, client_for: Any) -> None:
+    fake.expire_token(TOKEN)
+    with pytest.raises(ToolError) as exc:
+        await client_for(credential(TOKEN)).get_item("1001")
+    assert "rejected" in str(exc.value)
+
+
+async def test_static_tokens_report_no_scopes() -> None:
+    assert await granted_scopes(credential(TOKEN)) is None
+{%- endif %}
+
+
+# --- Rate limits and network errors -------------------------------------------------------
+
+
+async def test_rate_limit_honours_retry_after(
+    fake: {{ cls }}Fake, clock: FakeClock, client_for: Any
+) -> None:
+    fake.inject(Fault.rate_limit(retry_after=7), method="GET")
+    assert (await client_for(credential(TOKEN)).get_item("1001")).id == "1001"
+    assert clock.sleeps == [7]
+
+
+async def test_budget_exceeded_on_the_client(
+    fake: {{ cls }}Fake, clock: FakeClock, client_for: Any
+) -> None:
+    fake.inject(Fault.rate_limit(retry_after=45), method="GET")
+    with pytest.raises(RateLimited) as exc:
+        await client_for(credential(TOKEN)).get_item("1001")
+    assert exc.value.retry_after == 45
+    assert clock.sleeps == []
+
+
+async def test_wait_budget_is_per_tool_call(fake: {{ cls }}Fake, clock: FakeClock) -> None:
+    server = create_server(
+        credential=credential(TOKEN),
+        transport=fake.transport(),
+        clock=clock,
+        read_only=False,
+        variant="v1",
+    )
+    fake.inject(Fault.rate_limit(retry_after=TOOL_WAIT_BUDGET + 1), method="GET")
+    async with Client(server) as client:
+        result = await client.call_tool(GET, {"item_id": "1001"})
+        assert result.is_error
+        assert f"{PROVIDER} rate limited" in text(result)
+
+        # The next tool call starts with a fresh budget.
+        fake.inject(Fault.rate_limit(retry_after=TOOL_WAIT_BUDGET - 1), method="GET")
+        assert not (await client.call_tool(GET, {"item_id": "1001"})).is_error
+    assert clock.sleeps == [TOOL_WAIT_BUDGET - 1]
+
+
+async def test_network_errors_on_writes(fake: {{ cls }}Fake, clock: FakeClock) -> None:
+    server = create_server(
+        credential=credential(TOKEN),
+        transport=fake.transport(),
+        clock=clock,
+        read_only=False,
+        variant="v1",
+    )
+    before = len(fake.items)
+    fake.inject(Fault.network(), method="POST")
+    async with Client(server) as client:
+        result = await client.call_tool(CREATE, {"title": "x"})
+    assert result.is_error
+    assert f"Could not reach {PROVIDER} (ConnectError)" in text(result)
+    assert len(fake.items) == before

@@ -35,6 +35,7 @@ class RetryPolicy:
     """Base policy: never retries. Subclasses override the three hooks."""
 
     name: str = "generic"
+    """Provider name in messages to the model; integrations pass their own, e.g. "GitHub"."""
     max_attempts: int = 1
     # Retry only idempotent methods, even on rate limits (Jira's documented guidance).
     idempotent_only: bool = False

@@ -31,8 +31,13 @@ class Paginator(Protocol):
     @property
     def kind(self) -> str: ...
 
-    def prepare(self, url: str, params: Params, raw_cursor: str | None) -> tuple[str, Params]:
-        """URL and query params for the request that continues at `raw_cursor`."""
+    def prepare(
+        self, url: str, params: Params, raw_cursor: str | None, *, base: httpx2.URL
+    ) -> tuple[str, Params]:
+        """URL and query params for the request that continues at `raw_cursor`.
+
+        `base` is the API client's base URL; relative URLs are resolved against it.
+        """
         ...
 
     def next_raw(self, response: httpx2.Response, sent: str | None) -> str | None:
@@ -44,9 +49,14 @@ class Paginator(Protocol):
 class LinkHeaderPaginator:
     kind: str = "link_header"
 
-    def prepare(self, url: str, params: Params, raw_cursor: str | None) -> tuple[str, Params]:
-        # The next URL already carries every query param.
-        return (raw_cursor, {}) if raw_cursor else (url, params)
+    def prepare(
+        self, url: str, params: Params, raw_cursor: str | None, *, base: httpx2.URL
+    ) -> tuple[str, Params]:
+        if not raw_cursor:
+            return url, params
+        # The next URL already carries every query param. Its path is absolute on the
+        # base URL's host, so a base path like `/rest/api/3` must not be prepended again.
+        return str(base.copy_with(raw_path=raw_cursor.encode("ascii"))), {}
 
     def next_raw(self, response: httpx2.Response, sent: str | None) -> str | None:
         next_url = response.links.get("next", {}).get("url")
@@ -67,7 +77,9 @@ class BodyTokenPaginator:
     param: str
     is_last_field: str | None = None
 
-    def prepare(self, url: str, params: Params, raw_cursor: str | None) -> tuple[str, Params]:
+    def prepare(
+        self, url: str, params: Params, raw_cursor: str | None, *, base: httpx2.URL
+    ) -> tuple[str, Params]:
         if raw_cursor is None:
             return url, params
         return url, {**params, self.param: raw_cursor}
@@ -158,7 +170,7 @@ async def fetch_page(
 ) -> PageResponse:
     """Fetch the page at the model-supplied `cursor` (or the first page)."""
     raw = decode_cursor(paginator.kind, cursor) if cursor else None
-    req_url, req_params = paginator.prepare(url, dict(params or {}), raw)
+    req_url, req_params = paginator.prepare(url, dict(params or {}), raw, base=api.base_url)
     response = await _get(api, req_url, req_params)
     if not response.is_success:
         return PageResponse(response, None)
@@ -182,7 +194,7 @@ async def iter_pages(
     raw: str | None = None
     seen: set[str] = set()
     for _ in range(max_pages):
-        req_url, req_params = paginator.prepare(url, dict(params or {}), raw)
+        req_url, req_params = paginator.prepare(url, dict(params or {}), raw, base=api.base_url)
         response = await _get(api, req_url, req_params)
         yield response
         if not response.is_success:

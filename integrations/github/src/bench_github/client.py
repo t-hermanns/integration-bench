@@ -22,6 +22,7 @@ from bench_core.auth import Credential, CredentialAuth
 from bench_core.clock import Clock
 from bench_core.http import ApiClient, GitHubRetryPolicy, fetch_page, link_header
 from bench_core.permissions import NotFoundOrNoAccess, PermissionDenied
+
 from bench_github.models import (
     Comment,
     DirectoryEntry,
@@ -52,7 +53,7 @@ def make_api(
 ) -> ApiClient:
     return ApiClient(
         base_url,
-        policy=GitHubRetryPolicy(),
+        policy=GitHubRetryPolicy(name=PROVIDER),
         clock=clock,
         transport=transport,
         headers={

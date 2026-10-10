@@ -1,0 +1,6 @@
+"""In-memory {{ provider }} API for tests, and its default data."""
+
+from bench_{{ name }}.fake.backend import {{ cls }}Fake, credential
+from bench_{{ name }}.fake.seed import ITEMS, seed, seeded_fake
+
+__all__ = ["ITEMS", "{{ cls }}Fake", "credential", "seed", "seeded_fake"]

@@ -1,0 +1,16 @@
+[project]
+name = "bench-{{ name }}"
+version = "0.1.0"
+description = "{{ provider }} MCP server for integration-bench."
+requires-python = ">=3.13"
+dependencies = ["bench-core"]
+
+[project.scripts]
+bench-{{ name }} = "bench_{{ name }}.server:main"
+
+[tool.uv.sources]
+bench-core = { workspace = true }
+
+[build-system]
+requires = ["uv_build>=0.8,<1"]
+build-backend = "uv_build"

@@ -1,0 +1,32 @@
+"""Pydantic models for the {{ provider }} API, shaped for the tools.
+
+`Item` is the template's example resource; replace it with the real resources. Models
+validate the provider's raw JSON (use validation aliases such as `AliasPath` for nested
+fields) and ignore unknown fields, so new provider fields never break parsing.
+"""
+
+from datetime import datetime
+from typing import Literal
+
+from pydantic import BaseModel, ConfigDict
+
+
+class {{ cls }}Model(BaseModel):
+    model_config = ConfigDict(extra="ignore", populate_by_name=True, frozen=True)
+
+
+class Item({{ cls }}Model):
+    id: str
+    title: str
+    status: Literal["open", "closed"]
+    description: str | None = None
+    created_at: datetime
+    updated_at: datetime
+    url: str
+
+
+class Page[T](BaseModel):
+    """One page of results plus the opaque cursor for the next page."""
+
+    items: list[T]
+    next_cursor: str | None = None

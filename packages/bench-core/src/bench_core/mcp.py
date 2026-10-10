@@ -20,19 +20,21 @@ the HTTP client. Tools read that state with `lifespan_state(ctx)`.
 
 import os
 import re
-from collections.abc import AsyncIterator, Awaitable, Callable, Mapping, Sequence
-from contextlib import AbstractAsyncContextManager, asynccontextmanager
+from collections.abc import AsyncIterator, Awaitable, Callable, Iterator, Mapping, Sequence
+from contextlib import AbstractAsyncContextManager, asynccontextmanager, contextmanager
 from dataclasses import dataclass
 from importlib.resources.abc import Traversable
 from typing import Any, Literal
 
+import httpx2
 import yaml
 from mcp.server import MCPServer
 from mcp.server.mcpserver import Context
 from mcp.server.mcpserver.exceptions import ToolError
 from mcp.server.mcpserver.tools import Tool
-from pydantic import BaseModel, ConfigDict, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
+from bench_core.http import ApiClient
 from bench_core.permissions import (
     Granted,
     Selection,
@@ -117,6 +119,46 @@ class ToolSpec:
 def lifespan_state[StateT](ctx: Context[StateT]) -> StateT:
     """The object the server's lifespan yielded (e.g. a dataclass holding the `ApiClient`)."""
     return ctx.request_context.lifespan_context
+
+
+@contextmanager
+def tool_call(api: ApiClient, *, provider: str, wait_budget: float) -> Iterator[None]:
+    """Scope of one tool call: one wait budget shared by all its requests (pagination,
+    follow-up reads), and transport errors turned into a `ToolError` the model can act on.
+    """
+    with api.wait_budget(wait_budget):
+        try:
+            yield
+        except httpx2.TransportError as exc:
+            # Reads were already retried; writes are not, because the request may have
+            # reached the provider before the connection broke.
+            raise ToolError(
+                f"Could not reach {provider} ({type(exc).__name__}). Try again later. If this "
+                "call creates something, first check whether it was created."
+            ) from exc
+
+
+# --- Tool output helpers ------------------------------------------------------------------
+
+
+def _is_none(value: Any) -> bool:
+    return value is None
+
+
+def omit() -> Any:
+    """Default for format-dependent output fields: None, and left out of the output when None.
+
+    Use it as `author: str | None = omit()` on the tool's output model, not inside a `type`
+    alias (Pydantic ignores `Field(default=...)` there).
+    """
+    return Field(default=None, exclude_if=_is_none)
+
+
+def clip(text: str | None, limit: int) -> tuple[str | None, bool | None]:
+    """Text cut to `limit` characters, plus `True` if it was cut (else None, i.e. omitted)."""
+    if text is None or len(text) <= limit:
+        return text, None
+    return text[:limit], True
 
 
 def _short(value: Any, limit: int = 60) -> str:

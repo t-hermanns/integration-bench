@@ -9,6 +9,7 @@ from bench_core.auth import StaticToken
 from bench_core.http import RateLimited
 from bench_core.permissions import NotFoundOrNoAccess, PermissionDenied
 from bench_core.testing import FakeClock, Fault
+
 from bench_github.client import GitHubClient, make_api
 from bench_github.fake import OWNER, REPO, GitHubFake, SearchError, parse_search, seeded_fake
 

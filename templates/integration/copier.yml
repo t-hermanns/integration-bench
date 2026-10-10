@@ -1,0 +1,106 @@
+# Template for one integration package (integrations/<name>), extracted from the
+# hand-built GitHub integration. `bench new <name>` runs it; `copier update` pulls later
+# template changes into generated integrations.
+#
+# The generated package is green out of the box: an example resource ("items") with a
+# list, a get and a create tool, a fake backend in the chosen API style, cassette
+# scenarios and tests. Replace the example resource with the real API afterwards.
+
+_min_copier_version: "9.10"
+_subdirectory: template
+_answers_file: .copier-answers.yml
+
+name:
+  type: str
+  help: Integration name (package bench_<name>, tool prefix <name>_), e.g. jira
+  validator: >-
+    {% if not (name | regex_search('^[a-z][a-z0-9]{1,14}$')) %}
+    Use 2-15 lowercase letters or digits, starting with a letter.
+    {% endif %}
+
+provider:
+  type: str
+  help: Provider name as the model reads it in messages, e.g. Jira
+  default: "{{ name | capitalize }}"
+  validator: >-
+    {% if not (provider | regex_search('^[A-Za-z0-9][A-Za-z0-9 .-]{0,29}$')) %}
+    Use up to 30 letters, digits, spaces, dots or hyphens.
+    {% endif %}
+
+base_url:
+  type: str
+  help: API base URL, may include a path prefix (https://example.com/rest/api/3)
+  default: "https://api.{{ name }}.example.com"
+  validator: >-
+    {% if not (base_url | regex_search('^https://[a-z0-9.-]+(/[A-Za-z0-9._~/-]*[^/])?$')) %}
+    Use an https:// URL without query or trailing slash.
+    {% endif %}
+
+auth:
+  type: str
+  help: How the server authenticates
+  choices:
+    OAuth 2.0 with rotating refresh tokens (user signs in once): oauth_refresh
+    OAuth 2.0 client credentials (service account): client_credentials
+    Static bearer token (API key, bot token): bearer
+    HTTP Basic with user and API token: basic
+  default: bearer
+
+token_url:
+  type: str
+  help: OAuth token endpoint
+  default: "https://{{ name }}.example.com/oauth/token"
+  when: "{{ auth in ['oauth_refresh', 'client_credentials'] }}"
+
+pagination:
+  type: str
+  help: How list endpoints hand out the next page
+  choices:
+    Link header with rel="next" (GitHub): link_header
+    nextPageToken plus isLast in the body (Jira): next_page_token
+    nextPageToken in the body, pageToken parameter (Google): page_token
+    response_metadata.next_cursor in the body (Slack): cursor
+  default: link_header
+
+retry:
+  type: str
+  help: Rate-limit and retry behaviour (bench_core.http retry policies)
+  choices:
+    429 with Retry-After, nothing else retried (Slack and most APIs): slack
+    429/503, backoff with jitter, idempotent calls only (Jira): jira
+    429, 5xx and 403 rate-limit reasons, exponential backoff (Google): gdrive
+    403/429 with x-ratelimit headers, wait for the reset (GitHub): github
+  default: slack
+
+error_format:
+  type: str
+  help: What error responses look like
+  choices:
+    'HTTP status with {"message": ...} (GitHub style)': message
+    'HTTP status with {"errorMessages": [...], "errors": {...}} (Jira)': jira
+    'HTTP status with {"error": {"code", "message", "errors"}} (Google)': google
+    'HTTP 200 with {"ok": false, "error": ...} (Slack)': slack
+  default: message
+
+# Computed values (never asked, not stored in the answers file).
+cls:
+  type: str
+  default: "{{ name | capitalize }}"
+  when: false
+
+env:
+  type: str
+  default: "{{ name | upper }}"
+  when: false
+
+bare_list:
+  type: bool
+  default: "{{ pagination == 'link_header' and error_format != 'slack' }}"
+  when: false
+
+_message_after_copy: |
+  Generated integrations/{{ name }}. Next steps (`bench new` does the first two):
+    1. Add bench-{{ name }} to the root pyproject.toml and run `uv sync`.
+    2. `uv run bench synth {{ name }}` writes the synthetic cassettes.
+    3. `uv run pytest integrations/{{ name }}` should be green; then replace the example
+       "items" resource with the real API (client, models, fake, scenarios, tools).

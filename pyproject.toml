@@ -36,6 +36,11 @@ select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF", "PT", "ASYNC"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["bench_*"]
+# bench_core gets its own block, so generated integrations sort the same whatever their name.
+section-order = ["future", "standard-library", "third-party", "bench-core", "first-party", "local-folder"]
+
+[tool.ruff.lint.isort.sections]
+"bench-core" = ["bench_core"]
 
 [tool.pyright]
 pythonVersion = "3.13"

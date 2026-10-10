@@ -17,6 +17,7 @@ from bench_core.auth import Credential, StaticToken
 from bench_core.clock import Clock
 from bench_core.mcp import BenchServer, build_server, load_descriptions
 from bench_core.permissions import Granted
+
 from bench_github.client import BASE_URL, GitHubClient, make_api
 from bench_github.scopes import EXPAND
 from bench_github.tools import TOOLS, GitHubState

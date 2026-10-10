@@ -71,6 +71,10 @@ class ApiClient:
             timeout=timeout,
         )
 
+    @property
+    def base_url(self) -> httpx2.URL:
+        return self._http.base_url
+
     @contextmanager
     def wait_budget(self, seconds: float) -> Iterator[WaitBudget]:
         budget = WaitBudget(seconds)

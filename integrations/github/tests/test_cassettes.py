@@ -11,6 +11,7 @@ from vcr.errors import CannotOverwriteExistingCassetteException
 
 from bench_core.permissions import NotFoundOrNoAccess, PermissionDenied
 from bench_core.testing import read_manifest, stale_cassettes
+
 from bench_github.client import GitHubClient
 from bench_github.fake import OWNER, REPO
 from bench_github.models import DirectoryListing, FileContent

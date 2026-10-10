@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
 
+import httpx2
 import pytest
 from mcp.client import Client
 from mcp.server.mcpserver import Context
@@ -10,17 +11,22 @@ from mcp.server.mcpserver.exceptions import ToolError
 from mcp.types import CallToolResult, TextContent
 from pydantic import BaseModel
 
+from bench_core.http import ApiClient, RetryPolicy
 from bench_core.mcp import (
     Descriptions,
     ResponseFormat,
     ToolSpec,
     ToolText,
     build_server,
+    clip,
     lifespan_state,
     load_descriptions,
+    omit,
+    tool_call,
     variant_from_env,
 )
 from bench_core.permissions import ToolAccess, expand_levels, requires
+from bench_core.testing import FakeClock
 
 V1 = """\
 instructions: Demo server.
@@ -400,3 +406,43 @@ async def test_validation_errors_inside_tool_are_not_blamed_on_arguments(
     assert result.is_error
     assert "Invalid arguments" not in text_of(result)
     assert "not-an-int" not in text_of(result)
+
+
+# --- Tool helpers -------------------------------------------------------------------------
+
+
+class Shaped(BaseModel):
+    title: str
+    author: str | None = omit()
+
+
+def test_omit_drops_unset_fields_from_output() -> None:
+    assert Shaped(title="a").model_dump() == {"title": "a"}
+    assert Shaped(title="a", author="b").model_dump() == {"title": "a", "author": "b"}
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [(None, (None, None)), ("abc", ("abc", None)), ("abcdef", ("abcd", True))],
+)
+def test_clip(text: str | None, expected: tuple[str | None, bool | None]) -> None:
+    assert clip(text, 4) == expected
+
+
+@pytest.mark.anyio
+async def test_tool_call_turns_network_errors_into_tool_errors() -> None:
+    def refuse(request: httpx2.Request) -> httpx2.Response:
+        raise httpx2.ConnectError("refused", request=request)
+
+    api = ApiClient(
+        "https://api.example.test",
+        policy=RetryPolicy(),
+        clock=FakeClock(),
+        transport=httpx2.MockTransport(refuse),
+    )
+    async with api:
+        with (
+            pytest.raises(ToolError, match=r"Could not reach Example \(ConnectError\)"),
+            tool_call(api, provider="Example", wait_budget=5.0),
+        ):
+            await api.get("/items")

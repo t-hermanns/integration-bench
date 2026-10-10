@@ -23,6 +23,7 @@ from typing import Any, Literal
 import anyio
 import httpx2
 import yaml
+from mcp.server.mcpserver.exceptions import ToolError
 from vcr.cassette import Cassette
 from vcr.record_mode import RecordMode
 
@@ -37,6 +38,15 @@ MANIFEST_HEADER = (
     "# Kind of every cassette in this directory. `bench synth` writes `synthetic` ones from\n"
     "# the in-memory fake; `bench record` replaces them with `recorded` ones from the sandbox.\n"
 )
+
+
+async def expect_tool_error(call: Awaitable[Any]) -> None:
+    """Await `call` inside a scenario that records an error response (404, 403, 422 ...)."""
+    try:
+        await call
+    except ToolError:
+        return
+    raise AssertionError("scenario expected a tool error")
 
 
 @dataclass(frozen=True)

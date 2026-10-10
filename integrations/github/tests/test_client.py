@@ -11,6 +11,7 @@ from bench_core.auth import StaticToken
 from bench_core.http import decode_cursor
 from bench_core.permissions import NotFoundOrNoAccess, PermissionDenied
 from bench_core.testing import FakeBackend, FakeClock, FakeRequest
+
 from bench_github.client import (
     GitHubClient,
     accepted_permissions,

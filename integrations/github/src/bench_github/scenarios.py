@@ -10,11 +10,11 @@ from pathlib import Path
 from typing import Any
 
 import httpx2
-from mcp.server.mcpserver.exceptions import ToolError
 
 from bench_core.auth import StaticToken
 from bench_core.http import ApiClient
-from bench_core.testing import CassetteSuite, FakeBackend, FakeClock, Scenario
+from bench_core.testing import CassetteSuite, FakeBackend, FakeClock, Scenario, expect_tool_error
+
 from bench_github.client import GitHubClient, make_api
 from bench_github.fake import OWNER, REPO, GitHubFake, seeded_fake
 
@@ -34,14 +34,6 @@ def _api(transport: httpx2.AsyncBaseTransport | None, clock: FakeClock | None) -
     return make_api(
         credential=StaticToken("github", SYNTHETIC_TOKEN), transport=transport, clock=clock
     )
-
-
-async def _expect_error(call: Awaitable[Any]) -> None:
-    try:
-        await call
-    except ToolError:
-        return
-    raise AssertionError("scenario expected a tool error")
 
 
 Run = Callable[[GitHubClient], Awaitable[Any]]
@@ -74,7 +66,7 @@ async def search_no_results(gh: GitHubClient) -> None:
 
 
 async def search_unknown_user(gh: GitHubClient) -> None:
-    await _expect_error(gh.search_issues(f"repo:{OWNER}/{REPO} author:no-such-user-4711"))
+    await expect_tool_error(gh.search_issues(f"repo:{OWNER}/{REPO} author:no-such-user-4711"))
 
 
 async def get_issue(gh: GitHubClient) -> None:
@@ -82,7 +74,7 @@ async def get_issue(gh: GitHubClient) -> None:
 
 
 async def get_issue_not_found(gh: GitHubClient) -> None:
-    await _expect_error(gh.get_issue(OWNER, REPO, 999))
+    await expect_tool_error(gh.get_issue(OWNER, REPO, 999))
 
 
 async def list_issue_comments(gh: GitHubClient) -> None:
@@ -101,7 +93,7 @@ async def create_issue(gh: GitHubClient) -> None:
 
 
 async def create_issue_forbidden(gh: GitHubClient) -> None:
-    await _expect_error(gh.create_issue(OWNER, REPO, "Should not be created"))
+    await expect_tool_error(gh.create_issue(OWNER, REPO, "Should not be created"))
 
 
 def _read_only_token(fake: GitHubFake) -> None:
@@ -139,7 +131,7 @@ async def get_large_file(gh: GitHubClient) -> None:
 
 
 async def get_file_not_found(gh: GitHubClient) -> None:
-    await _expect_error(gh.get_file_contents(OWNER, REPO, "docs/missing.md"))
+    await expect_tool_error(gh.get_file_contents(OWNER, REPO, "docs/missing.md"))
 
 
 SCENARIOS: dict[str, Scenario] = {

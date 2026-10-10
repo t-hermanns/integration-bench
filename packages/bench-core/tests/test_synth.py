@@ -5,6 +5,7 @@ from pathlib import Path
 import httpx2
 import pytest
 import yaml
+from mcp.server.mcpserver.exceptions import ToolError
 from vcr.errors import CannotOverwriteExistingCassetteException
 
 from bench_core.http import ApiClient, RetryPolicy
@@ -14,6 +15,7 @@ from bench_core.testing import (
     FakeClock,
     FakeRequest,
     Scenario,
+    expect_tool_error,
     read_manifest,
     stale_cassettes,
     synthesize,
@@ -173,3 +175,15 @@ async def test_public_routes_skip_the_token_check() -> None:
         assert (await api.post("/oauth/token")).json() == {"token_seen": None}
         assert (await api.get("/private")).status_code == 401
         assert (await api.get("/unknown")).status_code == 401  # no route leaks existence
+
+
+async def test_expect_tool_error() -> None:
+    async def fails() -> None:
+        raise ToolError("nope")
+
+    async def succeeds() -> None:
+        return None
+
+    await expect_tool_error(fails())
+    with pytest.raises(AssertionError, match="expected a tool error"):
+        await expect_tool_error(succeeds())

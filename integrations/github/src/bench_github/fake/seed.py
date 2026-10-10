@@ -9,6 +9,7 @@ from datetime import UTC, datetime, timedelta
 
 from bench_core.clock import Clock
 from bench_core.testing import FakeClock
+
 from bench_github.fake.backend import GitHubFake, Repo
 
 OWNER = "bench-sandbox"

@@ -18,6 +18,7 @@ from mcp.types import CallToolResult, TextContent
 from bench_core.auth import AuthError, Credential, MemoryTokenStore, StaticToken, TokenSet
 from bench_core.http import RateLimited
 from bench_core.testing import FakeClock, Fault
+
 from bench_github.auth import TOKEN_URL, granted_permissions, installation, user_token
 from bench_github.client import GitHubClient, make_api
 from bench_github.fake import OWNER, REPO, GitHubFake, seeded_fake
