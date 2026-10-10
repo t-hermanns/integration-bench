@@ -1,15 +1,15 @@
 # Kind of every cassette in this directory. `bench synth` writes `synthetic` ones from
 # the in-memory fake; `bench record` replaces them with `recorded` ones from the sandbox.
 cassettes:
-  list_channels: synthetic
-  list_channels_paged: synthetic
-  post_message: synthetic
+  list_channels: recorded
+  list_channels_paged: recorded
+  post_message: recorded
   post_message_forbidden: synthetic
-  read_history: synthetic
-  read_history_missing_channel: synthetic
-  read_history_not_member: synthetic
-  read_thread: synthetic
-  read_thread_not_found: synthetic
-  reply_in_thread: synthetic
-  reply_thread_not_found: synthetic
-  reply_to_a_reply: synthetic
+  read_history: recorded
+  read_history_missing_channel: recorded
+  read_history_not_member: recorded
+  read_thread: recorded
+  read_thread_not_found: recorded
+  reply_in_thread: recorded
+  reply_thread_not_found: recorded
+  reply_to_a_reply: recorded

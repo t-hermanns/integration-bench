@@ -14,12 +14,67 @@ interactions:
     uri: https://slack.com/api/conversations.list?limit=1&types=public_channel&exclude_archived=true
   response:
     body:
-      string: '{"ok":true,"channels":[{"id":"C0FAKE00001","name":"general","is_channel":true,"is_private":false,"is_archived":false,"is_general":true,"is_member":false,"num_members":1,"topic":{"value":"","creator":"","last_set":0},"purpose":{"value":"","creator":"","last_set":0}}],"response_metadata":{"next_cursor":"o1"}}'
+      string: '{"ok":true,"channels":[{"id":"C0C840LNSQ3","created":1791654272,"creator":"U0C7URLRV5M","is_org_shared":false,"is_im":false,"context_team_id":"T0C94JFKPTJ","updated":1791654286516,"name":"alle-in-integration-bench","name_normalized":"alle-in-integration-bench","is_channel":true,"is_group":false,"is_mpim":false,"is_private":false,"is_archived":false,"is_general":true,"is_shared":false,"is_ext_shared":false,"unlinked":0,"is_pending_ext_shared":false,"pending_shared":[],"parent_conversation":null,"purpose":{"value":"Teile
+        Mitteilungen und Aktualisierungen zu Neuigkeiten des Unternehmens, anstehenden
+        Ereignissen oder Teammitgliedern, die ein Lob verdient haben. \u2b50","creator":"U0C7URLRV5M","last_set":1791654272},"topic":{"value":"","creator":"","last_set":0},"shared_team_ids":["T0C94JFKPTJ"],"pending_connected_team_ids":[],"is_member":false,"num_members":1,"properties":{"use_case":"welcome"},"previous_names":["alle-in-neuer-workspace"]}],"response_metadata":{"next_cursor":"dGVhbTpDMEM4QzVKUThQSw=="}}'
     headers:
+      access-control-allow-headers:
+      - slack-route, x-slack-version-ts, x-b3-traceid, x-b3-spanid, x-b3-parentspanid,
+        x-b3-sampled, x-b3-flags, x-background
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - x-slack-req-id, retry-after
+      alt-svc:
+      - h3=":443"; ma=2592000, h3-29=":443"; ma=2592000, quic=":443"; ma=2592000
+      cache-control:
+      - private, no-cache, no-store, must-revalidate
       content-length:
-      - '308'
+      - '1014'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
+      date:
+      - Sat, 10 Oct 2026 18:26:39 GMT
+      expires:
+      - Sat, 26 Jul 1997 05:00:00 GMT
+      pragma:
+      - no-cache
+      referrer-policy:
+      - no-referrer
+      server:
+      - Apache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      via:
+      - 1.1 slack-prod.tinyspeck.com, ingress-www-iad-external-prod-00436ffcc5410bfb4,ingress-edge-fra-prod-0502eeb126a1e3ed7
+      x-accepted-oauth-scopes:
+      - channels:read,groups:read,mpim:read,im:read,read
+      x-backend:
+      - api_normal
+      x-content-type-options:
+      - nosniff
+      x-edge-backend:
+      - envoy-www
+      x-envoy-upstream-service-time:
+      - '205'
+      x-oauth-scopes:
+      - channels:read,channels:history,chat:write
+      x-server:
+      - slack-www-hhvm-api-iad-7jo18yox60op
+      x-slack-edge-shared-secret-outcome:
+      - no-match
+      x-slack-req-id:
+      - eb64f86f78806e25091db6c8752fde2b
+      x-slack-shared-secret-outcome:
+      - no-match
+      x-slack-unique-id:
+      - 49472729-0002-4536-b581-1889e57d6a69
+      x-xss-protection:
+      - '0'
     status:
       code: 200
       message: OK
@@ -35,15 +90,71 @@ interactions:
       user-agent:
       - integration-bench
     method: GET
-    uri: https://slack.com/api/conversations.list?limit=1&types=public_channel&exclude_archived=true&cursor=o1
+    uri: https://slack.com/api/conversations.list?limit=1&types=public_channel&exclude_archived=true&cursor=dGVhbTpDMEM4QzVKUThQSw%3D%3D
   response:
     body:
-      string: '{"ok":true,"channels":[{"id":"C0FAKE00002","name":"random","is_channel":true,"is_private":false,"is_archived":false,"is_general":false,"is_member":false,"num_members":1,"topic":{"value":"","creator":"","last_set":0},"purpose":{"value":"","creator":"","last_set":0}}],"response_metadata":{"next_cursor":"o2"}}'
+      string: '{"ok":true,"channels":[{"id":"C0C8C5JQ8PK","created":1791654297,"creator":"U0C7URLRV5M","is_org_shared":false,"is_im":false,"context_team_id":"T0C94JFKPTJ","updated":1791654297890,"name":"neuer-channel","name_normalized":"neuer-channel","is_channel":true,"is_group":false,"is_mpim":false,"is_private":false,"is_archived":false,"is_general":false,"is_shared":false,"is_ext_shared":false,"unlinked":0,"is_pending_ext_shared":false,"pending_shared":[],"parent_conversation":null,"purpose":{"value":"Dieser
+        Channel ist f\u00fcr alles rund um #neuer-channel vorgesehen. Hier kannst
+        du zusammen mit deinem Team Meetings abhalten, Dokumente teilen und Entscheidungen
+        treffen.","creator":"U0C7URLRV5M","last_set":1791654297},"topic":{"value":"","creator":"","last_set":0},"shared_team_ids":["T0C94JFKPTJ"],"pending_connected_team_ids":[],"is_member":false,"num_members":1,"properties":{"use_case":"project"},"previous_names":[]}],"response_metadata":{"next_cursor":"dGVhbTpDMEM4QzVMQ1dMOQ=="}}'
     headers:
+      access-control-allow-headers:
+      - slack-route, x-slack-version-ts, x-b3-traceid, x-b3-spanid, x-b3-parentspanid,
+        x-b3-sampled, x-b3-flags, x-background
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - x-slack-req-id, retry-after
+      alt-svc:
+      - h3=":443"; ma=2592000, h3-29=":443"; ma=2592000, quic=":443"; ma=2592000
+      cache-control:
+      - private, no-cache, no-store, must-revalidate
       content-length:
-      - '308'
+      - '985'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
+      date:
+      - Sat, 10 Oct 2026 18:26:39 GMT
+      expires:
+      - Sat, 26 Jul 1997 05:00:00 GMT
+      pragma:
+      - no-cache
+      referrer-policy:
+      - no-referrer
+      server:
+      - Apache
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      via:
+      - 1.1 slack-prod.tinyspeck.com, ingress-www-iad-external-prod-0b9e5522c08727c3a,ingress-edge-fra-prod-0502eeb126a1e3ed7
+      x-accepted-oauth-scopes:
+      - channels:read,groups:read,mpim:read,im:read,read
+      x-backend:
+      - api_normal
+      x-content-type-options:
+      - nosniff
+      x-edge-backend:
+      - envoy-www
+      x-envoy-upstream-service-time:
+      - '205'
+      x-oauth-scopes:
+      - channels:read,channels:history,chat:write
+      x-server:
+      - slack-www-hhvm-api-iad-9jdqvsxtg38t
+      x-slack-edge-shared-secret-outcome:
+      - no-match
+      x-slack-req-id:
+      - 8563943e9c653b6c5fb43f616e08a634
+      x-slack-shared-secret-outcome:
+      - no-match
+      x-slack-unique-id:
+      - 80b29e69-21f3-44d5-a658-f175cf3cd819
+      x-xss-protection:
+      - '0'
     status:
       code: 200
       message: OK
