@@ -86,6 +86,45 @@ def _fields(project: str, spec: SeedIssue, account_id: str) -> dict[str, Any]:
     return fields
 
 
+async def reset(
+    env: Mapping[str, str],
+    *,
+    echo: Echo = print,
+    transport: httpx2.AsyncBaseTransport | None = None,
+) -> None:
+    """`bench sandbox reset jira`: undo what eval runs left in a seeded project. Deletes
+    issues after the seed range and comments after each seed issue's own, and moves seed
+    issues back to their seed status (labels and fields are not restored)."""
+    require(env, "JIRA_SITE", "JIRA_EMAIL", "JIRA_API_TOKEN")
+    key = project_key(env.get("JIRA_PROJECT") or DEFAULT_PROJECT)
+    credential = api_token("jira-sandbox", email=env["JIRA_EMAIL"], token=env["JIRA_API_TOKEN"])
+    async with make_api(
+        credential=credential, base_url=site_api_url(env["JIRA_SITE"]), transport=transport
+    ) as api:
+        client = JiraClient(api)
+        existing = await _issues(client, key)
+        _check_seeded(existing, key)
+        removed = 0
+        for issue in existing:
+            if int(issue.key.split("-")[1]) > len(ISSUES):
+                response = await api.delete(f"/issue/{issue.key}")
+                raise_for_status(response, action="delete an eval issue", what=issue.key)
+                echo(f"deleted {issue.key} {issue.summary}")
+                removed += 1
+        for n, spec in enumerate(ISSUES, 1):
+            issue = await client.get_issue(f"{key}-{n}")
+            for comment in issue.comments[len(spec.comments) :]:
+                response = await api.delete(f"/issue/{issue.key}/comment/{comment.id}")
+                raise_for_status(response, action="delete an eval comment", what=issue.key)
+                echo(f"deleted a comment on {issue.key}")
+                removed += 1
+            if issue.status != spec.status:
+                await _move(client, issue.key, spec.status)
+                echo(f"moved {issue.key} back to {spec.status}")
+                removed += 1
+        echo(f"jira: {key} reset ({removed} change(s))")
+
+
 async def _move(client: JiraClient, issue: str, status: str) -> None:
     for transition in await client.transitions(issue):
         if transition.to_status == status:

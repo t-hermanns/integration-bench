@@ -258,6 +258,45 @@ async def live_api(env: Mapping[str, str]) -> AsyncIterator[ApiClient]:
         yield api
 
 
+async def reset(env: Mapping[str, str], *, echo: Echo = print) -> None:
+    """`bench sandbox reset github`: undo what eval runs left. Issues after the seed range
+    are closed as not planned (REST cannot delete issues), comments after each seed
+    issue's or pull request's own are deleted."""
+    seeded = len(ISSUES) + len(PULLS)
+    changes = 0
+    async with live_api(env) as api:
+        repo = repo_path(OWNER, REPO)
+
+        async def pages(path: str, **params: Any) -> list[dict[str, Any]]:
+            found: list[dict[str, Any]] = []
+            for page in range(1, 50):
+                response = await api.get(path, params={**params, "per_page": 100, "page": page})
+                raise_for_status(response, action="list for the reset", what=path)
+                items = response.json()
+                found += items
+                if len(items) < 100:
+                    return found
+            raise SandboxError(f"{path}: too many pages")
+
+        for issue in await pages(f"{repo}/issues", state="open"):
+            if issue["number"] > seeded and "pull_request" not in issue:
+                response = await api.patch(
+                    f"{repo}/issues/{issue['number']}",
+                    json={"state": "closed", "state_reason": "not_planned"},
+                )
+                raise_for_status(response, action="close an eval issue", what=f"#{issue['number']}")
+                echo(f"closed #{issue['number']} {issue['title']}")
+                changes += 1
+        for number in range(1, seeded + 1):
+            comments = await pages(f"{repo}/issues/{number}/comments")
+            for comment in comments[len(COMMENTS.get(number, [])) :]:
+                response = await api.delete(f"{repo}/issues/comments/{comment['id']}")
+                raise_for_status(response, action="delete an eval comment", what=f"#{number}")
+                echo(f"deleted a comment on #{number}")
+                changes += 1
+    echo(f"github: {OWNER}/{REPO} reset ({changes} change(s))")
+
+
 _REPO = {"owner": OWNER, "repo": REPO}
 SMOKE = [
     SmokeCall("github_search_issues", {"query": f"repo:{OWNER}/{REPO} is:issue"}),

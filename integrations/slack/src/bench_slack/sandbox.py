@@ -105,6 +105,46 @@ async def seed(
     echo(f"slack: posted {len(MESSAGES)} seed messages to #{SANDBOX}")
 
 
+async def reset(
+    env: Mapping[str, str],
+    *,
+    echo: Echo = print,
+    transport: httpx2.AsyncBaseTransport | None = None,
+) -> None:
+    """`bench sandbox reset slack`: delete what eval runs posted. The seed messages are the
+    oldest top-level messages in seed order; every other message, and every reply after a
+    seed message's own, is deleted (the bot can only delete its own posts)."""
+    removed = 0
+    async with bot_api(env, transport=transport) as api:
+        client = SlackClient(api)
+        channel = (await sandbox_channel(client)).id
+        top = [
+            m async for m in _all(lambda c: client.read_history(channel, cursor=c, page_size=100))
+        ]
+        seeded = 0
+        for message in reversed(top):
+            spec = MESSAGES[seeded] if seeded < len(MESSAGES) else None
+            keep = spec is not None and message.text == spec.text
+            replies: list[Message] = []
+            if message.reply_count:
+                thread = await client.read_thread(channel, message.ts, page_size=100)
+                replies = [m for m in thread.items if m.ts != message.ts]
+            drop = replies[len(spec.replies) :] if keep and spec else replies
+            for reply in drop:
+                await client.delete_message(channel, reply.ts)
+                removed += 1
+            if keep:
+                seeded += 1
+            else:
+                await client.delete_message(channel, message.ts)
+                removed += 1
+            if drop or not keep:
+                echo(f"deleted {len(drop) + (not keep)} message(s): {message.text[:50]}")
+        if seeded < len(MESSAGES):
+            raise SandboxError(f"#{SANDBOX} lacks seed messages; delete the rest and seed again")
+    echo(f"slack: #{SANDBOX} reset ({removed} deletion(s))")
+
+
 @asynccontextmanager
 async def live_api(env: Mapping[str, str]) -> AsyncIterator[ApiClient]:
     """`bench record slack`: the bot token, which can read and post in the sandbox."""

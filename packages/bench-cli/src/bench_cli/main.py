@@ -221,6 +221,24 @@ def sandbox_seed(
         raise typer.Exit(1) from None
 
 
+@sandbox_app.command("reset")
+def sandbox_reset(
+    names: Annotated[list[str], typer.Argument(help="Integrations, e.g. jira slack")],
+    env_file: EnvFile = None,
+) -> None:
+    """Undo what eval runs left in the live sandbox (back to the seed)."""
+    env = env_settings(env_file)
+    modules = [load_sandbox(name) for name in names]
+    for name, module in zip(names, modules, strict=True):
+        if not hasattr(module, "reset"):
+            raise typer.BadParameter(f"bench_{name}.sandbox has no reset")
+        try:
+            anyio.run(lambda module=module: module.reset(env, echo=typer.echo))
+        except (SandboxError, ToolError, OAuthError) as exc:
+            typer.echo(f"error: {name}: {exc}", err=True)
+            raise typer.Exit(1) from None
+
+
 @app.command()
 def record(
     name: Annotated[str, typer.Argument(help="Integration, e.g. github")],

@@ -97,6 +97,50 @@ async def seed(
     echo(f"gdrive: created {SANDBOX} with {len(FILES)} entries")
 
 
+async def reset(
+    env: Mapping[str, str],
+    *,
+    echo: Echo = print,
+    transport: httpx2.AsyncBaseTransport | None = None,
+) -> None:
+    """`bench sandbox reset gdrive`: delete what eval runs created. Everything the app
+    created outside the sandbox folder goes, inside it everything that is not a seed path;
+    of two entries with the same seed path the older one stays."""
+    seeded = {f.path for f in FILES}
+    removed = 0
+    async with _api(env, transport) as api:
+        client = GdriveClient(api)
+        sandbox = await find_sandbox(client)
+        if sandbox is None:
+            raise SandboxError(f"no {SANDBOX} folder; run `bench sandbox seed gdrive` first")
+
+        async def delete(file: File, path: str) -> None:
+            nonlocal removed
+            await client.delete_file(file.id)
+            echo(f"deleted {path}")
+            removed += 1
+
+        for file in (await client.list_folder("root", page_size=100)).items:
+            if file.id != sandbox.id:
+                await delete(file, file.name)
+
+        async def walk(folder: File, prefix: str) -> None:
+            entries = (await client.list_folder(folder.id, page_size=100)).items
+            entries.sort(key=lambda f: (f.created_time is None, f.created_time or 0))
+            kept: set[str] = set()
+            for file in entries:
+                path = prefix + file.name
+                if path not in seeded or path in kept:
+                    await delete(file, f"{SANDBOX}/{path}")
+                    continue
+                kept.add(path)
+                if file.is_folder:
+                    await walk(file, path + "/")
+
+        await walk(sandbox, "")
+    echo(f"gdrive: {SANDBOX} reset ({removed} deletion(s))")
+
+
 async def _create_file(api: ApiClient, name: str, mime_type: str, text: str, parent: str) -> None:
     body, content_type = multipart({"name": name, "mimeType": mime_type, "parents": [parent]}, text)
     response = await api.post(
