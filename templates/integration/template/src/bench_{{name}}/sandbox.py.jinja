@@ -68,7 +68,8 @@ def live_credential(
 {%- elif auth == 'bearer' %}
     return static_token("{{ name }}", env["{{ env }}_TOKEN"])
 {%- else %}
-    return api_token("{{ name }}", email=env["{{ env }}_EMAIL"], token=env["{{ env }}_API_TOKEN"])
+    email, token = env["{{ env }}_EMAIL"], env["{{ env }}_API_TOKEN"]
+    return api_token("{{ name }}", email=email, token=token)
 {%- endif %}
 
 
@@ -78,7 +79,7 @@ async def seed(
     echo: Echo = print,
     transport: httpx2.AsyncBaseTransport | None = None,
 ) -> None:
-    raise SandboxError("{{ name }}: seeding is not written yet (bench_{{ name }}/sandbox.py)")
+    raise SandboxError("{{ name }}: seeding is not written yet (see sandbox.py)")
 
 
 @asynccontextmanager
