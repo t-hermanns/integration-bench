@@ -22,12 +22,21 @@ from bench_evals.models import Assistant, Request, ScriptedModel, ToolCall, Tool
 from bench_evals.runner import open_toolbox, run_task
 from bench_evals.scorer import score
 from bench_evals.tasks import CATEGORIES, EvalTask, check_tools, load_tasks, task_files
+from bench_gdrive.fake import credential as gdrive_credential
+from bench_gdrive.fake import seeded_fake as gdrive_fake
+from bench_gdrive.scopes import DRIVE_FILE
+from bench_gdrive.server import create_server as gdrive_server
 from bench_github.fake import seeded_fake as github_fake
 from bench_github.server import create_server as github_server
 from bench_jira.fake import credential
 from bench_jira.fake import seeded_fake as jira_fake
 from bench_jira.scopes import READ, WRITE
 from bench_jira.server import create_server as jira_server
+from bench_slack.fake import RELEASE
+from bench_slack.fake import credential as slack_credential
+from bench_slack.fake import seeded_fake as slack_fake
+from bench_slack.scopes import ALL as SLACK_SCOPES
+from bench_slack.server import create_server as slack_server
 
 pytestmark = pytest.mark.anyio
 
@@ -38,6 +47,30 @@ CURSOR = "<next_cursor>"
 """Stands for the `next_cursor` of the previous tool result."""
 
 GH = {"owner": "bench-sandbox", "repo": "widgets"}
+FLAKY = "Who owns the flaky export test?"
+
+
+def ref(field: str, key: str) -> str:
+    """`field` of the newest result item whose name or text is `key` (ids, ts)."""
+    return f"<{field}|{key}>"
+
+
+def find(name: str) -> tuple[str, dict[str, Any]]:
+    return ("gdrive_search_files", {"query": name})
+
+
+def read(name: str, **extra: Any) -> list[tuple[str, dict[str, Any]]]:
+    return [find(name), ("gdrive_read_file_content", {"file_id": ref("id", name), **extra})]
+
+
+CHANNELS = ("slack_list_channels", {})
+SANDBOX = {"channel_id": ref("id", "bench-sandbox")}
+HISTORY = ("slack_read_channel_history", SANDBOX)
+
+
+def thread(text: str) -> dict[str, Any]:
+    return {**SANDBOX, "thread_ts": ref("ts", text)}
+
 
 # task id -> (calls, own words added to the answer)
 SOLUTIONS: dict[str, tuple[list[tuple[str, dict[str, Any]]], str]] = {
@@ -229,6 +262,189 @@ SOLUTIONS: dict[str, tuple[list[tuple[str, dict[str, Any]]], str]] = {
         [("jira_get_issue", {"issue_key": "BENCH-12", "response_format": "detailed"})],
         "",
     ),
+    "gdrive-read-roadmap-q3": (read("Roadmap 2026"), ""),
+    "gdrive-read-glossary": (read("glossary.txt"), ""),
+    "gdrive-read-release-step": (read("Release checklist"), ""),
+    "gdrive-args-search-in-folder": (
+        [
+            find("Meeting notes"),
+            (
+                "gdrive_search_files",
+                {"query": "dark mode", "folder_id": ref("id", "Meeting notes")},
+            ),
+        ],
+        "",
+    ),
+    "gdrive-args-max-chars": (read("Roadmap 2026", max_chars=100), ""),
+    "gdrive-args-mime-type": (
+        [
+            find("glossary.txt"),
+            (
+                "gdrive_get_file_metadata",
+                {"file_id": ref("id", "glossary.txt"), "response_format": "detailed"},
+            ),
+        ],
+        "",
+    ),
+    "gdrive-write-agenda-in-folder": (
+        [
+            find("Meeting notes"),
+            (
+                "gdrive_create_document",
+                {
+                    "name": f"Agenda 2026-09-28 ({RUN_ID})",
+                    "content": "Release 2.4 status",
+                    "folder_id": ref("id", "Meeting notes"),
+                },
+            ),
+        ],
+        "Created it.",
+    ),
+    "gdrive-write-follow-up-doc": (
+        [
+            *read("Weekly sync 2026-09-14"),
+            find("Projects"),
+            (
+                "gdrive_create_document",
+                {
+                    "name": f"Export follow-up ({RUN_ID})",
+                    "content": "Lee investigates the export timeouts.",
+                    "folder_id": ref("id", "Projects"),
+                },
+            ),
+        ],
+        "",
+    ),
+    "gdrive-page-sandbox-folder": (
+        [
+            find("bench-sandbox"),
+            ("gdrive_list_folder", {"folder_id": ref("id", "bench-sandbox"), "page_size": 2}),
+            (
+                "gdrive_list_folder",
+                {"folder_id": ref("id", "bench-sandbox"), "page_size": 2, "cursor": CURSOR},
+            ),
+        ],
+        "",
+    ),
+    "gdrive-page-weekly-syncs": (
+        [
+            ("gdrive_search_files", {"query": "Weekly sync", "page_size": 2}),
+            ("gdrive_search_files", {"query": "Weekly sync", "page_size": 2, "cursor": CURSOR}),
+        ],
+        "",
+    ),
+    "gdrive-perm-foreign-file": (
+        [("gdrive_read_file_content", {"file_id": "1AbCdEfGhIjKlMnOpQrStUvWxYz"})],
+        "",
+    ),
+    "gdrive-abstain-delete": ([], "I can't delete files with the tools I have."),
+    "gdrive-abstain-share": ([], "I can't share files with the tools I have."),
+    "gdrive-confuse-folder-contents": (
+        [find("Projects"), ("gdrive_list_folder", {"folder_id": ref("id", "Projects")})],
+        "",
+    ),
+    "gdrive-confuse-owner-in-text": (read("Weekly sync 2026-09-07"), ""),
+    "slack-read-staging-db": ([CHANNELS, HISTORY], ""),
+    "slack-read-welcome": ([CHANNELS, HISTORY], ""),
+    "slack-read-standup": ([CHANNELS, HISTORY], ""),
+    "slack-args-thread-flaky-test": (
+        [CHANNELS, HISTORY, ("slack_read_thread", thread(FLAKY))],
+        "",
+    ),
+    "slack-args-thread-release-qa": (
+        [CHANNELS, HISTORY, ("slack_read_thread", thread(RELEASE))],
+        "",
+    ),
+    "slack-args-history-page-size": (
+        [CHANNELS, ("slack_read_channel_history", {**SANDBOX, "page_size": 50})],
+        "",
+    ),
+    "slack-write-reply-release": (
+        [
+            CHANNELS,
+            HISTORY,
+            ("slack_reply_in_thread", {**thread(RELEASE), "text": f"QA is done ({RUN_ID})."}),
+        ],
+        "Replied.",
+    ),
+    "slack-write-post-owner": (
+        [
+            CHANNELS,
+            HISTORY,
+            ("slack_read_thread", thread(FLAKY)),
+            (
+                "slack_post_message",
+                {**SANDBOX, "text": f"The flaky export test fix is in review ({RUN_ID})."},
+            ),
+        ],
+        "Posted.",
+    ),
+    "slack-page-channels": (
+        [
+            ("slack_list_channels", {"page_size": 2}),
+            ("slack_list_channels", {"page_size": 2, "cursor": CURSOR}),
+        ],
+        "",
+    ),
+    "slack-page-history": (
+        [
+            CHANNELS,
+            ("slack_read_channel_history", {**SANDBOX, "page_size": 2}),
+            ("slack_read_channel_history", {**SANDBOX, "page_size": 2, "cursor": CURSOR}),
+        ],
+        "",
+    ),
+    "slack-perm-not-member": (
+        [CHANNELS, ("slack_read_channel_history", {"channel_id": ref("id", "sozial")})],
+        "",
+    ),
+    "slack-abstain-direct-message": ([], "I can't send direct messages with the tools I have."),
+    "slack-abstain-missing-details": ([], "Which channel, and what should the update say?"),
+    "slack-confuse-announcement": (
+        [
+            CHANNELS,
+            ("slack_post_message", {**SANDBOX, "text": f"Code freeze starts Friday ({RUN_ID})."}),
+        ],
+        "",
+    ),
+    "slack-confuse-answer-question": (
+        [
+            CHANNELS,
+            HISTORY,
+            ("slack_reply_in_thread", {**thread(FLAKY), "text": f"Lee takes over ({RUN_ID})."}),
+        ],
+        "",
+    ),
+    "cross-checklist-step-to-slack": (
+        [
+            *read("Release checklist"),
+            CHANNELS,
+            ("slack_post_message", {**SANDBOX, "text": f"3. Update the changelog ({RUN_ID})"}),
+        ],
+        "Posted.",
+    ),
+    "cross-issue-to-drive-doc": (
+        [
+            ("github_get_issue", {**GH, "number": 12}),
+            (
+                "gdrive_create_document",
+                {
+                    "name": f"Issue 12 notes ({RUN_ID})",
+                    "content": "Crash on startup with Unicode paths",
+                },
+            ),
+        ],
+        "Created it.",
+    ),
+    "cross-notes-owner-to-thread": (
+        [
+            *read("Weekly sync 2026-09-14"),
+            CHANNELS,
+            HISTORY,
+            ("slack_reply_in_thread", {**thread(RELEASE), "text": f"Lee ({RUN_ID})"}),
+        ],
+        "",
+    ),
 }
 
 
@@ -242,17 +458,28 @@ def servers() -> dict[str, Any]:
     github = github_fake(FakeClock())
     github.issue_token(TOKEN, ["issues:write", "pull_requests:read", "contents:read"])
     common = {"clock": FakeClock(), "read_only": False, "variant": "v1"}
+    gdrive = gdrive_fake(FakeClock())
+    gdrive.issue_token(TOKEN, [DRIVE_FILE])
+    slack = slack_fake(FakeClock())
+    slack.issue_token(TOKEN, sorted(SLACK_SCOPES))
     return {
         "jira": jira_server(credential=credential(TOKEN), transport=jira.transport(), **common),
         "github": github_server(
             credential=StaticToken("github", TOKEN), transport=github.transport(), **common
+        ),
+        "gdrive": gdrive_server(
+            credential=gdrive_credential(TOKEN), transport=gdrive.transport(), **common
+        ),
+        "slack": slack_server(
+            credential=slack_credential(TOKEN), transport=slack.transport(), **common
         ),
     }
 
 
 def test_task_files_are_balanced():
     found = tasks()
-    by_integration = Counter(t.integrations for t in found)
+    by_integration = Counter(t.integrations for t in found if len(t.integrations) == 1)
+    assert 0 < len(found) - by_integration.total() <= 6, "a few tasks span integrations"
     for integrations, n in by_integration.items():
         assert 13 <= n <= 17, f"{integrations}: {n} tasks"
     for integrations in by_integration:
@@ -274,10 +501,31 @@ def test_every_task_has_a_solution():
     assert sorted(SOLUTIONS) == sorted(t.id for t in tasks())
 
 
+def resolve(request: Request, value: Any) -> Any:
+    """Replaces a `ref` placeholder with the value from the newest matching result."""
+    if not (isinstance(value, str) and value.startswith("<") and "|" in value):
+        return value
+    field, key = value[1:-1].split("|", 1)
+    for message in reversed(request.messages):
+        if isinstance(message, ToolResult) and not message.is_error:
+            for item in items(json.loads(message.content)):
+                if key in (item.get("name"), item.get("text")):
+                    return item[field]
+    raise AssertionError(f"no result item named {key!r}")
+
+
+def items(data: Any) -> list[dict[str, Any]]:
+    if isinstance(data, list):
+        return [found for entry in data for found in items(entry)]
+    if isinstance(data, dict):
+        return [data, *items(list(data.values()))]
+    return []
+
+
 def script(calls: list[tuple[str, dict[str, Any]]], words: str) -> list[Any]:
     def step(n: int, name: str, arguments: dict[str, Any]):
         def reply(request: Request) -> Assistant:
-            args = dict(arguments)
+            args = {key: resolve(request, value) for key, value in arguments.items()}
             if args.get("cursor") == CURSOR:
                 last = request.messages[-1]
                 assert isinstance(last, ToolResult)

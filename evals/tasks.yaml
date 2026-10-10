@@ -1,0 +1,50 @@
+# Eval tasks that need two integrations at once, against the same live sandboxes as the
+# per-integration task files. Writes carry {run_id} so they can be found and cleaned up.
+# Split: 2 dev, 1 test.
+tasks:
+  - id: cross-checklist-step-to-slack
+    integrations: [gdrive, slack]
+    category: multi_step_write
+    split: dev
+    prompt: >-
+      Read step 3 of the release checklist on Google Drive and post it as a new message
+      in the Slack channel #bench-sandbox, ending with "({run_id})".
+    expected_calls:
+      - tool: gdrive_read_file_content
+        args: {file_id: {$present: true}}
+      - tool: slack_post_message
+        args: {channel_id: {$present: true}, text: {$all: [{$contains: "{run_id}"},
+                                                         {$contains: changelog}]}}
+    answer_contains: [[posted, sent, done]]
+
+  - id: cross-issue-to-drive-doc
+    integrations: [github, gdrive]
+    category: multi_step_write
+    split: dev
+    prompt: >-
+      Look up issue #12 in the GitHub repository bench-sandbox/widgets and create a
+      Google Doc named "Issue 12 notes ({run_id})" whose text starts with the issue's
+      title.
+    expected_calls:
+      - tool: github_get_issue
+        args: {owner: bench-sandbox, repo: widgets, number: 12}
+      - tool: gdrive_create_document
+        args: {name: {$contains: "{run_id}"}, content: {$contains: Unicode paths}}
+    answer_contains: [[created, done]]
+
+  - id: cross-notes-owner-to-thread
+    integrations: [gdrive, slack]
+    category: multi_step_write
+    split: test
+    prompt: >-
+      The weekly sync notes of 2026-09-14 on Google Drive say who investigates the export
+      timeouts. Reply in the release 2.4 thread in the Slack channel #bench-sandbox with
+      that person's name, ending with "({run_id})".
+    expected_calls:
+      - tool: gdrive_read_file_content
+        args: {file_id: {$present: true}}
+      - tool: slack_reply_in_thread
+        args: {channel_id: {$present: true}, thread_ts: {$present: true},
+               text: {$all: [{$contains: "{run_id}"}, {$contains: Lee}]}}
+    forbidden_tools: [slack_post_message]
+    answer_contains: [Lee]

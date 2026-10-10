@@ -9,7 +9,16 @@ from mcp.types import CallToolResult, TextContent
 
 from bench_core.testing import FakeClock
 
-from bench_slack.fake import MESSAGES, RELEASE, SANDBOX, SlackFake, credential, seeded_fake
+from bench_slack.fake import (
+    GENERAL,
+    MESSAGES,
+    OTHER_CHANNELS,
+    RELEASE,
+    SANDBOX,
+    SlackFake,
+    credential,
+    seeded_fake,
+)
 from bench_slack.scopes import ALL, CHANNELS_HISTORY, CHANNELS_READ
 from bench_slack.server import create_server
 from bench_slack.tools import TEXT_LIMIT
@@ -112,7 +121,7 @@ async def release_ts(client: Client, channel: str) -> str:
 
 async def test_list_channels_concise_and_detailed(client: Client) -> None:
     concise = (await call(client, LIST))["channels"]
-    assert {c["name"] for c in concise} == {SANDBOX, "general", "random"}
+    assert {c["name"] for c in concise} == {SANDBOX, *OTHER_CHANNELS}
     assert set(concise[0]) == {"id", "name", "is_member"}
     detailed = (await call(client, LIST, response_format="detailed"))["channels"]
     sandbox = next(c for c in detailed if c["name"] == SANDBOX)
@@ -121,9 +130,9 @@ async def test_list_channels_concise_and_detailed(client: Client) -> None:
 
 
 async def test_list_channels_pages_with_cursor(client: Client) -> None:
-    first = await call(client, LIST, page_size=2)
-    assert len(first["channels"]) == 2
-    second = await call(client, LIST, page_size=2, cursor=first["next_cursor"])
+    first = await call(client, LIST, page_size=3)
+    assert len(first["channels"]) == 3
+    second = await call(client, LIST, page_size=3, cursor=first["next_cursor"])
     assert len(second["channels"]) == 1
     assert "next_cursor" not in second
 
@@ -195,7 +204,7 @@ async def test_errors_reach_the_model_as_tool_errors(client: Client) -> None:
 
 async def test_channels_the_app_has_not_joined(client: Client) -> None:
     channels = (await call(client, LIST))["channels"]
-    general = next(c["id"] for c in channels if c["name"] == "general")
+    general = next(c["id"] for c in channels if c["name"] == GENERAL)
     for tool, extra in [(HISTORY, {}), (POST, {"text": "hello"})]:
         result = await client.call_tool(tool, {"channel_id": general, **extra})
         assert result.is_error

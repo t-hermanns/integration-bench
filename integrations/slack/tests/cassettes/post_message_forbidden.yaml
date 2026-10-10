@@ -14,18 +14,18 @@ interactions:
     uri: https://slack.com/api/conversations.list?limit=100&types=public_channel&exclude_archived=true
   response:
     body:
-      string: '{"ok":true,"channels":[{"id":"C0FAKE00001","name":"general","is_channel":true,"is_private":false,"is_archived":false,"is_general":true,"is_member":false,"num_members":1,"topic":{"value":"","creator":"","last_set":0},"purpose":{"value":"","creator":"","last_set":0}},{"id":"C0FAKE00002","name":"random","is_channel":true,"is_private":false,"is_archived":false,"is_general":false,"is_member":false,"num_members":1,"topic":{"value":"","creator":"","last_set":0},"purpose":{"value":"","creator":"","last_set":0}},{"id":"C0FAKE00003","name":"bench-sandbox","is_channel":true,"is_private":false,"is_archived":false,"is_general":false,"is_member":true,"num_members":2,"topic":{"value":"","creator":"","last_set":0},"purpose":{"value":"Test
+      string: '{"ok":true,"channels":[{"id":"C0FAKE00001","name":"alle-in-integration-bench","is_channel":true,"is_private":false,"is_archived":false,"is_general":true,"is_member":false,"num_members":1,"topic":{"value":"","creator":"","last_set":0},"purpose":{"value":"","creator":"","last_set":0}},{"id":"C0FAKE00002","name":"sozial","is_channel":true,"is_private":false,"is_archived":false,"is_general":false,"is_member":false,"num_members":1,"topic":{"value":"","creator":"","last_set":0},"purpose":{"value":"","creator":"","last_set":0}},{"id":"C0FAKE00003","name":"neuer-channel","is_channel":true,"is_private":false,"is_archived":false,"is_general":false,"is_member":false,"num_members":1,"topic":{"value":"","creator":"","last_set":0},"purpose":{"value":"","creator":"","last_set":0}},{"id":"C0FAKE00004","name":"bench-sandbox","is_channel":true,"is_private":false,"is_archived":false,"is_general":false,"is_member":true,"num_members":2,"topic":{"value":"","creator":"","last_set":0},"purpose":{"value":"Test
         channel for integration-bench.","creator":"","last_set":0}}],"response_metadata":{"next_cursor":""}}'
     headers:
       content-length:
-      - '833'
+      - '1101'
       content-type:
       - application/json
     status:
       code: 200
       message: OK
 - request:
-    body: '{"channel":"C0FAKE00003","text":"not allowed"}'
+    body: '{"channel":"C0FAKE00004","text":"not allowed"}'
     headers:
       accept:
       - application/json

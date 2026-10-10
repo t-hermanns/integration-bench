@@ -1,0 +1,180 @@
+# Eval tasks for the Slack server against the live channel #bench-sandbox, seeded by
+# `bench sandbox seed slack` (data: bench_slack/fake/seed.py). Slack assigns channel ids
+# and message timestamps, so tasks name channels and quote messages; id and ts arguments
+# are only checked for presence, the answer shows whether the model read the right one.
+# Writes post to #bench-sandbox and carry {run_id}, so no task asks for the newest
+# message. Split: 9 dev (used to iterate the v2 descriptions), 6 test (measured once).
+integrations: [slack]
+tasks:
+  # --- read -----------------------------------------------------------------------------
+  - id: slack-read-staging-db
+    category: read
+    split: dev
+    prompt: What was announced in the Slack channel #bench-sandbox about the staging database?
+    expected_calls:
+      - tool: slack_read_channel_history
+        args: {channel_id: {$present: true}}
+    answer_contains: [read-only]
+
+  - id: slack-read-welcome
+    category: read
+    split: dev
+    prompt: >-
+      According to the welcome message in the Slack channel #bench-sandbox, what does
+      integration-bench do there?
+    expected_calls:
+      - tool: slack_read_channel_history
+        args: {channel_id: {$present: true}}
+    answer_contains: [[read and write, reads and writes]]
+
+  - id: slack-read-standup
+    category: read
+    split: test
+    prompt: From next week on, when is standup? It was posted in the Slack channel #bench-sandbox.
+    expected_calls:
+      - tool: slack_read_channel_history
+        args: {channel_id: {$present: true}}
+    answer_contains: ["9:30"]
+
+  # --- arguments ------------------------------------------------------------------------
+  - id: slack-args-thread-flaky-test
+    category: arguments
+    split: dev
+    prompt: >-
+      In the Slack channel #bench-sandbox, someone asked who owns the flaky export test.
+      What does the reply in that thread say?
+    expected_calls:
+      - tool: slack_read_thread
+        args: {channel_id: {$present: true}, thread_ts: {$present: true}}
+    answer_contains: [review]
+
+  - id: slack-args-thread-release-qa
+    category: arguments
+    split: dev
+    prompt: >-
+      Read the thread about release 2.4 in the Slack channel #bench-sandbox. By when will
+      QA be finished?
+    expected_calls:
+      - tool: slack_read_thread
+        args: {channel_id: {$present: true}, thread_ts: {$present: true}}
+    answer_contains: [Wednesday]
+
+  - id: slack-args-history-page-size
+    category: arguments
+    split: test
+    prompt: >-
+      Fetch the top-level messages of the Slack channel #bench-sandbox 50 at a time and
+      tell me which one asks whether anything is still blocking.
+    expected_calls:
+      - tool: slack_read_channel_history
+        args: {channel_id: {$present: true}, page_size: 50}
+    answer_contains: [Release 2.4]
+
+  # --- multi-step writes ----------------------------------------------------------------
+  - id: slack-write-reply-release
+    category: multi_step_write
+    split: dev
+    prompt: >-
+      In the Slack channel #bench-sandbox, reply in the thread of the release 2.4 message:
+      "QA is done ({run_id})."
+    expected_calls:
+      - tool: slack_read_channel_history
+        args: {channel_id: {$present: true}}
+      - tool: slack_reply_in_thread
+        args: {channel_id: {$present: true}, thread_ts: {$present: true},
+               text: {$contains: "{run_id}"}}
+    forbidden_tools: [slack_post_message]
+    answer_contains: [[replied, posted, sent, done]]
+
+  - id: slack-write-post-owner
+    category: multi_step_write
+    split: test
+    prompt: >-
+      Find out in the Slack channel #bench-sandbox what the owner of the flaky export test
+      said about the fix, then post a new top-level message there that sums it up and ends
+      with "({run_id})".
+    expected_calls:
+      - tool: slack_read_thread
+        args: {channel_id: {$present: true}, thread_ts: {$present: true}}
+      - tool: slack_post_message
+        args: {channel_id: {$present: true}, text: {$all: [{$contains: "{run_id}"},
+                                                         {$contains: review}]}}
+    forbidden_tools: [slack_reply_in_thread]
+    answer_contains: [[posted, sent, done]]
+
+  # --- pagination -----------------------------------------------------------------------
+  - id: slack-page-channels
+    category: pagination
+    split: dev
+    prompt: List all public channels of the Slack workspace, two per page.
+    expected_calls:
+      - tool: slack_list_channels
+        args: {page_size: 2}
+      - tool: slack_list_channels
+        args: {cursor: {$present: true}}
+    answer_contains: [bench-sandbox, alle-in-integration-bench, sozial, neuer-channel]
+
+  - id: slack-page-history
+    category: pagination
+    split: test
+    prompt: >-
+      Go through the top-level messages of the Slack channel #bench-sandbox two per page
+      until you find the one about the staging database. What does it say?
+    expected_calls:
+      - tool: slack_read_channel_history
+        args: {channel_id: {$present: true}, page_size: 2}
+      - tool: slack_read_channel_history
+        args: {cursor: {$present: true}}
+    answer_contains: [read-only]
+
+  # --- permission -----------------------------------------------------------------------
+  - id: slack-perm-not-member
+    category: permission
+    split: dev
+    prompt: What are the latest messages in the Slack channel #sozial?
+    expected_calls:
+      - tool: slack_read_channel_history
+        args: {channel_id: {$present: true}}
+        error: true
+    answer_contains: [[not a member, not in the channel, invite, no access, access, could not,
+                       couldn't, unable, cannot, can't]]
+
+  # --- abstention -----------------------------------------------------------------------
+  - id: slack-abstain-direct-message
+    category: abstention
+    split: dev
+    prompt: Send Dana a direct message on Slack saying the build is green.
+    forbidden_tools: [slack_post_message, slack_reply_in_thread]
+    answer_contains: [[can't, cannot, unable, not able, no tool, don't have, do not have,
+                       not possible, isn't possible]]
+
+  - id: slack-abstain-missing-details
+    category: abstention
+    split: test
+    prompt: Post the update on Slack.
+    forbidden_tools: [slack_post_message, slack_reply_in_thread]
+    answer_contains: [["?", which, more information, more details]]
+
+  # --- confusable tools -----------------------------------------------------------------
+  - id: slack-confuse-announcement
+    category: confusable
+    split: dev
+    prompt: >-
+      Announce in the Slack channel #bench-sandbox: "Code freeze starts Friday
+      ({run_id})."
+    expected_calls:
+      - tool: slack_post_message
+        args: {channel_id: {$present: true}, text: {$contains: "{run_id}"}}
+    forbidden_tools: [slack_reply_in_thread]
+
+  - id: slack-confuse-answer-question
+    category: confusable
+    split: test
+    prompt: >-
+      Answer the question about who owns the flaky export test in the Slack channel
+      #bench-sandbox: "Lee takes over from Monday ({run_id})."
+    expected_calls:
+      - tool: slack_reply_in_thread
+        args: {channel_id: {$present: true}, thread_ts: {$present: true},
+               text: {$contains: "{run_id}"}}
+    forbidden_tools: [slack_post_message]

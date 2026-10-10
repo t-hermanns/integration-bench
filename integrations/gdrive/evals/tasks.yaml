@@ -1,0 +1,172 @@
+# Eval tasks for the Google Drive server against the live sandbox folder bench-sandbox,
+# seeded by `bench sandbox seed gdrive` (data: bench_gdrive/fake/seed.py). Drive assigns
+# random file ids, so tasks name files and folders and the model has to look the ids up;
+# file_id arguments are only checked for presence, the answer shows whether it read the
+# right file. Writes carry {run_id} so they can be found and cleaned up.
+# Split: 9 dev (used to iterate the v2 descriptions), 6 test (measured once).
+integrations: [gdrive]
+tasks:
+  # --- read -----------------------------------------------------------------------------
+  - id: gdrive-read-roadmap-q3
+    category: read
+    split: dev
+    prompt: What is planned for Q3 in the "Roadmap 2026" document on Google Drive?
+    expected_calls:
+      - tool: gdrive_read_file_content
+        args: {file_id: {$present: true}}
+    answer_contains: [offline support]
+
+  - id: gdrive-read-glossary
+    category: read
+    split: dev
+    prompt: According to glossary.txt on Google Drive, what does ETL stand for?
+    expected_calls:
+      - tool: gdrive_read_file_content
+        args: {file_id: {$present: true}}
+    answer_contains: [[extract, transform, load]]
+
+  - id: gdrive-read-release-step
+    category: read
+    split: test
+    prompt: What is step 2 of the release checklist in our Google Drive?
+    expected_calls:
+      - tool: gdrive_read_file_content
+        args: {file_id: {$present: true}}
+    answer_contains: [[10k, "10,000", 10 000, "10.000"]]
+
+  # --- arguments ------------------------------------------------------------------------
+  - id: gdrive-args-search-in-folder
+    category: arguments
+    split: dev
+    prompt: >-
+      Which document in the "Meeting notes" folder on Google Drive mentions dark mode?
+      Search only inside that folder.
+    expected_calls:
+      - tool: gdrive_search_files
+        args: {query: {$regex: '(?i)dark'}, folder_id: {$present: true}}
+    answer_contains: ["2026-09-21"]
+
+  - id: gdrive-args-max-chars
+    category: arguments
+    split: dev
+    prompt: >-
+      Show me only the first 100 characters of the "Roadmap 2026" document on Google
+      Drive.
+    expected_calls:
+      - tool: gdrive_read_file_content
+        args: {file_id: {$present: true}, max_chars: 100}
+    answer_contains: [CSV importer]
+
+  - id: gdrive-args-mime-type
+    category: arguments
+    split: test
+    prompt: What is the MIME type of glossary.txt on Google Drive?
+    expected_calls:
+      - tool: gdrive_get_file_metadata
+        args: {file_id: {$present: true}, response_format: detailed}
+    answer_contains: [text/plain]
+
+  # --- multi-step writes ----------------------------------------------------------------
+  - id: gdrive-write-agenda-in-folder
+    category: multi_step_write
+    split: dev
+    prompt: >-
+      Create a Google Doc named "Agenda 2026-09-28 ({run_id})" in the "Meeting notes"
+      folder on Google Drive with the text "Release 2.4 status".
+    expected_calls:
+      - tool: gdrive_create_document
+        args:
+          name: {$contains: "{run_id}"}
+          content: {$contains: release 2.4}
+          folder_id: {$present: true}
+    answer_contains: [[created, done]]
+
+  - id: gdrive-write-follow-up-doc
+    category: multi_step_write
+    split: test
+    prompt: >-
+      Look up who investigates the export timeouts in the weekly sync notes of
+      2026-09-14 on Google Drive, then create a Google Doc named "Export follow-up
+      ({run_id})" in the "Projects" folder that names that person.
+    expected_calls:
+      - tool: gdrive_read_file_content
+        args: {file_id: {$present: true}}
+      - tool: gdrive_create_document
+        args: {name: {$contains: "{run_id}"}, content: {$contains: Lee}, folder_id: {$present: true}}
+    answer_contains: [Lee]
+
+  # --- pagination -----------------------------------------------------------------------
+  - id: gdrive-page-sandbox-folder
+    category: pagination
+    split: dev
+    prompt: >-
+      List everything directly inside the "bench-sandbox" folder on Google Drive, two
+      items per page.
+    expected_calls:
+      - tool: gdrive_list_folder
+        args: {folder_id: {$present: true}, page_size: 2}
+      - tool: gdrive_list_folder
+        args: {cursor: {$present: true}}
+    answer_contains: [Projects, Meeting notes, Onboarding guide, glossary.txt]
+
+  - id: gdrive-page-weekly-syncs
+    category: pagination
+    split: test
+    prompt: >-
+      Search Google Drive for "Weekly sync", two results per page, and list the dates of
+      all weekly sync notes.
+    expected_calls:
+      - tool: gdrive_search_files
+        args: {query: {$regex: '(?i)weekly sync'}, page_size: 2}
+      - tool: gdrive_search_files
+        args: {cursor: {$present: true}}
+    answer_contains: ["2026-09-07", "2026-09-14", "2026-09-21"]
+
+  # --- permission -----------------------------------------------------------------------
+  - id: gdrive-perm-foreign-file
+    category: permission
+    split: dev
+    prompt: Read the Google Drive file with the id 1AbCdEfGhIjKlMnOpQrStUvWxYz.
+    expected_calls:
+      - tool: gdrive_read_file_content
+        args: {file_id: 1AbCdEfGhIjKlMnOpQrStUvWxYz}
+        error: true
+    answer_contains: [[not found, no access, not accessible, access, does not exist,
+                       doesn't exist, could not, couldn't, unable]]
+
+  # --- abstention -----------------------------------------------------------------------
+  - id: gdrive-abstain-delete
+    category: abstention
+    split: dev
+    prompt: Delete glossary.txt from Google Drive.
+    forbidden_tools: [gdrive_create_document]
+    answer_contains: [[can't, cannot, unable, not able, no tool, don't have, do not have,
+                       not possible, isn't possible]]
+
+  - id: gdrive-abstain-share
+    category: abstention
+    split: test
+    prompt: Share the "Roadmap 2026" document on Google Drive with dana@example.com.
+    forbidden_tools: [gdrive_create_document]
+    answer_contains: [[can't, cannot, unable, not able, no tool, don't have, do not have,
+                       not possible, isn't possible]]
+
+  # --- confusable tools -----------------------------------------------------------------
+  - id: gdrive-confuse-folder-contents
+    category: confusable
+    split: dev
+    prompt: What is inside the "Projects" folder on Google Drive?
+    expected_calls:
+      - tool: gdrive_list_folder
+        args: {folder_id: {$present: true}}
+    answer_contains: [Roadmap 2026, Release checklist]
+
+  - id: gdrive-confuse-owner-in-text
+    category: confusable
+    split: test
+    prompt: >-
+      Who is named as the owner in the weekly sync notes of 2026-09-07 on Google Drive?
+    expected_calls:
+      - tool: gdrive_read_file_content
+        args: {file_id: {$present: true}}
+    answer_contains: [Dana]

@@ -6,7 +6,8 @@ synthetic and recorded cassettes alike. Keep both in sync when changing this dat
 
 Slack assigns channel ids and message timestamps itself, so scenarios look them up by
 channel name and message text, never by a hard-coded id. The live workspace also has
-Slack's default channels; the fake's `general` and `random` stand in for them.
+the default channels Slack created (German locale); the fake has them under the
+same names, so eval tasks can name them.
 """
 
 from dataclasses import dataclass
@@ -17,7 +18,8 @@ from bench_core.testing import FakeClock
 from bench_slack.fake.backend import SlackFake
 
 SANDBOX = "bench-sandbox"
-OTHER_CHANNELS = ("general", "random")
+GENERAL = "alle-in-integration-bench"
+OTHER_CHANNELS = (GENERAL, "sozial", "neuer-channel")
 """Channels the app is not a member of (reading them fails with `not_in_channel`)."""
 
 
@@ -51,7 +53,7 @@ RELEASE = MESSAGES[1].text
 
 def seed(fake: SlackFake) -> None:
     for name in OTHER_CHANNELS:
-        fake.add_channel(name, is_member=False, is_general=name == "general")
+        fake.add_channel(name, is_member=False, is_general=name == GENERAL)
     sandbox = fake.add_channel(SANDBOX, purpose="Test channel for integration-bench.")
     for message in MESSAGES:
         parent = fake.add_message(sandbox["id"], message.text)
