@@ -1,0 +1,41 @@
+name: live-smoke
+
+# Manual check that the repo secrets reach the live sandboxes: read-only tool calls
+# through each MCP server (`bench smoke`), no LLM calls.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: live-sandbox
+  cancel-in-progress: false
+
+env:
+  UV_VERSION: "0.13.0"
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      JIRA_SITE: ${{ secrets.JIRA_SITE }}
+      JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+      JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+      # Secret names may not start with GITHUB_, hence GH_.
+      GITHUB_APP_ID: ${{ secrets.GH_APP_ID }}
+      GITHUB_INSTALLATION_ID: ${{ secrets.GH_INSTALLATION_ID }}
+      GITHUB_PRIVATE_KEY: ${{ secrets.GH_PRIVATE_KEY }}
+      GDRIVE_CLIENT_ID: ${{ secrets.GDRIVE_CLIENT_ID }}
+      GDRIVE_CLIENT_SECRET: ${{ secrets.GDRIVE_CLIENT_SECRET }}
+      GDRIVE_REFRESH_TOKEN: ${{ secrets.GDRIVE_REFRESH_TOKEN }}
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          version: ${{ env.UV_VERSION }}
+          python-version: "3.14"
+      - run: uv sync --locked
+      - run: uv run bench smoke jira github gdrive slack

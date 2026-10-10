@@ -214,8 +214,21 @@ class EnvTokenStore:
 TOKEN_DIR_VAR = "BENCH_TOKEN_DIR"
 
 
+REFRESH_TOKEN_SUFFIX = "_REFRESH_TOKEN"
+
+
 def default_store(env: Mapping[str, str]) -> TokenStore:
     """Where `bench auth login` keeps user tokens: the OS keyring, or JSON files in
-    `BENCH_TOKEN_DIR` when set (tests, machines without a keyring backend)."""
-    directory = env.get(TOKEN_DIR_VAR)
-    return FileTokenStore(Path(directory)) if directory else KeyringTokenStore()
+    `BENCH_TOKEN_DIR` when set (tests, machines without a keyring backend).
+
+    CI has neither: there, `<ACCOUNT>_REFRESH_TOKEN` (e.g. `GDRIVE_REFRESH_TOKEN`) holds a
+    non-rotating refresh token, read through a read-only `EnvTokenStore`.
+    """
+    if directory := env.get(TOKEN_DIR_VAR):
+        return FileTokenStore(Path(directory))
+    from_env = {
+        name.removesuffix(REFRESH_TOKEN_SUFFIX).lower(): {"refresh_token": name}
+        for name, value in env.items()
+        if name.endswith(REFRESH_TOKEN_SUFFIX) and value
+    }
+    return EnvTokenStore(from_env, env) if from_env else KeyringTokenStore()

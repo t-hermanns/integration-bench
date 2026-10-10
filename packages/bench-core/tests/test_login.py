@@ -213,3 +213,12 @@ def test_default_store_uses_the_token_dir_when_set(tmp_path: Path) -> None:
     assert isinstance(store, FileTokenStore)
     assert store.directory == tmp_path
     assert isinstance(default_store({}), KeyringTokenStore)
+
+
+def test_default_store_reads_refresh_tokens_from_env_in_ci() -> None:
+    store = default_store({"GDRIVE_REFRESH_TOKEN": "rt", "SLACK_REFRESH_TOKEN": ""})
+    tokens = store.load("gdrive")
+    assert tokens is not None
+    assert tokens.refresh_token == "rt"
+    assert store.load("slack") is None
+    assert isinstance(default_store({"SLACK_REFRESH_TOKEN": ""}), KeyringTokenStore)
