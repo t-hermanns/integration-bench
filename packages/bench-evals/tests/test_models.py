@@ -315,3 +315,12 @@ async def test_cohere_errors_and_non_json_bodies() -> None:
 def test_build_needs_the_api_key() -> None:
     with pytest.raises(KeyError, match="GROQ_API_KEY"):
         PROVIDERS["groq"].build({})
+
+
+def test_cohere_tool_results_get_string_ids() -> None:
+    from bench_evals.models.http import string_ids
+
+    assert json.loads(string_ids('{"id": 42, "body": "hi"}')) == {"id": "42", "body": "hi"}
+    assert json.loads(string_ids('[{"id": 1}, {"id": "a"}]')) == [{"id": "1"}, {"id": "a"}]
+    for unchanged in ('{"id": "x"}', '{"key": "BENCH-1"}', "Unknown tool: x", "[1, 2]"):
+        assert string_ids(unchanged) == unchanged

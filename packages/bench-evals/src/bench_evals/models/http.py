@@ -157,7 +157,23 @@ class CohereModel(HttpModel):
                 }
                 return out | ({"tool_plan": plan} if plan else {})
             case ToolResult(call_id, _, content, _):
-                return {"role": "tool", "tool_call_id": call_id, "content": content}
+                return {"role": "tool", "tool_call_id": call_id, "content": string_ids(content)}
+
+
+def string_ids(content: str) -> str:
+    """Cohere reads a JSON object in a tool result as a document and rejects it (HTTP 400)
+    when its top-level `id` is not a string, e.g. a GitHub comment id."""
+    try:
+        data = json.loads(content)
+    except ValueError:
+        return content
+    items = data if isinstance(data, list) else [data]
+    changed = False
+    for item in items:
+        if isinstance(item, dict) and "id" in item and not isinstance(item["id"], str):
+            item["id"] = json.dumps(item["id"])
+            changed = True
+    return json.dumps(data, ensure_ascii=False, separators=(",", ":")) if changed else content
 
 
 class OpenAICompatModel(HttpModel):
