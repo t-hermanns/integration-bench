@@ -5,6 +5,7 @@ description = "Shared HTTP, auth, permissions, MCP and testing helpers for integ
 requires-python = ">=3.13"
 dependencies = [
     "httpx2>=2.13.1",
+    "mcp>=2.3,<3",
 ]
 
 [build-system]
