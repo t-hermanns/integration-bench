@@ -6,6 +6,8 @@ interactions:
       - application/json
       authorization:
       - REDACTED
+      cookie:
+      - REDACTED
       host:
       - bench-sandbox.atlassian.net
       user-agent:
@@ -14,13 +16,72 @@ interactions:
     uri: https://bench-sandbox.atlassian.net/rest/api/3/issue/BENCH-4/transitions
   response:
     body:
-      string: '{"transitions":[{"id":"21","name":"Start progress","to":{"id":"3","name":"In
-        Progress","statusCategory":{"key":"indeterminate","name":"In Progress"}},"isAvailable":true},{"id":"31","name":"Done","to":{"id":"10001","name":"Done","statusCategory":{"key":"done","name":"Done"}},"isAvailable":true}]}'
+      string: '{"expand":"transitions","transitions":[{"id":"11","name":"To Do","to":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/status/10001","description":"","iconUrl":"https://bench-sandbox.atlassian.net/images/icons/statuses/generic.png","name":"To
+        Do","id":"10001","statusCategory":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
+        Do"}},"hasScreen":false,"isGlobal":true,"isInitial":false,"isAvailable":true,"isConditional":false,"isLooped":false},{"id":"21","name":"In
+        Progress","to":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/status/10002","description":"","iconUrl":"https://bench-sandbox.atlassian.net/images/icons/statuses/generic.png","name":"In
+        Progress","id":"10002","statusCategory":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/statuscategory/4","id":4,"key":"indeterminate","colorName":"yellow","name":"In
+        Progress"}},"hasScreen":false,"isGlobal":true,"isInitial":false,"isAvailable":true,"isConditional":false,"isLooped":false},{"id":"31","name":"In
+        Review","to":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/status/10003","description":"","iconUrl":"https://bench-sandbox.atlassian.net/images/icons/statuses/generic.png","name":"In
+        Review","id":"10003","statusCategory":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/statuscategory/4","id":4,"key":"indeterminate","colorName":"yellow","name":"In
+        Progress"}},"hasScreen":false,"isGlobal":true,"isInitial":false,"isAvailable":true,"isConditional":false,"isLooped":false},{"id":"41","name":"Done","to":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/status/10000","description":"","iconUrl":"https://bench-sandbox.atlassian.net/images/icons/statuses/generic.png","name":"Done","id":"10000","statusCategory":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/statuscategory/3","id":3,"key":"done","colorName":"green","name":"Done"}},"hasScreen":false,"isGlobal":true,"isInitial":false,"isAvailable":true,"isConditional":false,"isLooped":false}]}'
     headers:
+      atl-request-id:
+      - 6383610f-8ecf-4c96-9df6-502927596542
+      atl-traceid:
+      - 6383610f8ecf4c969df6502927596542
+      cache-control:
+      - no-cache, no-store, no-transform
+      connection:
+      - keep-alive
       content-length:
-      - '296'
+      - '2040'
       content-type:
-      - application/json
+      - application/json;charset=UTF-8
+      date:
+      - Sat, 10 Oct 2026 16:19:24 GMT
+      nel:
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
+        "endpoint-1"}'
+      ratelimit:
+      - '"jira-burst-based";r=349;t=1'
+      ratelimit-policy:
+      - '"jira-burst-based";q=100;w=1'
+      report-to:
+      - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
+        "endpoint-1", "include_subdomains": true, "max_age": 600}'
+      server:
+      - AtlassianEdge
+      server-timing:
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=84,atl-edge;dur=83,atl-edge-internal;dur=16,atl-edge-upstream;dur=67,atl-edge-pop;desc="aws-eu-central-1",cdn-cache-miss,cdn-pop;desc="FRA60-P12",cdn-rid;desc="pyhzGPYk9NkcRtPb7IN3c2TVFXzw1XnzuQ0nkGw3J5boX9SDKyJktA==",cdn-downstream-fbl;dur=90
+      strict-transport-security:
+      - max-age=63072000; includeSubDomains; preload
+      timing-allow-origin:
+      - '*'
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      via:
+      - 1.1 b05a5dd80bc2a2f1773b586f1714217a.cloudfront.net (CloudFront)
+      x-aaccountid:
+      - 712020%3Afd9e126a-a8bb-47aa-bd2a-d83ab0d90083
+      x-amz-cf-id:
+      - pyhzGPYk9NkcRtPb7IN3c2TVFXzw1XnzuQ0nkGw3J5boX9SDKyJktA==
+      x-amz-cf-pop:
+      - FRA60-P12
+      x-arequestid:
+      - 720520cedeb174f94c3479ca56c16d38
+      x-cache:
+      - Miss from cloudfront
+      x-content-type-options:
+      - nosniff
+      x-ratelimit-limit:
+      - '350'
+      x-ratelimit-remaining:
+      - '349'
+      x-xss-protection:
+      - 1; mode=block
     status:
       code: 200
       message: OK
@@ -35,6 +96,8 @@ interactions:
       - '26'
       content-type:
       - application/json
+      cookie:
+      - REDACTED
       host:
       - bench-sandbox.atlassian.net
       user-agent:
@@ -44,7 +107,59 @@ interactions:
   response:
     body:
       string: ''
-    headers: {}
+    headers:
+      atl-request-id:
+      - 01d9c773-c473-4efa-9865-3a6ae9127754
+      atl-traceid:
+      - 01d9c773c4734efa98653a6ae9127754
+      cache-control:
+      - no-cache, no-store, no-transform
+      connection:
+      - keep-alive
+      content-type:
+      - text/html;charset=UTF-8
+      date:
+      - Sat, 10 Oct 2026 16:19:24 GMT
+      nel:
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
+        "endpoint-1"}'
+      ratelimit:
+      - '"jira-burst-based";r=198;t=1'
+      ratelimit-policy:
+      - '"jira-burst-based";q=100;w=1'
+      report-to:
+      - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
+        "endpoint-1", "include_subdomains": true, "max_age": 600}'
+      server:
+      - AtlassianEdge
+      server-timing:
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=4,cdn-upstream-fbl;dur=380,atl-edge;dur=374,atl-edge-internal;dur=13,atl-edge-upstream;dur=361,atl-edge-pop;desc="aws-eu-central-1",cdn-cache-miss,cdn-pop;desc="FRA60-P12",cdn-rid;desc="A8qEAxyQjIbU7YdDHoAcsTRL8gSRYGwokrB7KM7Wmy6b8qz4ZCFg4g==",cdn-downstream-fbl;dur=385
+      strict-transport-security:
+      - max-age=63072000; includeSubDomains; preload
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      via:
+      - 1.1 b05a5dd80bc2a2f1773b586f1714217a.cloudfront.net (CloudFront)
+      x-aaccountid:
+      - 712020%3Afd9e126a-a8bb-47aa-bd2a-d83ab0d90083
+      x-amz-cf-id:
+      - A8qEAxyQjIbU7YdDHoAcsTRL8gSRYGwokrB7KM7Wmy6b8qz4ZCFg4g==
+      x-amz-cf-pop:
+      - FRA60-P12
+      x-arequestid:
+      - c8187f261e2841b8246e0eb0bc07efe8
+      x-cache:
+      - Miss from cloudfront
+      x-content-type-options:
+      - nosniff
+      x-ratelimit-limit:
+      - '200'
+      x-ratelimit-remaining:
+      - '198'
+      x-xss-protection:
+      - 1; mode=block
     status:
       code: 204
       message: No Content
@@ -55,6 +170,8 @@ interactions:
       - application/json
       authorization:
       - REDACTED
+      cookie:
+      - REDACTED
       host:
       - bench-sandbox.atlassian.net
       user-agent:
@@ -63,13 +180,72 @@ interactions:
     uri: https://bench-sandbox.atlassian.net/rest/api/3/issue/BENCH-4/transitions
   response:
     body:
-      string: '{"transitions":[{"id":"11","name":"Back to To Do","to":{"id":"10000","name":"To
-        Do","statusCategory":{"key":"new","name":"To Do"}},"isAvailable":true},{"id":"31","name":"Done","to":{"id":"10001","name":"Done","statusCategory":{"key":"done","name":"Done"}},"isAvailable":true}]}'
+      string: '{"expand":"transitions","transitions":[{"id":"11","name":"To Do","to":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/status/10001","description":"","iconUrl":"https://bench-sandbox.atlassian.net/images/icons/statuses/generic.png","name":"To
+        Do","id":"10001","statusCategory":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
+        Do"}},"hasScreen":false,"isGlobal":true,"isInitial":false,"isAvailable":true,"isConditional":false,"isLooped":false},{"id":"21","name":"In
+        Progress","to":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/status/10002","description":"","iconUrl":"https://bench-sandbox.atlassian.net/images/icons/statuses/generic.png","name":"In
+        Progress","id":"10002","statusCategory":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/statuscategory/4","id":4,"key":"indeterminate","colorName":"yellow","name":"In
+        Progress"}},"hasScreen":false,"isGlobal":true,"isInitial":false,"isAvailable":true,"isConditional":false,"isLooped":false},{"id":"31","name":"In
+        Review","to":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/status/10003","description":"","iconUrl":"https://bench-sandbox.atlassian.net/images/icons/statuses/generic.png","name":"In
+        Review","id":"10003","statusCategory":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/statuscategory/4","id":4,"key":"indeterminate","colorName":"yellow","name":"In
+        Progress"}},"hasScreen":false,"isGlobal":true,"isInitial":false,"isAvailable":true,"isConditional":false,"isLooped":false},{"id":"41","name":"Done","to":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/status/10000","description":"","iconUrl":"https://bench-sandbox.atlassian.net/images/icons/statuses/generic.png","name":"Done","id":"10000","statusCategory":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/statuscategory/3","id":3,"key":"done","colorName":"green","name":"Done"}},"hasScreen":false,"isGlobal":true,"isInitial":false,"isAvailable":true,"isConditional":false,"isLooped":false}]}'
     headers:
+      atl-request-id:
+      - eb9b170a-d48d-4ce2-9677-9fb3c4fb6e7f
+      atl-traceid:
+      - eb9b170ad48d4ce296779fb3c4fb6e7f
+      cache-control:
+      - no-cache, no-store, no-transform
+      connection:
+      - keep-alive
       content-length:
-      - '277'
+      - '2040'
       content-type:
-      - application/json
+      - application/json;charset=UTF-8
+      date:
+      - Sat, 10 Oct 2026 16:19:25 GMT
+      nel:
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
+        "endpoint-1"}'
+      ratelimit:
+      - '"jira-burst-based";r=348;t=1'
+      ratelimit-policy:
+      - '"jira-burst-based";q=100;w=1'
+      report-to:
+      - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
+        "endpoint-1", "include_subdomains": true, "max_age": 600}'
+      server:
+      - AtlassianEdge
+      server-timing:
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=5,cdn-upstream-fbl;dur=148,atl-edge;dur=142,atl-edge-internal;dur=22,atl-edge-upstream;dur=120,atl-edge-pop;desc="aws-eu-central-1",cdn-cache-miss,cdn-pop;desc="FRA60-P12",cdn-rid;desc="RyDUQUWPPF3-LPpTbRDBvnhfEcUmz--UKMxcyBe1utYcbO1tlX3-KA==",cdn-downstream-fbl;dur=154
+      strict-transport-security:
+      - max-age=63072000; includeSubDomains; preload
+      timing-allow-origin:
+      - '*'
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      via:
+      - 1.1 b05a5dd80bc2a2f1773b586f1714217a.cloudfront.net (CloudFront)
+      x-aaccountid:
+      - 712020%3Afd9e126a-a8bb-47aa-bd2a-d83ab0d90083
+      x-amz-cf-id:
+      - RyDUQUWPPF3-LPpTbRDBvnhfEcUmz--UKMxcyBe1utYcbO1tlX3-KA==
+      x-amz-cf-pop:
+      - FRA60-P12
+      x-arequestid:
+      - 98bb226c2bdd65a2ec266d5c0c4c30e4
+      x-cache:
+      - Miss from cloudfront
+      x-content-type-options:
+      - nosniff
+      x-ratelimit-limit:
+      - '350'
+      x-ratelimit-remaining:
+      - '348'
+      x-xss-protection:
+      - 1; mode=block
     status:
       code: 200
       message: OK
@@ -84,6 +260,8 @@ interactions:
       - '26'
       content-type:
       - application/json
+      cookie:
+      - REDACTED
       host:
       - bench-sandbox.atlassian.net
       user-agent:
@@ -93,7 +271,59 @@ interactions:
   response:
     body:
       string: ''
-    headers: {}
+    headers:
+      atl-request-id:
+      - 9d9b4fbc-f412-47a8-a145-550a67765877
+      atl-traceid:
+      - 9d9b4fbcf41247a8a145550a67765877
+      cache-control:
+      - no-cache, no-store, no-transform
+      connection:
+      - keep-alive
+      content-type:
+      - text/html;charset=UTF-8
+      date:
+      - Sat, 10 Oct 2026 16:19:25 GMT
+      nel:
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
+        "endpoint-1"}'
+      ratelimit:
+      - '"jira-burst-based";r=197;t=1'
+      ratelimit-policy:
+      - '"jira-burst-based";q=100;w=1'
+      report-to:
+      - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
+        "endpoint-1", "include_subdomains": true, "max_age": 600}'
+      server:
+      - AtlassianEdge
+      server-timing:
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=381,atl-edge;dur=379,atl-edge-internal;dur=14,atl-edge-upstream;dur=365,atl-edge-pop;desc="aws-eu-central-1",cdn-cache-miss,cdn-pop;desc="FRA60-P12",cdn-rid;desc="B1G4eYJj2ghalzJ6l8SUEtNvYSN1VOjPtfJuHbtFaDJ98wC0uI7ySw==",cdn-downstream-fbl;dur=388
+      strict-transport-security:
+      - max-age=63072000; includeSubDomains; preload
+      timing-allow-origin:
+      - '*'
+      vary:
+      - Accept-Encoding
+      via:
+      - 1.1 b05a5dd80bc2a2f1773b586f1714217a.cloudfront.net (CloudFront)
+      x-aaccountid:
+      - 712020%3Afd9e126a-a8bb-47aa-bd2a-d83ab0d90083
+      x-amz-cf-id:
+      - B1G4eYJj2ghalzJ6l8SUEtNvYSN1VOjPtfJuHbtFaDJ98wC0uI7ySw==
+      x-amz-cf-pop:
+      - FRA60-P12
+      x-arequestid:
+      - 8c2117585c025e464db1e73b1ac212c1
+      x-cache:
+      - Miss from cloudfront
+      x-content-type-options:
+      - nosniff
+      x-ratelimit-limit:
+      - '200'
+      x-ratelimit-remaining:
+      - '197'
+      x-xss-protection:
+      - 1; mode=block
     status:
       code: 204
       message: No Content

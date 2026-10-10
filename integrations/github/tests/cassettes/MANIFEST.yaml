@@ -1,19 +1,19 @@
 # Kind of every cassette in this directory. `bench synth` writes `synthetic` ones from
 # the in-memory fake; `bench record` replaces them with `recorded` ones from the sandbox.
 cassettes:
-  add_issue_comment: synthetic
-  create_issue: synthetic
+  add_issue_comment: recorded
+  create_issue: recorded
   create_issue_forbidden: synthetic
-  get_binary_file: synthetic
-  get_directory: synthetic
-  get_file: synthetic
-  get_file_not_found: synthetic
-  get_file_with_space: synthetic
-  get_issue: synthetic
-  get_issue_not_found: synthetic
-  get_large_file: synthetic
-  list_issue_comments: synthetic
-  list_pull_requests: synthetic
-  search_issues: synthetic
-  search_no_results: synthetic
-  search_unknown_user: synthetic
+  get_binary_file: recorded
+  get_directory: recorded
+  get_file: recorded
+  get_file_not_found: recorded
+  get_file_with_space: recorded
+  get_issue: recorded
+  get_issue_not_found: recorded
+  get_large_file: recorded
+  list_issue_comments: recorded
+  list_pull_requests: recorded
+  search_issues: recorded
+  search_no_results: recorded
+  search_unknown_user: recorded

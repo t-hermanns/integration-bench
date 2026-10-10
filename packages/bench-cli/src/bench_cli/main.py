@@ -1,12 +1,14 @@
 """`bench` command line. Integrations are found by convention: `bench_<name>.scenarios`."""
 
 import importlib
+import shutil
 import subprocess
 import sys
 import tempfile
 import time
 import webbrowser
 from pathlib import Path
+from types import ModuleType
 from typing import Annotated
 
 import anyio
@@ -16,7 +18,14 @@ from mcp.server.mcpserver.exceptions import ToolError
 from bench_core.auth import LoginError, LoginSpec, OAuthError, default_store, login
 from bench_core.doctor import load_env
 from bench_core.sandbox import SandboxError
-from bench_core.testing import CassetteSuite, stale_cassettes, synthesize
+from bench_core.testing import (
+    CassetteSuite,
+    RecordResult,
+    SecretsFound,
+    record_live,
+    stale_cassettes,
+    synthesize,
+)
 
 from bench_cli import doctor as doctor_checks
 from bench_cli import scaffold
@@ -155,6 +164,15 @@ def env_settings(env_file: Path | None) -> dict[str, str]:
     return load_env(env_file)
 
 
+def load_sandbox(name: str) -> ModuleType:
+    try:
+        return importlib.import_module(f"bench_{name}.sandbox")
+    except ModuleNotFoundError as exc:
+        if exc.name not in (f"bench_{name}", f"bench_{name}.sandbox"):
+            raise
+        raise typer.BadParameter(f"no integration {name!r} with a sandbox module") from None
+
+
 @sandbox_app.command("seed")
 def sandbox_seed(
     name: Annotated[str, typer.Argument(help="Integration, e.g. jira")],
@@ -163,18 +181,49 @@ def sandbox_seed(
     ] = None,
 ) -> None:
     """Create the fake's seed data in the live sandbox (once; reruns change nothing)."""
-    try:
-        module = importlib.import_module(f"bench_{name}.sandbox")
-    except ModuleNotFoundError as exc:
-        if exc.name not in (f"bench_{name}", f"bench_{name}.sandbox"):
-            raise
-        raise typer.BadParameter(f"no integration {name!r} with a sandbox module") from None
+    module = load_sandbox(name)
     env = env_settings(env_file)
     try:
         anyio.run(lambda: module.seed(env, echo=typer.echo))
     except (SandboxError, ToolError, OAuthError) as exc:
         typer.echo(f"error: {exc}", err=True)
         raise typer.Exit(1) from None
+
+
+@app.command()
+def record(
+    name: Annotated[str, typer.Argument(help="Integration, e.g. github")],
+    only: Annotated[
+        list[str] | None, typer.Option("--only", help="Scenario to record; repeatable")
+    ] = None,
+    env_file: Annotated[
+        Path | None, typer.Option(help="Settings file (default: .env in the repo root)")
+    ] = None,
+) -> None:
+    """Re-record cassettes by running the scenarios against the live sandbox."""
+    suite = load_suite(name)
+    sandbox = load_sandbox(name)
+    env = env_settings(env_file)
+
+    async def run() -> RecordResult:
+        async with sandbox.live_api(env) as api:
+            return await record_live(suite, api, only=only)
+
+    try:
+        result = anyio.run(run)
+    except KeyError as exc:
+        raise typer.BadParameter(str(exc.args[0])) from None
+    except (SandboxError, SecretsFound, ToolError, OAuthError) as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(1) from None
+    typer.echo(f"{name}: recorded {len(result.recorded)} cassette(s) in {suite.cassette_dir}")
+    if result.synthetic_only:
+        typer.echo(f"kept synthetic (need a shaped fake): {', '.join(result.synthetic_only)}")
+    if shutil.which("gitleaks"):
+        subprocess.run(["gitleaks", "dir", str(suite.cassette_dir)], check=False)
+    else:
+        typer.echo("gitleaks not found; only the built-in secret patterns were checked")
+    typer.echo(f"next: `uv run pytest integrations/{name}`, review the diff, commit")
 
 
 def load_login(name: str) -> LoginSpec:

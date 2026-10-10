@@ -6,14 +6,16 @@ relative (`-7d`, `-2w`, `-3h`, `-30m`) dates and `ORDER BY`. Fields: project, ke
 statusCategory, issuetype/type, priority, assignee, reporter, labels, summary,
 description, comment, text, created, updated.
 
-Errors read like Jira's (unknown field, unknown value, unsupported operator, syntax,
-unbounded query), so tool errors in tests match what the model sees live. Like Jira,
-`!=` and `not in` never match issues whose field is empty.
+Like Jira's /search/jql, only syntax errors and unbounded queries are errors, worded as
+Jira words them. Everything else that cannot match (unknown field, value or function, an
+operator the field does not support, an invalid date) makes the clause match nothing,
+and an unknown sort field is ignored. Like Jira, `!=` and `not in` never match issues
+whose field is empty.
 """
 
 import re
-from collections.abc import Callable, Mapping, Sequence
-from dataclasses import dataclass, field
+from collections.abc import Callable, Mapping
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
@@ -28,6 +30,14 @@ UNBOUNDED = (
 
 class JqlError(ValueError):
     """The message is what Jira puts into `errorMessages`."""
+
+
+class _NoMatch(Exception):
+    """A well-formed clause that cannot match; Jira answers it with no results."""
+
+
+def _nothing(issue: Issue) -> bool:
+    return False
 
 
 # --- Tokens -------------------------------------------------------------------------------
@@ -79,20 +89,14 @@ class Field:
     name: str
     kind: str  # value | text | date
     get: Callable[[Issue], list[Any]]
-    known: Callable[["Context"], set[str]] | None = None
 
 
 @dataclass(frozen=True)
 class Context:
-    """What the fake knows beyond the issues: the caller and the configured values."""
+    """What the fake knows beyond the issues: the caller and the time."""
 
     current_user: str
     now: datetime
-    projects: Mapping[str, str] = field(default_factory=dict)  # key -> name
-    statuses: Mapping[str, str] = field(default_factory=dict)  # name -> category key
-    categories: Mapping[str, str] = field(default_factory=dict)  # key -> name
-    issue_types: Sequence[str] = ()
-    priorities: Sequence[str] = ()
 
 
 def _fields(issue: Issue) -> Mapping[str, Any]:
@@ -162,17 +166,12 @@ def _category(issue: Issue) -> list[Any]:
 
 
 _FIELD_LIST = [
-    Field("project", "value", _project, lambda c: {*c.projects, *c.projects.values()}),
+    Field("project", "value", _project),
     Field("key", "value", lambda i: [i.get("key"), i.get("id")]),
-    Field("status", "value", _nested("status", "name"), lambda c: set(c.statuses)),
-    Field(
-        "statuscategory",
-        "value",
-        _category,
-        lambda c: {*c.categories, *c.categories.values()},
-    ),
-    Field("issuetype", "value", _nested("issuetype", "name"), lambda c: set(c.issue_types)),
-    Field("priority", "value", _nested("priority", "name"), lambda c: set(c.priorities)),
+    Field("status", "value", _nested("status", "name")),
+    Field("statuscategory", "value", _category),
+    Field("issuetype", "value", _nested("issuetype", "name")),
+    Field("priority", "value", _nested("priority", "name")),
     Field("assignee", "value", _person("assignee")),
     Field("reporter", "value", _person("reporter")),
     Field("labels", "value", lambda i: list(_fields(i).get("labels") or [])),
@@ -193,12 +192,9 @@ ALIASES = {
 }
 
 
-def lookup(name: str) -> Field:
+def lookup(name: str) -> Field | None:
     key = name.casefold()
-    found = FIELDS.get(ALIASES.get(key, key))
-    if found is None:
-        raise JqlError(f"Field '{name}' does not exist or you do not have permission to view it.")
-    return found
+    return FIELDS.get(ALIASES.get(key, key))
 
 
 # --- Values -------------------------------------------------------------------------------
@@ -223,10 +219,7 @@ def parse_date(value: str, now: datetime) -> datetime:
             return datetime.strptime(value.strip(), fmt).replace(tzinfo=UTC)
         except ValueError:
             continue
-    raise JqlError(
-        f"Date value '{value}' is invalid. Valid formats include: 'yyyy/MM/dd HH:mm', "
-        "'yyyy-MM-dd HH:mm', 'yyyy/MM/dd', 'yyyy-MM-dd', or a period format e.g. '-5d', '4w 2d'."
-    )
+    raise _NoMatch
 
 
 # --- Parser -------------------------------------------------------------------------------
@@ -235,21 +228,19 @@ def parse_date(value: str, now: datetime) -> datetime:
 @dataclass
 class Query:
     where: Predicate | None
-    order: list[tuple[str, bool]]  # (field, descending)
+    order: list[tuple[Field, bool]]  # (field, descending)
 
     def matches(self, issue: Issue) -> bool:
         return self.where is None or self.where(issue)
 
     def sort(self, issues: list[Issue]) -> list[Issue]:
         result = list(issues)
-        for name, descending in reversed(self.order or [("created", True)]):
-            result.sort(key=_sort_key(name), reverse=descending)
+        for found, descending in reversed(self.order or [(FIELDS["created"], True)]):
+            result.sort(key=_sort_key(found), reverse=descending)
         return result
 
 
-def _sort_key(name: str) -> Callable[[Issue], Any]:
-    found = lookup(name)
-
+def _sort_key(found: Field) -> Callable[[Issue], Any]:
     def key(issue: Issue) -> Any:
         if found.name == "key":
             project, _, number = str(issue.get("key")).partition("-")
@@ -288,8 +279,11 @@ class _Parser:
     def expect_punct(self, char: str) -> None:
         token = self.peek()
         if token is None or token.kind != "punct" or token.text != char:
-            got = "end of query" if token is None else f"'{token.text}'"
-            raise JqlError(f"Error in the JQL Query: Expecting '{char}' but got {got}.")
+            if token is None:
+                raise JqlError(
+                    f"Error in the JQL Query: Expecting '{char}' before the end of the query."
+                )
+            raise JqlError(f"Error in the JQL Query: Expecting '{char}' but got '{token.text}'.")
         self.pos += 1
 
     # grammar
@@ -298,7 +292,7 @@ class _Parser:
         where = None
         if self.peek() is not None and not self.at_keyword("ORDER", "BY"):
             where = self.or_expr()
-        order: list[tuple[str, bool]] = []
+        order: list[tuple[Field | None, bool]] = []
         if self.at_keyword("ORDER", "BY"):
             self.pos += 2
             order.append(self.order_item())
@@ -309,15 +303,14 @@ class _Parser:
             raise JqlError(
                 f"Error in the JQL Query: Expecting either 'OR' or 'AND' but got '{extra.text}'."
             )
-        return Query(where, order)
+        return Query(where, [(f, desc) for f, desc in order if f is not None])
 
-    def order_item(self) -> tuple[str, bool]:
-        token = self.take()
-        lookup(token.text)
+    def order_item(self) -> tuple[Field | None, bool]:
+        found = lookup(self.take().text)
         descending = False
         if self.at_keyword("DESC") or self.at_keyword("ASC"):
             descending = self.take().keyword == "DESC"
-        return token.text, descending
+        return found, descending
 
     def or_expr(self) -> Predicate:
         parts = [self.and_expr()]
@@ -365,6 +358,12 @@ class _Parser:
         return token.text
 
     def value(self) -> Value:
+        if self.peek() is None:
+            # Sic: Jira drops "the" in this one message.
+            raise JqlError(
+                "Error in JQL Query: Expecting either a value, list or function before the end "
+                "of the query."
+            )
         token = self.take()
         if token.kind == "punct":
             raise JqlError(f"Error in the JQL Query: Expecting a value but got '{token.text}'.")
@@ -390,23 +389,32 @@ class _Parser:
         return result
 
     def clause(self) -> Predicate:
+        if self.peek() is None:
+            raise JqlError(
+                "Error in the JQL Query: Expecting a field name at the end of the query."
+            )
         name = self.take()
         if name.kind not in ("word", "string"):
             raise JqlError(f"Error in the JQL Query: Expecting a field name but got '{name.text}'.")
         found = lookup(name.text)
         op = self.operator()
-        if op in ("in", "not in"):
-            return self.compare(found, name.text, op, self.values())
         if op in ("is", "is not"):
             token = self.take()
             if token.keyword not in ("EMPTY", "NULL"):
                 raise JqlError(
-                    f"Error in the JQL Query: The operator '{op.upper()}' only supports "
-                    f"EMPTY or NULL, not '{token.text}'."
+                    "Your query couldn't be processed. Make sure it's valid and try again later."
                 )
+            if found is None:
+                return _nothing
             empty = op == "is"
             return lambda i: (not found.get(i)) == empty
-        return self.compare(found, name.text, op, [self.value()])
+        raw = self.values() if op in ("in", "not in") else [self.value()]
+        if found is None:
+            return _nothing
+        try:
+            return self.compare(found, op, raw)
+        except _NoMatch:
+            return _nothing
 
     # semantics
 
@@ -415,33 +423,23 @@ class _Parser:
             return value.text
         if value.text.casefold() == "currentuser":
             return self.context.current_user
-        raise JqlError(f"Error in the JQL Query: Unable to find JQL function '{value.text}()'.")
+        raise _NoMatch
 
-    def unsupported(self, op: str, name: str) -> JqlError:
-        return JqlError(f"The operator '{op}' is not supported by the '{name}' field.")
-
-    def compare(self, found: Field, name: str, op: str, raw: list[Value]) -> Predicate:
+    def compare(self, found: Field, op: str, raw: list[Value]) -> Predicate:
         if found.kind == "text":
             if op not in ("~", "!~"):
-                raise self.unsupported(op, name)
+                raise _NoMatch
             terms = _terms(raw[0].text)
             hit: Predicate = lambda i: any(_contains(v, terms) for v in found.get(i))  # noqa: E731
             return hit if op == "~" else lambda i: not hit(i)
         if op in ("~", "!~"):
-            raise self.unsupported(op, name)
+            raise _NoMatch
         if found.kind == "date":
             when = [parse_date(self.resolve(v), self.context.now) for v in raw]
-            return _date_compare(found, op, when, name, self)
+            return _date_compare(found, op, when)
         if op in (">", ">=", "<", "<="):
-            raise self.unsupported(op, name)
+            return _rank_compare(found, op, self.resolve(raw[0]))
         wanted = {self.resolve(v).casefold() for v in raw}
-        if found.known is not None:
-            known = {k.casefold() for k in found.known(self.context)}
-            for value in raw:
-                if self.resolve(value).casefold() not in known:
-                    raise JqlError(
-                        f"The value '{value.text}' does not exist for the field '{name}'."
-                    )
 
         def equal(issue: Issue) -> bool:
             return any(str(v).casefold() in wanted for v in found.get(issue))
@@ -468,23 +466,33 @@ def _contains(text: Any, terms: list[str]) -> bool:
     return True
 
 
-def _date_compare(
-    found: Field, op: str, when: list[datetime], name: str, parser: _Parser
-) -> Predicate:
-    checks: dict[str, Callable[[datetime, datetime], bool]] = {
-        "=": lambda a, b: a == b,
-        "!=": lambda a, b: a != b,
-        ">": lambda a, b: a > b,
-        ">=": lambda a, b: a >= b,
-        "<": lambda a, b: a < b,
-        "<=": lambda a, b: a <= b,
-        "in": lambda a, b: a == b,
-    }
+_CHECKS: dict[str, Callable[[Any, Any], bool]] = {
+    "=": lambda a, b: a == b,
+    "!=": lambda a, b: a != b,
+    ">": lambda a, b: a > b,
+    ">=": lambda a, b: a >= b,
+    "<": lambda a, b: a < b,
+    "<=": lambda a, b: a <= b,
+    "in": lambda a, b: a == b,
+}
+_RANKS = {name.casefold(): rank for name, rank in PRIORITY_RANK.items()}
+
+
+def _rank_compare(found: Field, op: str, value: str) -> Predicate:
+    """`priority > Low` compares ranks (Highest is the greatest); other fields match nothing."""
+    bound = _RANKS.get(value.casefold())
+    if found.name != "priority" or bound is None:
+        raise _NoMatch
+    check = _CHECKS[op]
+    return lambda i: any(check(_RANKS.get(str(v).casefold(), 0), bound) for v in found.get(i))
+
+
+def _date_compare(found: Field, op: str, when: list[datetime]) -> Predicate:
     if op == "not in":
         return lambda i: bool(found.get(i)) and all(v not in when for v in found.get(i))
-    if op not in checks:
-        raise parser.unsupported(op, name)
-    check = checks[op]
+    if op not in _CHECKS:
+        raise _NoMatch
+    check = _CHECKS[op]
     return lambda i: any(check(v, w) for v in found.get(i) for w in when)
 
 

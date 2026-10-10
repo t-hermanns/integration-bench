@@ -121,11 +121,11 @@ async def test_search_pages_with_cursor(client: Client) -> None:
 
 
 async def test_search_detailed(client: Client) -> None:
-    page = await call(client, SEARCH, jql="key = BENCH-3", response_format="detailed")
+    page = await call(client, SEARCH, jql="key = BENCH-8", response_format="detailed")
     hit = page["issues"][0]
-    assert hit["assignee"] == "Sam Lee"
-    assert hit["labels"] == ["export", "performance"]
-    assert hit["url"] == f"{SITE_URL}/browse/BENCH-3"
+    assert hit["assignee"] == "Bench Bot"
+    assert hit["labels"] == ["i18n", "ui"]
+    assert hit["url"] == f"{SITE_URL}/browse/BENCH-8"
     assert {"priority", "updated"} <= set(hit)
 
 
@@ -160,11 +160,9 @@ async def test_search_jql(client: Client, jql: str, keys: list[str]) -> None:
 async def test_search_errors_reach_the_model(client: Client) -> None:
     assert "Unbounded JQL" in await error(client, SEARCH, jql="ORDER BY created DESC")
     assert "must not be empty" in await error(client, SEARCH, jql="  ")
-    message = await error(client, SEARCH, jql='project = BENCH AND status = "Closed"')
-    assert "The value 'Closed' does not exist for the field 'status'" in message
+    message = await error(client, SEARCH, jql="project = BENCH AND (status = Done")
+    assert "Expecting ')' before the end of the query." in message
     assert "Fix the arguments" in message
-    message = await error(client, SEARCH, jql="summary = crash")
-    assert "The operator '=' is not supported by the 'summary' field" in message
     assert "Invalid cursor" in await error(client, SEARCH, jql="project = BENCH", cursor="abc")
 
 
@@ -182,7 +180,7 @@ async def test_get_issue_concise_and_detailed(client: Client) -> None:
     detailed = await call(client, GET, issue_key="BENCH-1", response_format="detailed")
     assert detailed["reporter"] == "Bench Bot"
     assert detailed["status_category"] == "new"
-    assert [c["author"] for c in detailed["comments"]] == ["Sam Lee", "Alex Doe"]
+    assert [c["author"] for c in detailed["comments"]] == ["Bench Bot", "Bench Bot"]
     assert "more_comments" not in detailed
     assert {"created", "updated", "url", "project"} <= set(detailed)
 
@@ -249,20 +247,22 @@ async def test_add_comment(client: Client, fake: JiraFake) -> None:
     assert "must not be empty" in await error(client, COMMENT, issue_key="BENCH-2", body=" ")
 
 
-async def test_transition_by_status_or_transition_name(client: Client) -> None:
+async def test_transition_by_status_name(client: Client) -> None:
     moved = await call(client, TRANSITION, issue_key="BENCH-4", status="in progress")
     assert moved == {"key": "BENCH-4", "status": "In Progress", "url": f"{SITE_URL}/browse/BENCH-4"}
     assert (await call(client, GET, issue_key="BENCH-4"))["status"] == "In Progress"
+    review = await call(client, TRANSITION, issue_key="BENCH-4", status="In Review")
+    assert review["status"] == "In Review"
     done = await call(client, TRANSITION, issue_key="BENCH-4", status="Done")
     assert done["status"] == "Done"
-    reopened = await call(client, TRANSITION, issue_key="BENCH-4", status="Back to To Do")
+    reopened = await call(client, TRANSITION, issue_key="BENCH-4", status="to do")
     assert reopened["status"] == "To Do"
 
 
 async def test_transition_to_unknown_status_lists_options(client: Client) -> None:
     message = await error(client, TRANSITION, issue_key="BENCH-5", status="Closed")
     assert "cannot move to 'Closed'" in message
-    assert "In Progress, To Do" in message
+    assert "In Progress, In Review, To Do" in message
 
 
 async def test_errors_reach_the_model_as_tool_errors(client: Client) -> None:

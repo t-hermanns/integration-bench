@@ -19,14 +19,69 @@ interactions:
     uri: https://bench-sandbox.atlassian.net/rest/api/3/issue/BENCH-2/comment
   response:
     body:
-      string: '{"id":"20005","self":"https://bench-sandbox.atlassian.net/rest/api/3/issue/10002/comment/20005","author":{"accountId":"557058:bench-bot","displayName":"Bench
-        Bot","accountType":"atlassian"},"body":{"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Design
-        draft is ready for review."}]}]},"created":"2027-01-15T08:00:00.000+0000","updated":"2027-01-15T08:00:00.000+0000"}'
+      string: '{"self":"https://bench-sandbox.atlassian.net/rest/api/3/issue/10001/comment/10005","id":"10005","author":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/user?accountId=712020%3Afd9e126a-a8bb-47aa-bd2a-d83ab0d90083","accountId":"712020:fd9e126a-a8bb-47aa-bd2a-d83ab0d90083","emailAddress":"redacted@example.invalid","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png","24x24":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png","16x16":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png","32x32":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png"},"displayName":"Tristan
+        Hermanns","active":true,"timeZone":"Europe/Berlin","accountType":"atlassian"},"body":{"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Design
+        draft is ready for review."}]}]},"updateAuthor":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/user?accountId=712020%3Afd9e126a-a8bb-47aa-bd2a-d83ab0d90083","accountId":"712020:fd9e126a-a8bb-47aa-bd2a-d83ab0d90083","emailAddress":"redacted@example.invalid","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png","24x24":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png","16x16":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png","32x32":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png"},"displayName":"Tristan
+        Hermanns","active":true,"timeZone":"Europe/Berlin","accountType":"atlassian"},"created":"2026-10-10T18:19:20.938+0200","updated":"2026-10-10T18:19:20.938+0200","jsdPublic":true}'
     headers:
-      content-length:
-      - '410'
+      atl-request-id:
+      - 317b9612-5f31-4b26-b477-c7ad3ea77d7f
+      atl-traceid:
+      - 317b96125f314b26b477c7ad3ea77d7f
+      cache-control:
+      - no-cache, no-store, no-transform
+      connection:
+      - keep-alive
       content-type:
-      - application/json
+      - application/json;charset=UTF-8
+      date:
+      - Sat, 10 Oct 2026 16:19:21 GMT
+      location:
+      - https://bench-sandbox.atlassian.net/rest/api/3/issue/10001/comment/10005
+      nel:
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
+        "endpoint-1"}'
+      ratelimit:
+      - '"jira-burst-based";r=199;t=1'
+      ratelimit-policy:
+      - '"jira-burst-based";q=100;w=1'
+      report-to:
+      - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
+        "endpoint-1", "include_subdomains": true, "max_age": 600}'
+      server:
+      - AtlassianEdge
+      server-timing:
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=3,cdn-upstream-fbl;dur=351,atl-edge;dur=346,atl-edge-internal;dur=25,atl-edge-upstream;dur=321,atl-edge-pop;desc="aws-eu-central-1",cdn-cache-miss,cdn-pop;desc="FRA60-P12",cdn-rid;desc="gkgmQVpZpA1j0f2ITLyDvlKBydNoGbGNXaWq8JQhXVjhG2rIRqEMPQ==",cdn-downstream-fbl;dur=359
+      set-cookie:
+      - REDACTED
+      strict-transport-security:
+      - max-age=63072000; includeSubDomains; preload
+      timing-allow-origin:
+      - '*'
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      via:
+      - 1.1 b05a5dd80bc2a2f1773b586f1714217a.cloudfront.net (CloudFront)
+      x-aaccountid:
+      - 712020%3Afd9e126a-a8bb-47aa-bd2a-d83ab0d90083
+      x-amz-cf-id:
+      - gkgmQVpZpA1j0f2ITLyDvlKBydNoGbGNXaWq8JQhXVjhG2rIRqEMPQ==
+      x-amz-cf-pop:
+      - FRA60-P12
+      x-arequestid:
+      - db6c408119d472c1f1ce38ded8fc01fe
+      x-cache:
+      - Miss from cloudfront
+      x-content-type-options:
+      - nosniff
+      x-ratelimit-limit:
+      - '200'
+      x-ratelimit-remaining:
+      - '199'
+      x-xss-protection:
+      - 1; mode=block
     status:
       code: 201
       message: Created

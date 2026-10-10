@@ -75,18 +75,26 @@ SECRET_PATTERNS: dict[str, re.Pattern[str]] = {
     ),
 }
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9-]+(?:\.[A-Za-z0-9-]+)*\.[A-Za-z]{2,}")
+# Credentials inside URLs in bodies, e.g. GitHub's `download_url` of a private repo file
+# (`raw.githubusercontent.com/...?token=...`). Only the value is replaced.
+URL_SECRET = re.compile(
+    r"([?&](?:" + "|".join(sorted(SENSITIVE_FIELDS - {"private_key"})) + r")=)([^&#\s\"'\\]+)"
+)
 
 
 def scrub(text: str) -> str:
-    """Replace known token formats and e-mail addresses in free text."""
+    """Replace known token formats, credentials in URLs and e-mail addresses in free text."""
     for pattern in SECRET_PATTERNS.values():
         text = pattern.sub(REDACTED, text)
+    text = URL_SECRET.sub(lambda m: m[1] + REDACTED, text)
     return EMAIL.sub(REDACTED_EMAIL, text)
 
 
 def find_secrets(text: str) -> list[str]:
     """Names of the patterns that still match (never the values, so it is safe to print)."""
     found = [name for name, pattern in SECRET_PATTERNS.items() if pattern.search(text)]
+    if any(m[2] != REDACTED for m in URL_SECRET.finditer(text)):
+        found.append("url_credential")
     if any(m.group() != REDACTED_EMAIL for m in EMAIL.finditer(text)):
         found.append("email")
     return found

@@ -1,8 +1,9 @@
-"""Cassette scenarios for the GitHub client (`bench synth github`, later `bench record`).
+"""Cassette scenarios for `bench synth github` (fake) and `bench record github` (sandbox).
 
 Each scenario drives `GitHubClient` against the sandbox repository. Expected tool errors
 are caught, so the cassette holds the error response the tests then replay. Scenarios
-with `prepare` shape the fake and can only be synthesized.
+with `prepare` shape the fake and can only be synthesized; a `teardown` undoes what a
+live run created (issues cannot be deleted over REST, so they are closed).
 """
 
 from collections.abc import Awaitable, Callable
@@ -15,8 +16,9 @@ from bench_core.auth import StaticToken
 from bench_core.http import ApiClient
 from bench_core.testing import CassetteSuite, FakeBackend, FakeClock, Scenario, expect_tool_error
 
-from bench_github.client import GitHubClient, make_api
+from bench_github.client import GitHubClient, make_api, raise_for_status, repo_path
 from bench_github.fake import OWNER, REPO, GitHubFake, seeded_fake
+from bench_github.models import Comment, Issue
 
 CASSETTE_DIR = Path(__file__).resolve().parents[2] / "tests" / "cassettes"
 SYNTHETIC_TOKEN = "synthetic-token"
@@ -37,18 +39,24 @@ def _api(transport: httpx2.AsyncBaseTransport | None, clock: FakeClock | None) -
 
 
 Run = Callable[[GitHubClient], Awaitable[Any]]
+Teardown = Callable[[ApiClient, Any], Awaitable[None]]
 
 
-def _scenario(run: Run, description: str, prepare: Callable[[GitHubFake], None] | None = None):
-    async def drive(api: ApiClient) -> None:
-        await run(GitHubClient(api))
+def _scenario(
+    run: Run,
+    description: str,
+    prepare: Callable[[GitHubFake], None] | None = None,
+    teardown: Teardown | None = None,
+) -> Scenario:
+    async def drive(api: ApiClient) -> Any:
+        return await run(GitHubClient(api))
 
     def shape(fake: FakeBackend) -> None:
         assert prepare is not None
         assert isinstance(fake, GitHubFake)
         prepare(fake)
 
-    return Scenario(drive, shape if prepare else None, description)
+    return Scenario(drive, shape if prepare else None, description, teardown)
 
 
 # --- Scenarios ----------------------------------------------------------------------------
@@ -82,8 +90,8 @@ async def list_issue_comments(gh: GitHubClient) -> None:
     await gh.list_issue_comments(OWNER, REPO, 1, per_page=2, cursor=first.next_cursor)
 
 
-async def create_issue(gh: GitHubClient) -> None:
-    await gh.create_issue(
+async def create_issue(gh: GitHubClient) -> Issue:
+    return await gh.create_issue(
         OWNER,
         REPO,
         "Export button does nothing in Firefox",
@@ -100,8 +108,21 @@ def _read_only_token(fake: GitHubFake) -> None:
     fake.issue_token(SYNTHETIC_TOKEN, ["issues:read", "pull_requests:read", "contents:read"])
 
 
-async def add_issue_comment(gh: GitHubClient) -> None:
-    await gh.add_issue_comment(OWNER, REPO, 1, "Confirmed on the latest release as well.")
+async def add_issue_comment(gh: GitHubClient) -> Comment:
+    return await gh.add_issue_comment(OWNER, REPO, 1, "Confirmed on the latest release as well.")
+
+
+async def _close_issue(api: ApiClient, issue: Issue) -> None:
+    response = await api.patch(
+        f"{repo_path(OWNER, REPO)}/issues/{issue.number}",
+        json={"state": "closed", "state_reason": "not_planned"},
+    )
+    raise_for_status(response, action="close the recorded issue", what=f"Issue {issue.number}")
+
+
+async def _delete_comment(api: ApiClient, comment: Comment) -> None:
+    response = await api.delete(f"{repo_path(OWNER, REPO)}/issues/comments/{comment.id}")
+    raise_for_status(response, action="delete the recorded comment", what="Comment on issue 1")
 
 
 async def list_pull_requests(gh: GitHubClient) -> None:
@@ -141,11 +162,13 @@ SCENARIOS: dict[str, Scenario] = {
     "get_issue": _scenario(get_issue, "Issue with labels, assignee and milestone"),
     "get_issue_not_found": _scenario(get_issue_not_found, "404 for a missing issue"),
     "list_issue_comments": _scenario(list_issue_comments, "Three comments, two pages"),
-    "create_issue": _scenario(create_issue, "New issue with a label"),
+    "create_issue": _scenario(create_issue, "New issue with a label", teardown=_close_issue),
     "create_issue_forbidden": _scenario(
         create_issue_forbidden, "403 without issues:write", prepare=_read_only_token
     ),
-    "add_issue_comment": _scenario(add_issue_comment, "Comment on issue 1"),
+    "add_issue_comment": _scenario(
+        add_issue_comment, "Comment on issue 1", teardown=_delete_comment
+    ),
     "list_pull_requests": _scenario(list_pull_requests, "All pull requests, two pages"),
     "get_file": _scenario(get_file, "README.md as text"),
     "get_file_with_space": _scenario(get_file_with_space, "Quoted path and ref"),

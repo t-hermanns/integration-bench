@@ -9,7 +9,8 @@ ends up with exactly the fake's files.
 """
 
 import base64
-from collections.abc import Mapping
+from collections.abc import AsyncIterator, Mapping
+from contextlib import asynccontextmanager
 from dataclasses import dataclass
 from typing import Any
 from urllib.parse import quote
@@ -29,7 +30,9 @@ from bench_github.fake.seed import (
     FILES,
     ISSUES,
     MAINTAINER,
+    OWNER,
     PULLS,
+    REPO,
     issue_assignees,
     issue_author,
     issue_milestone,
@@ -230,3 +233,26 @@ class Seeder:
         if branch:
             body["branch"] = branch
         await self.call(self.bot, "PUT", url, f"File {path}", **body)
+
+
+@asynccontextmanager
+async def live_api(env: Mapping[str, str]) -> AsyncIterator[ApiClient]:
+    """`bench record github`: the App's installation token (the contributor bot)."""
+    require(env, "GITHUB_APP_ID", "GITHUB_INSTALLATION_ID")
+    key = private_key(env)
+    if key is None:
+        raise SandboxError("set GITHUB_PRIVATE_KEY or GITHUB_PRIVATE_KEY_PATH")
+    if (env.get("GITHUB_ORG") or DEFAULT_ORG, env.get("GITHUB_REPO") or DEFAULT_REPO) != (
+        OWNER,
+        REPO,
+    ):
+        raise SandboxError(f"cassettes replay against {OWNER}/{REPO}; record there")
+    bot = installation(
+        "github-record",
+        app_id=env["GITHUB_APP_ID"],
+        private_key_pem=key,
+        installation_id=int(env["GITHUB_INSTALLATION_ID"]),
+    )
+    await bot.authorization()  # fetch the installation token now, not inside a cassette
+    async with make_api(credential=bot) as api:
+        yield api

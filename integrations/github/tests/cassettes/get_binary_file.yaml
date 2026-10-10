@@ -16,22 +16,63 @@ interactions:
     uri: https://api.github.com/repos/bench-sandbox/widgets/contents/assets/logo.png
   response:
     body:
-      string: '{"type":"file","name":"logo.png","path":"assets/logo.png","sha":"f2832104c14b337b66b5bf3a27e6dd11af918f9c","size":29,"encoding":"base64","content":"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAA=\n","html_url":"https://github.com/bench-sandbox/widgets/blob/main/assets/logo.png"}'
+      string: '{"name":"logo.png","path":"assets/logo.png","sha":"d1ed0c8713020f5bda68b22792b0512681d2c0f9","size":29,"url":"https://api.github.com/repos/bench-sandbox/widgets/contents/assets/logo.png?ref=main","html_url":"https://github.com/bench-sandbox/widgets/blob/main/assets/logo.png","git_url":"https://api.github.com/repos/bench-sandbox/widgets/git/blobs/d1ed0c8713020f5bda68b22792b0512681d2c0f9","download_url":"https://raw.githubusercontent.com/bench-sandbox/widgets/main/assets/logo.png?token=REDACTED","type":"file","content":"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAA=\n","encoding":"base64","_links":{"self":"https://api.github.com/repos/bench-sandbox/widgets/contents/assets/logo.png?ref=main","git":"https://api.github.com/repos/bench-sandbox/widgets/git/blobs/d1ed0c8713020f5bda68b22792b0512681d2c0f9","html":"https://github.com/bench-sandbox/widgets/blob/main/assets/logo.png"}}'
     headers:
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset, Warning
+      cache-control:
+      - private, max-age=60, s-maxage=60
       content-length:
-      - '272'
+      - '879'
+      content-security-policy:
+      - default-src 'none'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
+      date:
+      - Sat, 10 Oct 2026 16:27:42 GMT
+      etag:
+      - '"d1ed0c8713020f5bda68b22792b0512681d2c0f9"'
+      last-modified:
+      - Sat, 10 Oct 2026 16:08:08 GMT
+      referrer-policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      server:
+      - github.com
+      strict-transport-security:
+      - max-age=31536000; includeSubdomains; preload
+      vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP, Accept-Encoding, Accept, X-Requested-With
+      x-accepted-github-permissions:
+      - contents=read
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - deny
       x-github-api-version-selected:
       - '2022-11-28'
+      x-github-edge-region:
+      - fra
+      x-github-media-type:
+      - github.v3; format=json
+      x-github-request-id:
+      - F05A:B47D0:B105F5F:10973ADC:6ACA677E
       x-ratelimit-limit:
       - '5000'
       x-ratelimit-remaining:
-      - '4999'
+      - '4921'
       x-ratelimit-reset:
-      - '1800003600'
+      - '1791652052'
       x-ratelimit-resource:
       - core
+      x-ratelimit-used:
+      - '79'
+      x-xss-protection:
+      - '0'
     status:
       code: 200
       message: OK

@@ -61,9 +61,9 @@ async def test_search_no_results(client: JiraClient) -> None:
 async def test_search_invalid_jql(client: JiraClient) -> None:
     with (
         SUITE.replay("search_invalid_jql"),
-        pytest.raises(ToolError, match=r"sprint_name.*Fix the arguments"),
+        pytest.raises(ToolError, match=r"Expecting '\)'.*Fix the arguments"),
     ):
-        await client.search_issues("project = BENCH AND sprint_name = 4")
+        await client.search_issues("project = BENCH AND (summary ~ crash")
 
 
 async def test_get_issue(client: JiraClient) -> None:
@@ -72,12 +72,13 @@ async def test_get_issue(client: JiraClient) -> None:
     assert issue.summary == "Checkout crashes when the cart is empty"
     assert (issue.status, issue.status_category) == ("To Do", "new")
     assert issue.project == "BENCH"
-    assert issue.assignee == "Alex Doe"
+    assert issue.assignee is None
     assert issue.description is not None
     assert "1. Open the shop" in issue.description
     assert "KeyError: 'total'" in issue.description
     assert issue.comment_total == len(issue.comments) == 2
-    assert issue.comments[0].author == "Sam Lee"
+    # Live, the API token's user wrote the seed: reporter and every comment author.
+    assert issue.comments[0].author == issue.reporter is not None
 
 
 async def test_get_issue_not_found(client: JiraClient) -> None:

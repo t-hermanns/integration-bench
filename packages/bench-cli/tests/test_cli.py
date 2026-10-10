@@ -128,3 +128,28 @@ def test_auth_login_rejects_unknown_integrations() -> None:
     result = runner.invoke(app, ["auth", "login", "nope"])
     assert result.exit_code == 2
     assert "no integration 'nope'" in result.output
+
+
+# --- bench record ---------------------------------------------------------------------------
+
+
+@pytest.mark.usefixtures("clean_env")
+def test_record_needs_the_sandbox_settings(tmp_path: Path) -> None:
+    result = runner.invoke(app, ["record", "jira", "--env-file", str(tmp_path / "x.env")])
+    assert result.exit_code == 1
+    assert "set JIRA_SITE, JIRA_EMAIL, JIRA_API_TOKEN" in result.output
+
+
+@pytest.mark.usefixtures("clean_env")
+def test_record_only_against_the_site_the_cassettes_replay(tmp_path: Path) -> None:
+    env = tmp_path / "x.env"
+    env.write_text("JIRA_SITE=other-site\nJIRA_EMAIL=a@b.test\nJIRA_API_TOKEN=t\n")
+    result = runner.invoke(app, ["record", "jira", "--env-file", str(env)])
+    assert result.exit_code == 1
+    assert "cassettes replay against https://bench-sandbox.atlassian.net" in result.output
+
+
+def test_record_rejects_unknown_integrations() -> None:
+    result = runner.invoke(app, ["record", "nope"])
+    assert result.exit_code == 2
+    assert "no integration 'nope'" in result.output

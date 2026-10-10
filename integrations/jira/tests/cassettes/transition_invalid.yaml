@@ -10,6 +10,8 @@ interactions:
       - '27'
       content-type:
       - application/json
+      cookie:
+      - REDACTED
       host:
       - bench-sandbox.atlassian.net
       user-agent:
@@ -20,10 +22,62 @@ interactions:
     body:
       string: '{"errorMessages":["Transition id ''999'' is not valid for this issue."],"errors":{}}'
     headers:
+      atl-request-id:
+      - 12995310-528e-43e6-94a7-85d1dbd2cbea
+      atl-traceid:
+      - 12995310528e43e694a785d1dbd2cbea
+      cache-control:
+      - no-store, no-cache
+      connection:
+      - keep-alive
       content-length:
       - '82'
       content-type:
-      - application/json
+      - application/json;charset=UTF-8
+      date:
+      - Sat, 10 Oct 2026 16:19:24 GMT
+      nel:
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
+        "endpoint-1"}'
+      ratelimit:
+      - '"jira-burst-based";r=199;t=1'
+      ratelimit-policy:
+      - '"jira-burst-based";q=100;w=1'
+      report-to:
+      - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
+        "endpoint-1", "include_subdomains": true, "max_age": 600}'
+      server:
+      - AtlassianEdge
+      server-timing:
+      - atl-edge;dur=139,atl-edge-internal;dur=13,atl-edge-upstream;dur=126,atl-edge-pop;desc="aws-eu-central-1"
+      strict-transport-security:
+      - max-age=63072000; includeSubDomains; preload
+      timing-allow-origin:
+      - '*'
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      via:
+      - 1.1 b05a5dd80bc2a2f1773b586f1714217a.cloudfront.net (CloudFront)
+      x-aaccountid:
+      - 712020%3Afd9e126a-a8bb-47aa-bd2a-d83ab0d90083
+      x-amz-cf-id:
+      - lLEiSNSrqMBV8G_2EsAMzMwoR3CalrYzW5M9W0B2xET21pYxqLdh_w==
+      x-amz-cf-pop:
+      - FRA60-P12
+      x-arequestid:
+      - 077cd165e9a9cf6e40d3ebf927ca1d84
+      x-cache:
+      - Error from cloudfront
+      x-content-type-options:
+      - nosniff
+      x-ratelimit-limit:
+      - '200'
+      x-ratelimit-remaining:
+      - '199'
+      x-xss-protection:
+      - 1; mode=block
     status:
       code: 400
       message: Bad Request

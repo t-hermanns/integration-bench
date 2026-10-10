@@ -16,22 +16,63 @@ interactions:
     uri: https://api.github.com/repos/bench-sandbox/widgets/contents
   response:
     body:
-      string: '[{"name":"README.md","path":"README.md","sha":"8ec9a00bfd09b3190ac6b22251dbb1aa95a0579d","size":149,"type":"file"},{"name":"assets","path":"assets","sha":"3685e330ec5277a9dd5661c61f2bc55811f5a628","size":0,"type":"dir"},{"name":"data","path":"data","sha":"a17c9aaa61e80a1bf71d0d850af4e5baa9800bbd","size":0,"type":"dir"},{"name":"docs","path":"docs","sha":"71ab8b6afb1bae3df247e0286da35e0da16564ff","size":0,"type":"dir"},{"name":"src","path":"src","sha":"f27fede2220bcd326aee3e86ddfd4ebd0fe58cb9","size":0,"type":"dir"}]'
+      string: '[{"name":"README.md","path":"README.md","sha":"8efab8682b3aae184922dcaad9c1753036273a25","size":149,"url":"https://api.github.com/repos/bench-sandbox/widgets/contents/README.md?ref=main","html_url":"https://github.com/bench-sandbox/widgets/blob/main/README.md","git_url":"https://api.github.com/repos/bench-sandbox/widgets/git/blobs/8efab8682b3aae184922dcaad9c1753036273a25","download_url":"https://raw.githubusercontent.com/bench-sandbox/widgets/main/README.md?token=REDACTED","type":"file","_links":{"self":"https://api.github.com/repos/bench-sandbox/widgets/contents/README.md?ref=main","git":"https://api.github.com/repos/bench-sandbox/widgets/git/blobs/8efab8682b3aae184922dcaad9c1753036273a25","html":"https://github.com/bench-sandbox/widgets/blob/main/README.md"}},{"name":"assets","path":"assets","sha":"6c1a3e214dc5f2c42032972ca56276eae7ce29fe","size":0,"url":"https://api.github.com/repos/bench-sandbox/widgets/contents/assets?ref=main","html_url":"https://github.com/bench-sandbox/widgets/tree/main/assets","git_url":"https://api.github.com/repos/bench-sandbox/widgets/git/trees/6c1a3e214dc5f2c42032972ca56276eae7ce29fe","download_url":null,"type":"dir","_links":{"self":"https://api.github.com/repos/bench-sandbox/widgets/contents/assets?ref=main","git":"https://api.github.com/repos/bench-sandbox/widgets/git/trees/6c1a3e214dc5f2c42032972ca56276eae7ce29fe","html":"https://github.com/bench-sandbox/widgets/tree/main/assets"}},{"name":"data","path":"data","sha":"b5db56da4169bf9d8c181cce6d9f42ac7e8b4309","size":0,"url":"https://api.github.com/repos/bench-sandbox/widgets/contents/data?ref=main","html_url":"https://github.com/bench-sandbox/widgets/tree/main/data","git_url":"https://api.github.com/repos/bench-sandbox/widgets/git/trees/b5db56da4169bf9d8c181cce6d9f42ac7e8b4309","download_url":null,"type":"dir","_links":{"self":"https://api.github.com/repos/bench-sandbox/widgets/contents/data?ref=main","git":"https://api.github.com/repos/bench-sandbox/widgets/git/trees/b5db56da4169bf9d8c181cce6d9f42ac7e8b4309","html":"https://github.com/bench-sandbox/widgets/tree/main/data"}},{"name":"docs","path":"docs","sha":"28744d2bc2b98eafefc9ba004870f231e9d04d32","size":0,"url":"https://api.github.com/repos/bench-sandbox/widgets/contents/docs?ref=main","html_url":"https://github.com/bench-sandbox/widgets/tree/main/docs","git_url":"https://api.github.com/repos/bench-sandbox/widgets/git/trees/28744d2bc2b98eafefc9ba004870f231e9d04d32","download_url":null,"type":"dir","_links":{"self":"https://api.github.com/repos/bench-sandbox/widgets/contents/docs?ref=main","git":"https://api.github.com/repos/bench-sandbox/widgets/git/trees/28744d2bc2b98eafefc9ba004870f231e9d04d32","html":"https://github.com/bench-sandbox/widgets/tree/main/docs"}},{"name":"src","path":"src","sha":"d589fc60ef1727b9ae52ef57001fb742c4ce8b9c","size":0,"url":"https://api.github.com/repos/bench-sandbox/widgets/contents/src?ref=main","html_url":"https://github.com/bench-sandbox/widgets/tree/main/src","git_url":"https://api.github.com/repos/bench-sandbox/widgets/git/trees/d589fc60ef1727b9ae52ef57001fb742c4ce8b9c","download_url":null,"type":"dir","_links":{"self":"https://api.github.com/repos/bench-sandbox/widgets/contents/src?ref=main","git":"https://api.github.com/repos/bench-sandbox/widgets/git/trees/d589fc60ef1727b9ae52ef57001fb742c4ce8b9c","html":"https://github.com/bench-sandbox/widgets/tree/main/src"}}]'
     headers:
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset, Warning
+      cache-control:
+      - private, max-age=60, s-maxage=60
       content-length:
-      - '521'
+      - '3398'
+      content-security-policy:
+      - default-src 'none'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
+      date:
+      - Sat, 10 Oct 2026 16:27:41 GMT
+      etag:
+      - '"806a175cc059efca7127f9a68a8f585f1f1de8d0"'
+      last-modified:
+      - Sat, 10 Oct 2026 16:08:13 GMT
+      referrer-policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      server:
+      - github.com
+      strict-transport-security:
+      - max-age=31536000; includeSubdomains; preload
+      vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP, Accept-Encoding, Accept, X-Requested-With
+      x-accepted-github-permissions:
+      - contents=read
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - deny
       x-github-api-version-selected:
       - '2022-11-28'
+      x-github-edge-region:
+      - fra
+      x-github-media-type:
+      - github.v3; format=json
+      x-github-request-id:
+      - F05A:B47D0:B105C4F:109735C6:6ACA677D
       x-ratelimit-limit:
       - '5000'
       x-ratelimit-remaining:
-      - '4999'
+      - '4923'
       x-ratelimit-reset:
-      - '1800003600'
+      - '1791652052'
       x-ratelimit-resource:
       - core
+      x-ratelimit-used:
+      - '77'
+      x-xss-protection:
+      - '0'
     status:
       code: 200
       message: OK
@@ -52,22 +93,63 @@ interactions:
     uri: https://api.github.com/repos/bench-sandbox/widgets/contents/src/widgets
   response:
     body:
-      string: '[{"name":"__init__.py","path":"src/widgets/__init__.py","sha":"41b04479ad68fc24eef8375711f842f6694297ca","size":39,"type":"file"},{"name":"core.py","path":"src/widgets/core.py","sha":"f34653b846c853cf258b069d377e1065544eeccb","size":138,"type":"file"}]'
+      string: '[{"name":"__init__.py","path":"src/widgets/__init__.py","sha":"c368f6d0fa8203562244d573fea33189ca9b49f9","size":39,"url":"https://api.github.com/repos/bench-sandbox/widgets/contents/src/widgets/__init__.py?ref=main","html_url":"https://github.com/bench-sandbox/widgets/blob/main/src/widgets/__init__.py","git_url":"https://api.github.com/repos/bench-sandbox/widgets/git/blobs/c368f6d0fa8203562244d573fea33189ca9b49f9","download_url":"https://raw.githubusercontent.com/bench-sandbox/widgets/main/src/widgets/__init__.py?token=REDACTED","type":"file","_links":{"self":"https://api.github.com/repos/bench-sandbox/widgets/contents/src/widgets/__init__.py?ref=main","git":"https://api.github.com/repos/bench-sandbox/widgets/git/blobs/c368f6d0fa8203562244d573fea33189ca9b49f9","html":"https://github.com/bench-sandbox/widgets/blob/main/src/widgets/__init__.py"}},{"name":"core.py","path":"src/widgets/core.py","sha":"8b51cb3750808498ea40ba2748b4405ec866afee","size":138,"url":"https://api.github.com/repos/bench-sandbox/widgets/contents/src/widgets/core.py?ref=main","html_url":"https://github.com/bench-sandbox/widgets/blob/main/src/widgets/core.py","git_url":"https://api.github.com/repos/bench-sandbox/widgets/git/blobs/8b51cb3750808498ea40ba2748b4405ec866afee","download_url":"https://raw.githubusercontent.com/bench-sandbox/widgets/main/src/widgets/core.py?token=REDACTED","type":"file","_links":{"self":"https://api.github.com/repos/bench-sandbox/widgets/contents/src/widgets/core.py?ref=main","git":"https://api.github.com/repos/bench-sandbox/widgets/git/blobs/8b51cb3750808498ea40ba2748b4405ec866afee","html":"https://github.com/bench-sandbox/widgets/blob/main/src/widgets/core.py"}}]'
     headers:
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset, Warning
+      cache-control:
+      - private, max-age=60, s-maxage=60
       content-length:
-      - '252'
+      - '1686'
+      content-security-policy:
+      - default-src 'none'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
+      date:
+      - Sat, 10 Oct 2026 16:27:41 GMT
+      etag:
+      - '"806a175cc059efca7127f9a68a8f585f1f1de8d0"'
+      last-modified:
+      - Sat, 10 Oct 2026 16:08:13 GMT
+      referrer-policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      server:
+      - github.com
+      strict-transport-security:
+      - max-age=31536000; includeSubdomains; preload
+      vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP, Accept-Encoding, Accept, X-Requested-With
+      x-accepted-github-permissions:
+      - contents=read
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - deny
       x-github-api-version-selected:
       - '2022-11-28'
+      x-github-edge-region:
+      - fra
+      x-github-media-type:
+      - github.v3; format=json
+      x-github-request-id:
+      - F05A:B47D0:B105DC0:10973839:6ACA677D
       x-ratelimit-limit:
       - '5000'
       x-ratelimit-remaining:
-      - '4998'
+      - '4922'
       x-ratelimit-reset:
-      - '1800003600'
+      - '1791652052'
       x-ratelimit-resource:
       - core
+      x-ratelimit-used:
+      - '78'
+      x-xss-protection:
+      - '0'
     status:
       code: 200
       message: OK

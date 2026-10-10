@@ -16,28 +16,69 @@ interactions:
     uri: https://api.github.com/repos/bench-sandbox/widgets/issues/1/comments?per_page=2
   response:
     body:
-      string: '[{"id":1000013,"url":"https://api.github.com/repos/bench-sandbox/widgets/issues/comments/1000013","html_url":"https://github.com/bench-sandbox/widgets/issues/1#issuecomment-1000013","issue_url":"https://api.github.com/repos/bench-sandbox/widgets/issues/1","user":{"login":"bench-contributor","id":1768,"type":"User","html_url":"https://github.com/bench-contributor"},"body":"I
-        can reproduce this on 2.3.1.","created_at":"2026-09-05T23:00:00Z","updated_at":"2026-09-05T23:00:00Z","author_association":"CONTRIBUTOR"},{"id":1000014,"url":"https://api.github.com/repos/bench-sandbox/widgets/issues/comments/1000014","html_url":"https://github.com/bench-sandbox/widgets/issues/1#issuecomment-1000014","issue_url":"https://api.github.com/repos/bench-sandbox/widgets/issues/1","user":{"login":"bench-maintainer","id":1621,"type":"User","html_url":"https://github.com/bench-maintainer"},"body":"Thanks!
-        We should fall back to defaults when the file is empty.","created_at":"2026-09-06T00:00:00Z","updated_at":"2026-09-06T00:00:00Z","author_association":"CONTRIBUTOR"}]'
+      string: '[{"url":"https://api.github.com/repos/bench-sandbox/widgets/issues/comments/6099496955","html_url":"https://github.com/bench-sandbox/widgets/issues/1#issuecomment-6099496955","issue_url":"https://api.github.com/repos/bench-sandbox/widgets/issues/1","id":6099496955,"node_id":"IC_kwDOVD11K88AAAABa47v-w","user":{"login":"integration-bench-th[bot]","id":340636199,"node_id":"BOT_kgDOFE2yJw","avatar_url":"https://avatars.githubusercontent.com/u/340634723?v=4","gravatar_id":"","url":"https://api.github.com/users/integration-bench-th%5Bbot%5D","html_url":"https://github.com/apps/integration-bench-th","followers_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/followers","following_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/following{/other_user}","gists_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/gists{/gist_id}","starred_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/subscriptions","organizations_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/orgs","repos_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/repos","events_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/events{/privacy}","received_events_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/received_events","type":"Bot","user_view_type":"public","site_admin":false},"created_at":"2026-10-10T16:07:43Z","updated_at":"2026-10-10T16:07:43Z","body":"I
+        can reproduce this on 2.3.1.","author_association":"NONE","pin":null,"reactions":{"url":"https://api.github.com/repos/bench-sandbox/widgets/issues/comments/6099496955/reactions","total_count":0,"+1":0,"-1":0,"laugh":0,"hooray":0,"confused":0,"heart":0,"rocket":0,"eyes":0},"performed_via_github_app":{"id":5264049,"client_id":"Iv23lilghocM0vXtfXuB","slug":"integration-bench-th","node_id":"A_kwHOFE2sY84AUFKx","owner":{"login":"bench-sandbox","id":340634723,"node_id":"O_kgDOFE2sYw","avatar_url":"https://avatars.githubusercontent.com/u/340634723?v=4","gravatar_id":"","url":"https://api.github.com/users/bench-sandbox","html_url":"https://github.com/bench-sandbox","followers_url":"https://api.github.com/users/bench-sandbox/followers","following_url":"https://api.github.com/users/bench-sandbox/following{/other_user}","gists_url":"https://api.github.com/users/bench-sandbox/gists{/gist_id}","starred_url":"https://api.github.com/users/bench-sandbox/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/bench-sandbox/subscriptions","organizations_url":"https://api.github.com/users/bench-sandbox/orgs","repos_url":"https://api.github.com/users/bench-sandbox/repos","events_url":"https://api.github.com/users/bench-sandbox/events{/privacy}","received_events_url":"https://api.github.com/users/bench-sandbox/received_events","type":"Organization","user_view_type":"public","site_admin":false},"name":"integration-bench-th","description":"","external_url":"https://github.com/t-hermanns/integration-bench","html_url":"https://github.com/apps/integration-bench-th","created_at":"2026-10-10T14:56:20Z","updated_at":"2026-10-10T14:59:55Z","permissions":{"contents":"write","issues":"write","metadata":"read","pull_requests":"write"},"events":[]},"minimized":null},{"url":"https://api.github.com/repos/bench-sandbox/widgets/issues/comments/6099497130","html_url":"https://github.com/bench-sandbox/widgets/issues/1#issuecomment-6099497130","issue_url":"https://api.github.com/repos/bench-sandbox/widgets/issues/1","id":6099497130,"node_id":"IC_kwDOVD11K88AAAABa47wqg","user":{"login":"t-hermanns","id":37556412,"node_id":"MDQ6VXNlcjM3NTU2NDEy","avatar_url":"https://avatars.githubusercontent.com/u/37556412?v=4","gravatar_id":"","url":"https://api.github.com/users/t-hermanns","html_url":"https://github.com/t-hermanns","followers_url":"https://api.github.com/users/t-hermanns/followers","following_url":"https://api.github.com/users/t-hermanns/following{/other_user}","gists_url":"https://api.github.com/users/t-hermanns/gists{/gist_id}","starred_url":"https://api.github.com/users/t-hermanns/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/t-hermanns/subscriptions","organizations_url":"https://api.github.com/users/t-hermanns/orgs","repos_url":"https://api.github.com/users/t-hermanns/repos","events_url":"https://api.github.com/users/t-hermanns/events{/privacy}","received_events_url":"https://api.github.com/users/t-hermanns/received_events","type":"User","user_view_type":"public","site_admin":false},"created_at":"2026-10-10T16:07:44Z","updated_at":"2026-10-10T16:07:44Z","body":"Thanks!
+        We should fall back to defaults when the file is empty.","author_association":"NONE","pin":null,"reactions":{"url":"https://api.github.com/repos/bench-sandbox/widgets/issues/comments/6099497130/reactions","total_count":0,"+1":0,"-1":0,"laugh":0,"hooray":0,"confused":0,"heart":0,"rocket":0,"eyes":0},"performed_via_github_app":{"id":5264049,"client_id":"Iv23lilghocM0vXtfXuB","slug":"integration-bench-th","node_id":"A_kwHOFE2sY84AUFKx","owner":{"login":"bench-sandbox","id":340634723,"node_id":"O_kgDOFE2sYw","avatar_url":"https://avatars.githubusercontent.com/u/340634723?v=4","gravatar_id":"","url":"https://api.github.com/users/bench-sandbox","html_url":"https://github.com/bench-sandbox","followers_url":"https://api.github.com/users/bench-sandbox/followers","following_url":"https://api.github.com/users/bench-sandbox/following{/other_user}","gists_url":"https://api.github.com/users/bench-sandbox/gists{/gist_id}","starred_url":"https://api.github.com/users/bench-sandbox/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/bench-sandbox/subscriptions","organizations_url":"https://api.github.com/users/bench-sandbox/orgs","repos_url":"https://api.github.com/users/bench-sandbox/repos","events_url":"https://api.github.com/users/bench-sandbox/events{/privacy}","received_events_url":"https://api.github.com/users/bench-sandbox/received_events","type":"Organization","user_view_type":"public","site_admin":false},"name":"integration-bench-th","description":"","external_url":"https://github.com/t-hermanns/integration-bench","html_url":"https://github.com/apps/integration-bench-th","created_at":"2026-10-10T14:56:20Z","updated_at":"2026-10-10T14:59:55Z","permissions":{"contents":"write","issues":"write","metadata":"read","pull_requests":"write"},"events":[]},"minimized":null}]'
     headers:
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset, Warning
+      cache-control:
+      - private, max-age=60, s-maxage=60
       content-length:
-      - '1060'
+      - '6509'
+      content-security-policy:
+      - default-src 'none'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
+      date:
+      - Sat, 10 Oct 2026 16:21:49 GMT
+      etag:
+      - W/"b79124c8e7ce51f3cb67a2926093a7cd7067e8657c8dd601c4ca0fb0aec88b7c"
       link:
-      - <https://api.github.com/repos/bench-sandbox/widgets/issues/1/comments?per_page=2&page=2>;
-        rel="next", <https://api.github.com/repos/bench-sandbox/widgets/issues/1/comments?per_page=2&page=2>;
+      - <https://api.github.com/repositories/1413313835/issues/1/comments?per_page=2&page=2>;
+        rel="next", <https://api.github.com/repositories/1413313835/issues/1/comments?per_page=2&page=2>;
         rel="last"
+      referrer-policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      server:
+      - github.com
+      strict-transport-security:
+      - max-age=31536000; includeSubdomains; preload
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With
+      x-accepted-github-permissions:
+      - issues=read; pull_requests=read
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - deny
       x-github-api-version-selected:
       - '2022-11-28'
+      x-github-edge-region:
+      - fra
+      x-github-media-type:
+      - github.v3; format=json
+      x-github-request-id:
+      - F047:2F4446:AF2F0B2:1068C492:6ACA661D
       x-ratelimit-limit:
       - '5000'
       x-ratelimit-remaining:
-      - '4999'
+      - '4929'
       x-ratelimit-reset:
-      - '1800003600'
+      - '1791652052'
       x-ratelimit-resource:
       - core
+      x-ratelimit-used:
+      - '71'
+      x-xss-protection:
+      - '0'
     status:
       code: 200
       message: OK
@@ -55,30 +96,71 @@ interactions:
       x-github-api-version:
       - '2022-11-28'
     method: GET
-    uri: https://api.github.com/repos/bench-sandbox/widgets/issues/1/comments?per_page=2&page=2
+    uri: https://api.github.com/repositories/1413313835/issues/1/comments?per_page=2&page=2
   response:
     body:
-      string: '[{"id":1000015,"url":"https://api.github.com/repos/bench-sandbox/widgets/issues/comments/1000015","html_url":"https://github.com/bench-sandbox/widgets/issues/1#issuecomment-1000015","issue_url":"https://api.github.com/repos/bench-sandbox/widgets/issues/1","user":{"login":"bench-contributor","id":1768,"type":"User","html_url":"https://github.com/bench-contributor"},"body":"I
-        opened a pull request for the fallback.","created_at":"2026-09-06T01:00:00Z","updated_at":"2026-09-06T01:00:00Z","author_association":"CONTRIBUTOR"}]'
+      string: '[{"url":"https://api.github.com/repos/bench-sandbox/widgets/issues/comments/6099497267","html_url":"https://github.com/bench-sandbox/widgets/issues/1#issuecomment-6099497267","issue_url":"https://api.github.com/repos/bench-sandbox/widgets/issues/1","id":6099497267,"node_id":"IC_kwDOVD11K88AAAABa47xMw","user":{"login":"integration-bench-th[bot]","id":340636199,"node_id":"BOT_kgDOFE2yJw","avatar_url":"https://avatars.githubusercontent.com/u/340634723?v=4","gravatar_id":"","url":"https://api.github.com/users/integration-bench-th%5Bbot%5D","html_url":"https://github.com/apps/integration-bench-th","followers_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/followers","following_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/following{/other_user}","gists_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/gists{/gist_id}","starred_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/subscriptions","organizations_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/orgs","repos_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/repos","events_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/events{/privacy}","received_events_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/received_events","type":"Bot","user_view_type":"public","site_admin":false},"created_at":"2026-10-10T16:07:44Z","updated_at":"2026-10-10T16:07:44Z","body":"I
+        opened a pull request for the fallback.","author_association":"NONE","pin":null,"reactions":{"url":"https://api.github.com/repos/bench-sandbox/widgets/issues/comments/6099497267/reactions","total_count":0,"+1":0,"-1":0,"laugh":0,"hooray":0,"confused":0,"heart":0,"rocket":0,"eyes":0},"performed_via_github_app":{"id":5264049,"client_id":"Iv23lilghocM0vXtfXuB","slug":"integration-bench-th","node_id":"A_kwHOFE2sY84AUFKx","owner":{"login":"bench-sandbox","id":340634723,"node_id":"O_kgDOFE2sYw","avatar_url":"https://avatars.githubusercontent.com/u/340634723?v=4","gravatar_id":"","url":"https://api.github.com/users/bench-sandbox","html_url":"https://github.com/bench-sandbox","followers_url":"https://api.github.com/users/bench-sandbox/followers","following_url":"https://api.github.com/users/bench-sandbox/following{/other_user}","gists_url":"https://api.github.com/users/bench-sandbox/gists{/gist_id}","starred_url":"https://api.github.com/users/bench-sandbox/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/bench-sandbox/subscriptions","organizations_url":"https://api.github.com/users/bench-sandbox/orgs","repos_url":"https://api.github.com/users/bench-sandbox/repos","events_url":"https://api.github.com/users/bench-sandbox/events{/privacy}","received_events_url":"https://api.github.com/users/bench-sandbox/received_events","type":"Organization","user_view_type":"public","site_admin":false},"name":"integration-bench-th","description":"","external_url":"https://github.com/t-hermanns/integration-bench","html_url":"https://github.com/apps/integration-bench-th","created_at":"2026-10-10T14:56:20Z","updated_at":"2026-10-10T14:59:55Z","permissions":{"contents":"write","issues":"write","metadata":"read","pull_requests":"write"},"events":[]},"minimized":null}]'
     headers:
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset, Warning
+      cache-control:
+      - private, max-age=60, s-maxage=60
       content-length:
-      - '526'
+      - '3357'
+      content-security-policy:
+      - default-src 'none'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
+      date:
+      - Sat, 10 Oct 2026 16:21:50 GMT
+      etag:
+      - W/"9c782372994bc910b745719cf6f462dc9af2855c6b1c31afe44054d5129ea87b"
       link:
-      - <https://api.github.com/repos/bench-sandbox/widgets/issues/1/comments?per_page=2&page=1>;
-        rel="first", <https://api.github.com/repos/bench-sandbox/widgets/issues/1/comments?per_page=2&page=1>;
-        rel="prev"
+      - <https://api.github.com/repositories/1413313835/issues/1/comments?per_page=2&page=1>;
+        rel="prev", <https://api.github.com/repositories/1413313835/issues/1/comments?per_page=2&page=1>;
+        rel="first"
+      referrer-policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      server:
+      - github.com
+      strict-transport-security:
+      - max-age=31536000; includeSubdomains; preload
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With
+      x-accepted-github-permissions:
+      - issues=read; pull_requests=read
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - deny
       x-github-api-version-selected:
       - '2022-11-28'
+      x-github-edge-region:
+      - fra
+      x-github-media-type:
+      - github.v3; format=json
+      x-github-request-id:
+      - F047:2F4446:AF2F32E:1068C864:6ACA661D
       x-ratelimit-limit:
       - '5000'
       x-ratelimit-remaining:
-      - '4998'
+      - '4928'
       x-ratelimit-reset:
-      - '1800003600'
+      - '1791652052'
       x-ratelimit-resource:
       - core
+      x-ratelimit-used:
+      - '72'
+      x-xss-protection:
+      - '0'
     status:
       code: 200
       message: OK

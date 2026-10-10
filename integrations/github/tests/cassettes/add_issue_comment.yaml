@@ -20,23 +20,64 @@ interactions:
     uri: https://api.github.com/repos/bench-sandbox/widgets/issues/1/comments
   response:
     body:
-      string: '{"id":1000026,"url":"https://api.github.com/repos/bench-sandbox/widgets/issues/comments/1000026","html_url":"https://github.com/bench-sandbox/widgets/issues/1#issuecomment-1000026","issue_url":"https://api.github.com/repos/bench-sandbox/widgets/issues/1","user":{"login":"bench-bot[bot]","id":1391,"type":"Bot","html_url":"https://github.com/bench-bot[bot]"},"body":"Confirmed
-        on the latest release as well.","created_at":"2027-01-15T08:00:00Z","updated_at":"2027-01-15T08:00:00Z","author_association":"CONTRIBUTOR"}'
+      string: '{"url":"https://api.github.com/repos/bench-sandbox/widgets/issues/comments/6099631084","html_url":"https://github.com/bench-sandbox/widgets/issues/1#issuecomment-6099631084","issue_url":"https://api.github.com/repos/bench-sandbox/widgets/issues/1","id":6099631084,"node_id":"IC_kwDOVD11K88AAAABa5D77A","user":{"login":"integration-bench-th[bot]","id":340636199,"node_id":"BOT_kgDOFE2yJw","avatar_url":"https://avatars.githubusercontent.com/u/340634723?v=4","gravatar_id":"","url":"https://api.github.com/users/integration-bench-th%5Bbot%5D","html_url":"https://github.com/apps/integration-bench-th","followers_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/followers","following_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/following{/other_user}","gists_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/gists{/gist_id}","starred_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/subscriptions","organizations_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/orgs","repos_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/repos","events_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/events{/privacy}","received_events_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/received_events","type":"Bot","user_view_type":"public","site_admin":false},"created_at":"2026-10-10T16:21:44Z","updated_at":"2026-10-10T16:21:44Z","author_association":"NONE","body":"Confirmed
+        on the latest release as well.","reactions":{"url":"https://api.github.com/repos/bench-sandbox/widgets/issues/comments/6099631084/reactions","total_count":0,"+1":0,"-1":0,"laugh":0,"hooray":0,"confused":0,"heart":0,"rocket":0,"eyes":0},"performed_via_github_app":{"id":5264049,"slug":"integration-bench-th","node_id":"A_kwHOFE2sY84AUFKx","owner":{"login":"bench-sandbox","id":340634723,"node_id":"O_kgDOFE2sYw","avatar_url":"https://avatars.githubusercontent.com/u/340634723?v=4","gravatar_id":"","url":"https://api.github.com/users/bench-sandbox","html_url":"https://github.com/bench-sandbox","followers_url":"https://api.github.com/users/bench-sandbox/followers","following_url":"https://api.github.com/users/bench-sandbox/following{/other_user}","gists_url":"https://api.github.com/users/bench-sandbox/gists{/gist_id}","starred_url":"https://api.github.com/users/bench-sandbox/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/bench-sandbox/subscriptions","organizations_url":"https://api.github.com/users/bench-sandbox/orgs","repos_url":"https://api.github.com/users/bench-sandbox/repos","events_url":"https://api.github.com/users/bench-sandbox/events{/privacy}","received_events_url":"https://api.github.com/users/bench-sandbox/received_events","type":"Organization","user_view_type":"public","site_admin":false},"name":"integration-bench-th","description":"","external_url":"https://github.com/t-hermanns/integration-bench","html_url":"https://github.com/apps/integration-bench-th","created_at":"2026-10-10T14:56:20Z","updated_at":"2026-10-10T14:59:55Z","permissions":{"contents":"write","issues":"write","metadata":"read","pull_requests":"write"},"events":[]},"minimized":null,"pin":null}'
     headers:
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset, Warning
+      cache-control:
+      - private, max-age=60, s-maxage=60
       content-length:
-      - '516'
+      - '3319'
+      content-security-policy:
+      - default-src 'none'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
+      date:
+      - Sat, 10 Oct 2026 16:21:45 GMT
+      etag:
+      - '"d80903c3b41a9c17b43948aa6952865f66db51f8364bc642f176e29b5c89ae34"'
+      location:
+      - https://api.github.com/repos/bench-sandbox/widgets/issues/comments/6099631084
+      referrer-policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      server:
+      - github.com
+      strict-transport-security:
+      - max-age=31536000; includeSubdomains; preload
+      vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With
+      x-accepted-github-permissions:
+      - issues=write; pull_requests=write
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - deny
       x-github-api-version-selected:
       - '2022-11-28'
+      x-github-edge-region:
+      - fra
+      x-github-media-type:
+      - github.v3; format=json
+      x-github-request-id:
+      - F047:2F4446:AF2CD6C:10688EEA:6ACA6618
       x-ratelimit-limit:
       - '5000'
       x-ratelimit-remaining:
-      - '4999'
+      - '4942'
       x-ratelimit-reset:
-      - '1800003600'
+      - '1791652052'
       x-ratelimit-resource:
       - core
+      x-ratelimit-used:
+      - '58'
+      x-xss-protection:
+      - '0'
     status:
       code: 201
       message: Created

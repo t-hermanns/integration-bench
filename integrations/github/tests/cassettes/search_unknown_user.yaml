@@ -17,14 +17,61 @@ interactions:
   response:
     body:
       string: '{"message":"Validation Failed","errors":[{"message":"The listed users
-        and repositories cannot be searched either because the resources do not exist
-        or you do not have permission to view them.","resource":"Search","field":"q","code":"invalid"}],"documentation_url":"https://docs.github.com/rest","status":"422"}'
+        cannot be searched either because the users do not exist or you do not have
+        permission to view the users.","resource":"Search","field":"q","code":"invalid"}],"documentation_url":"https://docs.github.com/v3/search/","status":"422"}'
     headers:
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset, Warning
+      cache-control:
+      - no-cache
       content-length:
-      - '310'
+      - '300'
+      content-security-policy:
+      - default-src 'none'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
+      date:
+      - Sat, 10 Oct 2026 16:21:52 GMT
+      referrer-policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      server:
+      - github.com
+      strict-transport-security:
+      - max-age=31536000; includeSubdomains; preload
+      vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With
+      x-accepted-github-permissions:
+      - allows_permissionless_access=true
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - deny
+      x-github-api-version-selected:
+      - '2022-11-28'
+      x-github-edge-region:
+      - fra
+      x-github-media-type:
+      - github.v3; format=json
+      x-github-request-id:
+      - F047:2F4446:AF306B0:1068E514:6ACA6620
+      x-ratelimit-limit:
+      - '30'
+      x-ratelimit-remaining:
+      - '26'
+      x-ratelimit-reset:
+      - '1791649371'
+      x-ratelimit-resource:
+      - search
+      x-ratelimit-used:
+      - '4'
+      x-xss-protection:
+      - '0'
     status:
       code: 422
-      message: Unprocessable Content
+      message: Unprocessable Entity
 version: 1

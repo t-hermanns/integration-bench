@@ -16,22 +16,61 @@ interactions:
     uri: https://api.github.com/search/issues?q=repo%3Abench-sandbox%2Fwidgets+kubernetes+is%3Aissue&per_page=20
   response:
     body:
-      string: '{"total_count":0,"incomplete_results":false,"items":[]}'
+      string: '{"total_count":0,"incomplete_results":false,"items":[],"search_type":"lexical"}'
     headers:
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset, Warning
+      cache-control:
+      - no-cache
       content-length:
-      - '55'
+      - '79'
+      content-security-policy:
+      - default-src 'none'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
+      date:
+      - Sat, 10 Oct 2026 16:21:52 GMT
+      referrer-policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      server:
+      - github.com
+      strict-transport-security:
+      - max-age=31536000; includeSubdomains; preload
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With
+      x-accepted-github-permissions:
+      - allows_permissionless_access=true
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - deny
       x-github-api-version-selected:
       - '2022-11-28'
+      x-github-edge-region:
+      - fra
+      x-github-media-type:
+      - github.v3; format=json
+      x-github-request-id:
+      - F047:2F4446:AF303FD:1068E13E:6ACA661F
       x-ratelimit-limit:
-      - '5000'
+      - '30'
       x-ratelimit-remaining:
-      - '4999'
+      - '27'
       x-ratelimit-reset:
-      - '1800003600'
+      - '1791649371'
       x-ratelimit-resource:
-      - core
+      - search
+      x-ratelimit-used:
+      - '3'
+      x-xss-protection:
+      - '0'
     status:
       code: 200
       message: OK

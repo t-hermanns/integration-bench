@@ -16,22 +16,63 @@ interactions:
     uri: https://api.github.com/repos/bench-sandbox/widgets/contents/README.md
   response:
     body:
-      string: '{"type":"file","name":"README.md","path":"README.md","sha":"d5f4810c477861dbf457cd06db1eec8edf506469","size":149,"encoding":"base64","content":"IyB3aWRnZXRzCgpBIHNtYWxsIGxpYnJhcnkgZm9yIG1hbmFnaW5nIHdpZGdl\ndHMuCgojIyBJbnN0YWxsCgogICAgcGlwIGluc3RhbGwgd2lkZ2V0cwoKIyMg\nVXNhZ2UKCiAgICBpbXBvcnQgd2lkZ2V0cwogICAgd2lkZ2V0cy5sb2FkKCJ3\naWRnZXRzLnRvbWwiKQo=\n","html_url":"https://github.com/bench-sandbox/widgets/blob/main/README.md"}'
+      string: '{"name":"README.md","path":"README.md","sha":"8efab8682b3aae184922dcaad9c1753036273a25","size":149,"url":"https://api.github.com/repos/bench-sandbox/widgets/contents/README.md?ref=main","html_url":"https://github.com/bench-sandbox/widgets/blob/main/README.md","git_url":"https://api.github.com/repos/bench-sandbox/widgets/git/blobs/8efab8682b3aae184922dcaad9c1753036273a25","download_url":"https://raw.githubusercontent.com/bench-sandbox/widgets/main/README.md?token=REDACTED","type":"file","content":"IyB3aWRnZXRzCgpBIHNtYWxsIGxpYnJhcnkgZm9yIG1hbmFnaW5nIHdpZGdl\ndHMuCgojIyBJbnN0YWxsCgogICAgcGlwIGluc3RhbGwgd2lkZ2V0cwoKIyMg\nVXNhZ2UKCiAgICBpbXBvcnQgd2lkZ2V0cwogICAgd2lkZ2V0cy5sb2FkKCJ3\naWRnZXRzLnRvbWwiKQo=\n","encoding":"base64","_links":{"self":"https://api.github.com/repos/bench-sandbox/widgets/contents/README.md?ref=main","git":"https://api.github.com/repos/bench-sandbox/widgets/git/blobs/8efab8682b3aae184922dcaad9c1753036273a25","html":"https://github.com/bench-sandbox/widgets/blob/main/README.md"}}'
     headers:
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset, Warning
+      cache-control:
+      - private, max-age=60, s-maxage=60
       content-length:
-      - '428'
+      - '1011'
+      content-security-policy:
+      - default-src 'none'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
+      date:
+      - Sat, 10 Oct 2026 16:27:41 GMT
+      etag:
+      - '"8efab8682b3aae184922dcaad9c1753036273a25"'
+      last-modified:
+      - Sat, 10 Oct 2026 16:08:08 GMT
+      referrer-policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      server:
+      - github.com
+      strict-transport-security:
+      - max-age=31536000; includeSubdomains; preload
+      vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP, Accept-Encoding, Accept, X-Requested-With
+      x-accepted-github-permissions:
+      - contents=read
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - deny
       x-github-api-version-selected:
       - '2022-11-28'
+      x-github-edge-region:
+      - fra
+      x-github-media-type:
+      - github.v3; format=json
+      x-github-request-id:
+      - F05A:B47D0:B10593B:109730E9:6ACA677D
       x-ratelimit-limit:
       - '5000'
       x-ratelimit-remaining:
-      - '4999'
+      - '4925'
       x-ratelimit-reset:
-      - '1800003600'
+      - '1791652052'
       x-ratelimit-resource:
       - core
+      x-ratelimit-used:
+      - '75'
+      x-xss-protection:
+      - '0'
     status:
       code: 200
       message: OK

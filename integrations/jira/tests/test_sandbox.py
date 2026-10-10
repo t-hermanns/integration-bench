@@ -6,7 +6,6 @@ from bench_core.sandbox import SandboxError
 from bench_core.testing import FakeClock
 
 from bench_jira.fake import JiraFake, seeded_fake
-from bench_jira.fake.backend import BOT
 from bench_jira.sandbox import seed
 from bench_jira.scopes import READ, WRITE
 
@@ -32,17 +31,14 @@ def summary(fake: JiraFake, key: str) -> tuple[object, ...]:
     )  # fmt: skip
 
 
-async def test_seed_matches_the_fake_seed_with_only_the_bot_assigned() -> None:
+async def test_seed_matches_the_fake_seed() -> None:
     fake = with_token(JiraFake(clock=FakeClock()))
     lines: list[str] = []
     await seed(ENV, echo=lines.append, transport=fake.transport())
     reference = seeded_fake()
     assert sorted(fake.issues) == sorted(reference.issues)
     for key in reference.issues:
-        expected = list(summary(reference, key))
-        if expected[6] != BOT["accountId"]:
-            expected[6] = None  # Alex and Sam do not exist live
-        assert summary(fake, key) == tuple(expected), key
+        assert summary(fake, key) == summary(reference, key), key
     assert lines[0] == "BENCH-1 [To Do] Checkout crashes when the cart is empty"
     assert lines[-1] == "jira: created 12 issues in BENCH"
 

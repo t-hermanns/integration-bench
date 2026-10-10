@@ -16,12 +16,59 @@ interactions:
     uri: https://api.github.com/repos/bench-sandbox/widgets/issues/999
   response:
     body:
-      string: '{"message":"Not Found","documentation_url":"https://docs.github.com/rest","status":"404"}'
+      string: '{"message":"Not Found","documentation_url":"https://docs.github.com/rest/issues/issues#get-an-issue","status":"404"}'
     headers:
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset, Warning
       content-length:
-      - '89'
+      - '116'
+      content-security-policy:
+      - default-src 'none'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
+      date:
+      - Sat, 10 Oct 2026 16:21:49 GMT
+      referrer-policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      server:
+      - github.com
+      strict-transport-security:
+      - max-age=31536000; includeSubdomains; preload
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding, Accept, X-Requested-With
+      x-accepted-github-permissions:
+      - issues=read
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - deny
+      x-github-api-version-selected:
+      - '2022-11-28'
+      x-github-edge-region:
+      - fra
+      x-github-media-type:
+      - github.v3; format=json
+      x-github-request-id:
+      - F047:2F4446:AF2ED04:1068BEBF:6ACA661C
+      x-ratelimit-limit:
+      - '5000'
+      x-ratelimit-remaining:
+      - '4931'
+      x-ratelimit-reset:
+      - '1791652052'
+      x-ratelimit-resource:
+      - core
+      x-ratelimit-used:
+      - '69'
+      x-xss-protection:
+      - '0'
     status:
       code: 404
       message: Not Found

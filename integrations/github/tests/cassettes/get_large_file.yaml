@@ -16,22 +16,63 @@ interactions:
     uri: https://api.github.com/repos/bench-sandbox/widgets/contents/data/large.csv
   response:
     body:
-      string: '{"type":"file","name":"large.csv","path":"data/large.csv","sha":"ec0f15cacf5b2b8fef2191b3adfee7f5ec48b4f2","size":1170008,"encoding":"none","content":"","html_url":"https://github.com/bench-sandbox/widgets/blob/main/data/large.csv"}'
+      string: '{"name":"large.csv","path":"data/large.csv","sha":"13a9d2987b26f2a63a7a6d6a54a6b27df405e42e","size":1170008,"url":"https://api.github.com/repos/bench-sandbox/widgets/contents/data/large.csv?ref=main","html_url":"https://github.com/bench-sandbox/widgets/blob/main/data/large.csv","git_url":"https://api.github.com/repos/bench-sandbox/widgets/git/blobs/13a9d2987b26f2a63a7a6d6a54a6b27df405e42e","download_url":"https://raw.githubusercontent.com/bench-sandbox/widgets/main/data/large.csv?token=REDACTED","type":"file","content":"","encoding":"none","_links":{"self":"https://api.github.com/repos/bench-sandbox/widgets/contents/data/large.csv?ref=main","git":"https://api.github.com/repos/bench-sandbox/widgets/git/blobs/13a9d2987b26f2a63a7a6d6a54a6b27df405e42e","html":"https://github.com/bench-sandbox/widgets/blob/main/data/large.csv"}}'
     headers:
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset, Warning
+      cache-control:
+      - private, max-age=60, s-maxage=60
       content-length:
-      - '232'
+      - '835'
+      content-security-policy:
+      - default-src 'none'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
+      date:
+      - Sat, 10 Oct 2026 16:27:42 GMT
+      etag:
+      - '"13a9d2987b26f2a63a7a6d6a54a6b27df405e42e"'
+      last-modified:
+      - Sat, 10 Oct 2026 16:08:08 GMT
+      referrer-policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      server:
+      - github.com
+      strict-transport-security:
+      - max-age=31536000; includeSubdomains; preload
+      vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP, Accept-Encoding, Accept, X-Requested-With
+      x-accepted-github-permissions:
+      - contents=read
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - deny
       x-github-api-version-selected:
       - '2022-11-28'
+      x-github-edge-region:
+      - fra
+      x-github-media-type:
+      - github.v3; format=json
+      x-github-request-id:
+      - F05A:B47D0:B106125:10973DB4:6ACA677E
       x-ratelimit-limit:
       - '5000'
       x-ratelimit-remaining:
-      - '4999'
+      - '4920'
       x-ratelimit-reset:
-      - '1800003600'
+      - '1791652052'
       x-ratelimit-resource:
       - core
+      x-ratelimit-used:
+      - '80'
+      x-xss-protection:
+      - '0'
     status:
       code: 200
       message: OK

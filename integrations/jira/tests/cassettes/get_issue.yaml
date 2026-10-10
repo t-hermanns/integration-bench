@@ -6,6 +6,8 @@ interactions:
       - application/json
       authorization:
       - REDACTED
+      cookie:
+      - REDACTED
       host:
       - bench-sandbox.atlassian.net
       user-agent:
@@ -14,23 +16,77 @@ interactions:
     uri: https://bench-sandbox.atlassian.net/rest/api/3/issue/BENCH-1?fields=summary%2Cstatus%2Cissuetype%2Cpriority%2Cassignee%2Clabels%2Ccreated%2Cupdated%2Cproject%2Creporter%2Cdescription%2Ccomment
   response:
     body:
-      string: '{"id":"10001","key":"BENCH-1","self":"https://bench-sandbox.atlassian.net/rest/api/3/issue/10001","fields":{"project":{"key":"BENCH","name":"Bench
-        Sandbox"},"summary":"Checkout crashes when the cart is empty","issuetype":{"id":"10002","name":"Bug"},"status":{"id":"10000","name":"To
-        Do","statusCategory":{"key":"new","name":"To Do"}},"priority":{"id":"1","name":"Highest"},"labels":["checkout","crash"],"assignee":{"accountId":"557058:alex-doe","displayName":"Alex
-        Doe","accountType":"atlassian"},"reporter":{"accountId":"557058:bench-bot","displayName":"Bench
-        Bot","accountType":"atlassian"},"description":{"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Steps
+      string: '{"expand":"renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations","id":"10000","self":"https://bench-sandbox.atlassian.net/rest/api/3/issue/10000","key":"BENCH-1","fields":{"summary":"Checkout
+        crashes when the cart is empty","issuetype":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/issuetype/10006","id":"10006","description":"","iconUrl":"https://bench-sandbox.atlassian.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10303?size=medium","name":"Bug","subtask":false,"avatarId":10303,"entityId":"8e5c0bb4-6b81-4b99-bc4f-56a3a910a438","hierarchyLevel":0},"created":"2026-10-10T18:07:05.102+0200","project":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/project/10000","id":"10000","key":"BENCH","name":"Bench","projectTypeKey":"software","simplified":true,"avatarUrls":{"48x48":"https://bench-sandbox.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/10413","24x24":"https://bench-sandbox.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/10413?size=small","16x16":"https://bench-sandbox.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/10413?size=xsmall","32x32":"https://bench-sandbox.atlassian.net/rest/api/3/universal_avatar/view/type/project/avatar/10413?size=medium"}},"description":{"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Steps
         to reproduce:"},{"type":"hardBreak"},{"type":"text","text":"1. Open the shop"},{"type":"hardBreak"},{"type":"text","text":"2.
         Go to checkout without adding items"}]},{"type":"paragraph","content":[{"type":"text","text":"The
-        page shows a 500 error: KeyError: ''total''."}]}]},"created":"2026-09-01T09:00:00.000+0000","updated":"2026-09-01T11:00:00.000+0000","comment":{"comments":[{"id":"20001","self":"https://bench-sandbox.atlassian.net/rest/api/3/issue/10001/comment/20001","author":{"accountId":"557058:sam-lee","displayName":"Sam
-        Lee","accountType":"atlassian"},"body":{"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Seen
-        in production since the release on Monday."}]}]},"created":"2026-09-01T10:00:00.000+0000","updated":"2026-09-01T10:00:00.000+0000"},{"id":"20002","self":"https://bench-sandbox.atlassian.net/rest/api/3/issue/10001/comment/20002","author":{"accountId":"557058:alex-doe","displayName":"Alex
-        Doe","accountType":"atlassian"},"body":{"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Found
-        it: the total is only set once an item is added."}]}]},"created":"2026-09-01T11:00:00.000+0000","updated":"2026-09-01T11:00:00.000+0000"}],"total":2,"maxResults":2,"startAt":0}}}'
+        page shows a 500 error: KeyError: ''total''."}]}]},"comment":{"comments":[{"self":"https://bench-sandbox.atlassian.net/rest/api/3/issue/10000/comment/10000","id":"10000","author":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/user?accountId=712020%3Afd9e126a-a8bb-47aa-bd2a-d83ab0d90083","accountId":"712020:fd9e126a-a8bb-47aa-bd2a-d83ab0d90083","emailAddress":"redacted@example.invalid","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png","24x24":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png","16x16":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png","32x32":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png"},"displayName":"Tristan
+        Hermanns","active":true,"timeZone":"Europe/Berlin","accountType":"atlassian"},"body":{"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Seen
+        in production since the release on Monday."}]}]},"updateAuthor":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/user?accountId=712020%3Afd9e126a-a8bb-47aa-bd2a-d83ab0d90083","accountId":"712020:fd9e126a-a8bb-47aa-bd2a-d83ab0d90083","emailAddress":"redacted@example.invalid","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png","24x24":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png","16x16":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png","32x32":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png"},"displayName":"Tristan
+        Hermanns","active":true,"timeZone":"Europe/Berlin","accountType":"atlassian"},"created":"2026-10-10T18:07:06.336+0200","updated":"2026-10-10T18:07:06.336+0200","jsdPublic":true},{"self":"https://bench-sandbox.atlassian.net/rest/api/3/issue/10000/comment/10001","id":"10001","author":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/user?accountId=712020%3Afd9e126a-a8bb-47aa-bd2a-d83ab0d90083","accountId":"712020:fd9e126a-a8bb-47aa-bd2a-d83ab0d90083","emailAddress":"redacted@example.invalid","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png","24x24":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png","16x16":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png","32x32":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png"},"displayName":"Tristan
+        Hermanns","active":true,"timeZone":"Europe/Berlin","accountType":"atlassian"},"body":{"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Found
+        it: the total is only set once an item is added."}]}]},"updateAuthor":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/user?accountId=712020%3Afd9e126a-a8bb-47aa-bd2a-d83ab0d90083","accountId":"712020:fd9e126a-a8bb-47aa-bd2a-d83ab0d90083","emailAddress":"redacted@example.invalid","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png","24x24":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png","16x16":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png","32x32":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png"},"displayName":"Tristan
+        Hermanns","active":true,"timeZone":"Europe/Berlin","accountType":"atlassian"},"created":"2026-10-10T18:07:06.626+0200","updated":"2026-10-10T18:07:06.626+0200","jsdPublic":true}],"self":"https://bench-sandbox.atlassian.net/rest/api/3/issue/10000/comment","maxResults":2,"total":2,"startAt":0},"reporter":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/user?accountId=712020%3Afd9e126a-a8bb-47aa-bd2a-d83ab0d90083","accountId":"712020:fd9e126a-a8bb-47aa-bd2a-d83ab0d90083","emailAddress":"redacted@example.invalid","avatarUrls":{"48x48":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png","24x24":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png","16x16":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png","32x32":"https://secure.gravatar.com/avatar/6ee93f642aaa438ab4dc2964b17d15cd?d=https%3A%2F%2Favatar-management--avatars.us-west-2.prod.public.atl-paas.net%2Finitials%2FTH-5.png"},"displayName":"Tristan
+        Hermanns","active":true,"timeZone":"Europe/Berlin","accountType":"atlassian"},"assignee":null,"priority":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/priority/1","iconUrl":"https://bench-sandbox.atlassian.net/images/icons/priorities/highest_new.svg","name":"Highest","id":"1"},"updated":"2026-10-10T18:07:06.626+0200","status":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/status/10001","description":"","iconUrl":"https://bench-sandbox.atlassian.net/images/icons/statuses/generic.png","name":"To
+        Do","id":"10001","statusCategory":{"self":"https://bench-sandbox.atlassian.net/rest/api/3/statuscategory/2","id":2,"key":"new","colorName":"blue-gray","name":"To
+        Do"}},"labels":["checkout","crash"]}}'
     headers:
+      atl-request-id:
+      - 46788511-4703-4718-a6ad-0f0888d46191
+      atl-traceid:
+      - 4678851147034718a6ad0f0888d46191
+      cache-control:
+      - no-cache, no-store, no-transform
+      connection:
+      - keep-alive
       content-length:
-      - '1973'
+      - '8440'
       content-type:
-      - application/json
+      - application/json;charset=UTF-8
+      date:
+      - Sat, 10 Oct 2026 16:19:23 GMT
+      nel:
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
+        "endpoint-1"}'
+      ratelimit:
+      - '"jira-burst-based";r=399;t=1'
+      ratelimit-policy:
+      - '"jira-burst-based";q=150;w=1'
+      report-to:
+      - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
+        "endpoint-1", "include_subdomains": true, "max_age": 600}'
+      server:
+      - AtlassianEdge
+      server-timing:
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=4,cdn-upstream-fbl;dur=125,atl-edge;dur=121,atl-edge-internal;dur=31,atl-edge-upstream;dur=90,atl-edge-pop;desc="aws-eu-central-1",cdn-cache-miss,cdn-pop;desc="FRA60-P12",cdn-rid;desc="mg6EXhVDOxA_M4MHfPHeSzqKCX8gH1sSb9Vw1GT15C3HQVkhDU7BWA==",cdn-downstream-fbl;dur=132
+      strict-transport-security:
+      - max-age=63072000; includeSubDomains; preload
+      timing-allow-origin:
+      - '*'
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      via:
+      - 1.1 b05a5dd80bc2a2f1773b586f1714217a.cloudfront.net (CloudFront)
+      x-aaccountid:
+      - 712020%3Afd9e126a-a8bb-47aa-bd2a-d83ab0d90083
+      x-amz-cf-id:
+      - mg6EXhVDOxA_M4MHfPHeSzqKCX8gH1sSb9Vw1GT15C3HQVkhDU7BWA==
+      x-amz-cf-pop:
+      - FRA60-P12
+      x-arequestid:
+      - a4a1f84c51432e999b47065de735f990
+      x-cache:
+      - Miss from cloudfront
+      x-content-type-options:
+      - nosniff
+      x-ratelimit-limit:
+      - '400'
+      x-ratelimit-remaining:
+      - '399'
+      x-xss-protection:
+      - 1; mode=block
     status:
       code: 200
       message: OK

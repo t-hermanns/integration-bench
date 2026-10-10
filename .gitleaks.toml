@@ -1,0 +1,13 @@
+# gitleaks' default rules plus one exception. Jira's `nextPageToken` is a base64 search
+# cursor (it encodes the JQL), not a credential, but trips the generic-api-key rule.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Jira search cursors in recorded cassettes"
+# No `targetRules`: gitleaks 8.28 then skips the allowlist for the extended default rules.
+condition = "AND"
+regexTarget = "match"
+regexes = ['''nextPageToken''']
+# Either separator: gitleaks reports native paths on Windows.
+paths = ['''integrations[/\\][^/\\]+[/\\]tests[/\\]cassettes[/\\][^/\\]+\.yaml''']

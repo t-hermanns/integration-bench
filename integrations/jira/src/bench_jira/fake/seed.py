@@ -3,7 +3,8 @@
 `bench sandbox seed jira` creates the same issues in project BENCH of the test site,
 so the scenarios and their assertions hold for synthetic and recorded cassettes alike.
 Keep both in sync when changing this data. Live issue keys depend on creation order:
-create them in list order into an empty project.
+create them in list order into an empty project. The live site has one user, the API
+token's, so every comment is the fake's own account (`BOT`) and the only assignee is it.
 """
 
 from dataclasses import dataclass
@@ -16,10 +17,6 @@ from bench_jira.fake.backend import BOT, JiraFake
 
 _START = datetime(2026, 9, 1, 9, 0, tzinfo=UTC)
 
-ALEX = "557058:alex-doe"
-SAM = "557058:sam-lee"
-USERS = {ALEX: "Alex Doe", SAM: "Sam Lee"}
-
 
 @dataclass(frozen=True)
 class SeedIssue:
@@ -30,8 +27,8 @@ class SeedIssue:
     labels: tuple[str, ...] = ()
     assignee: str | None = None
     description: str | None = None
-    comments: tuple[tuple[str, str], ...] = ()
-    """(author account id, text)"""
+    comments: tuple[str, ...] = ()
+    """Texts, all written by `BOT`."""
 
 
 ISSUES: list[SeedIssue] = [
@@ -40,7 +37,6 @@ ISSUES: list[SeedIssue] = [
         issue_type="Bug",
         priority="Highest",
         labels=("checkout", "crash"),
-        assignee=ALEX,
         description=(
             "Steps to reproduce:\n"
             "1. Open the shop\n"
@@ -48,8 +44,8 @@ ISSUES: list[SeedIssue] = [
             "The page shows a 500 error: KeyError: 'total'."
         ),
         comments=(
-            (SAM, "Seen in production since the release on Monday."),
-            (ALEX, "Found it: the total is only set once an item is added."),
+            "Seen in production since the release on Monday.",
+            "Found it: the total is only set once an item is added.",
         ),
     ),
     SeedIssue(  # BENCH-2
@@ -64,9 +60,8 @@ ISSUES: list[SeedIssue] = [
         status="In Progress",
         priority="High",
         labels=("export", "performance"),
-        assignee=SAM,
         description="Exports over 10k rows time out after 30 s.",
-        comments=((SAM, "Streaming the rows instead of building the file in memory."),),
+        comments=("Streaming the rows instead of building the file in memory.",),
     ),
     SeedIssue(  # BENCH-4
         "Document the plugin API",
@@ -79,7 +74,6 @@ ISSUES: list[SeedIssue] = [
         status="Done",
         priority="High",
         labels=("auth",),
-        assignee=ALEX,
         description="Fixed by renewing the IdP certificate.",
     ),
     SeedIssue(  # BENCH-6
@@ -109,7 +103,6 @@ ISSUES: list[SeedIssue] = [
         status="Done",
         priority="Low",
         labels=("tests",),
-        assignee=SAM,
         description="Fixed by freezing the clock in the test.",
     ),
     SeedIssue(  # BENCH-10
@@ -130,9 +123,8 @@ ISSUES: list[SeedIssue] = [
         status="In Progress",
         priority="Highest",
         labels=("crash", "reports"),
-        assignee=ALEX,
         description="The second save hits a stale file handle.\n\n- Windows only\n- Since 2.4",
-        comments=((BOT["accountId"], "Reproduced on Windows 11."),),
+        comments=("Reproduced on Windows 11.",),
     ),
 ]
 
@@ -142,8 +134,6 @@ def at(hours: int) -> str:
 
 
 def seed(fake: JiraFake) -> None:
-    for account_id, name in USERS.items():
-        fake.add_user(account_id, name)
     for n, spec in enumerate(ISSUES):
         issue = fake.add_issue(
             spec.summary,
@@ -155,8 +145,8 @@ def seed(fake: JiraFake) -> None:
             description=spec.description,
             created=at(n * 5),
         )
-        for c, (author, text) in enumerate(spec.comments):
-            fake.add_comment(issue["key"], text, author=author, created=at(n * 5 + c + 1))
+        for c, text in enumerate(spec.comments):
+            fake.add_comment(issue["key"], text, author=BOT["accountId"], created=at(n * 5 + c + 1))
 
 
 def seeded_fake(clock: Clock | None = None, *, require_auth: bool = True) -> JiraFake:

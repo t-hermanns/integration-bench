@@ -5,7 +5,8 @@ two, ...). The same scenarios produce both kinds of cassettes:
 
 - `bench synth <name>` runs them against the integration's in-memory fake and records
   the traffic with vcrpy -> `synthetic` cassettes (development, before accounts exist).
-- `bench record <name>` (later) runs them against the live sandbox -> `recorded`.
+- `bench record <name>` runs them against the live sandbox -> `recorded`; a scenario's
+  `teardown` then undoes what it created, outside the cassette.
 
 Tests replay a cassette with `suite.replay(name)` and never know which kind it is.
 `cassettes/MANIFEST.yaml` records the kind of every cassette; `synthesize` does not
@@ -28,7 +29,7 @@ from vcr.cassette import Cassette
 from vcr.record_mode import RecordMode
 
 from bench_core.http import ApiClient
-from bench_core.testing.cassettes import make_vcr
+from bench_core.testing.cassettes import find_secrets, make_vcr
 from bench_core.testing.clock import FakeClock
 from bench_core.testing.fake import FakeBackend
 
@@ -56,6 +57,8 @@ class Scenario:
     prepare: Callable[[FakeBackend], None] | None = None
     """Synthetic only: shape the fake before the run (inject faults, revoke scopes)."""
     description: str = ""
+    teardown: Callable[[ApiClient, Any], Awaitable[None]] | None = None
+    """Live only: undo what `run` created (gets its result), so reruns find the seed."""
 
 
 @dataclass(frozen=True)
@@ -180,3 +183,52 @@ async def stale_cassettes(suite: CassetteSuite, scratch: Path) -> list[str]:
         if not current.exists() or current.read_bytes() != fresh.read_bytes():
             stale.append(name)
     return stale
+
+
+class SecretsFound(Exception):
+    """A recorded cassette still matches a secret pattern; it was deleted, not kept."""
+
+
+@dataclass(frozen=True)
+class RecordResult:
+    recorded: tuple[str, ...]
+    synthetic_only: tuple[str, ...]
+    """Scenarios with `prepare`: they need a shaped fake and stay synthetic."""
+
+
+async def record_live(
+    suite: CassetteSuite, api: ApiClient, *, only: Sequence[str] | None = None
+) -> RecordResult:
+    """Run the scenarios against the live sandbox through `api` and mark them `recorded`.
+
+    Every cassette is checked with `find_secrets` before it is kept. The manifest is
+    written after each scenario, so an aborted run keeps what it recorded so far.
+    """
+    unknown = sorted(set(only or ()) - set(suite.scenarios))
+    if unknown:
+        raise KeyError(f"{suite.integration}: unknown scenario(s) {', '.join(unknown)}")
+    manifest = read_manifest(suite.cassette_dir)
+    recorded: list[str] = []
+    skipped: list[str] = []
+    for name in only or sorted(suite.scenarios):
+        scenario = suite.scenarios[name]
+        if scenario.prepare:
+            skipped.append(name)
+            continue
+        path = suite.path(name)
+        target = anyio.Path(path)
+        await target.unlink(missing_ok=True)
+        await target.parent.mkdir(parents=True, exist_ok=True)
+        with make_vcr(record_mode=RecordMode.ALL).use_cassette(str(path)):
+            result = await scenario.run(api)
+        if scenario.teardown:
+            await scenario.teardown(api, result)
+        text = await target.read_text(encoding="utf-8")
+        if leaks := find_secrets(text):
+            await target.unlink()
+            raise SecretsFound(f"{name}: cassette matched {', '.join(leaks)}; deleted it")
+        _write_text(path, text)
+        manifest[name] = "recorded"
+        write_manifest(suite.cassette_dir, manifest)
+        recorded.append(name)
+    return RecordResult(tuple(recorded), tuple(skipped))

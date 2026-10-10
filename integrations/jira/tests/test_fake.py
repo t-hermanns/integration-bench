@@ -34,7 +34,7 @@ def keys(fake: JiraFake, query: str) -> list[str]:
         ),
         ("status not in ('To Do', Done) ORDER BY key", ["BENCH-3", "BENCH-8", "BENCH-12"]),
         ("statusCategory = indeterminate ORDER BY key", ["BENCH-3", "BENCH-8", "BENCH-12"]),
-        ("assignee = 'Alex Doe' AND NOT status = Done ORDER BY key", ["BENCH-1", "BENCH-12"]),
+        ("assignee = 'Bench Bot' AND NOT status = Done ORDER BY key", ["BENCH-8", "BENCH-10"]),
         ("labels = crash AND (priority = High OR issuetype = Story) ORDER BY key", ["BENCH-7"]),
         ("summary ~ 'csv' ORDER BY key", ["BENCH-3", "BENCH-11"]),
         ('summary ~ "export*" ORDER BY key', ["BENCH-3", "BENCH-9"]),
@@ -60,13 +60,9 @@ def test_order_by_several_fields(fake: JiraFake) -> None:
 
 
 def test_negations_skip_empty_fields(fake: JiraFake) -> None:
-    unassigned = set(keys(fake, "project = BENCH AND assignee is EMPTY"))
-    not_alex = set(keys(fake, "assignee != 'Alex Doe'"))
-    assert unassigned
-    assert not unassigned & not_alex
-    assert not_alex == set(keys(fake, "assignee is not EMPTY")) - set(
-        keys(fake, "assignee = 'Alex Doe'")
-    )
+    assert keys(fake, "project = BENCH AND assignee is EMPTY")
+    assert keys(fake, "assignee is not EMPTY") == keys(fake, "assignee = 'Bench Bot'")
+    assert keys(fake, "assignee != 'Bench Bot'") == []
 
 
 def test_relative_dates_use_the_fake_clock(fake: JiraFake) -> None:
@@ -85,25 +81,46 @@ def test_default_order_is_newest_first(fake: JiraFake) -> None:
     [
         ("", "Unbounded JQL queries are not allowed"),
         ("ORDER BY key", "Unbounded JQL queries are not allowed"),
-        ("sprint = 1", "Field 'sprint' does not exist"),
-        ("status = Closed", "The value 'Closed' does not exist for the field 'status'"),
-        ("project = NOPE", "The value 'NOPE' does not exist for the field 'project'"),
-        ("summary = crash", "The operator '=' is not supported by the 'summary' field"),
-        ("status ~ done", "The operator '~' is not supported by the 'status' field"),
-        ("priority > Low", "The operator '>' is not supported by the 'priority' field"),
-        ("assignee = me()", "Unable to find JQL function 'me()'"),
-        ("created > yesterday", "Date value 'yesterday' is invalid"),
-        ("status = Done AND", "Expecting more of the query"),
+        ("status = Done AND", "Expecting a field name at the end of the query."),
+        ("summary ~ ", "Error in JQL Query: Expecting either a value, list or function"),
         ("status Done", "Expecting operator but got 'Done'"),
         ("status = Done project = BENCH", "Expecting either 'OR' or 'AND'"),
-        ("(status = Done", "Expecting ')'"),
-        ("labels is foo", "only supports EMPTY or NULL"),
-        ("status = Done ORDER BY rank", "Field 'rank' does not exist"),
+        ("(status = Done", "Expecting ')' before the end of the query."),
+        ("labels is foo", "Your query couldn't be processed."),
     ],
 )
-def test_errors_read_like_jira(fake: JiraFake, query: str, message: str) -> None:
+def test_syntax_errors_read_like_jira(fake: JiraFake, query: str, message: str) -> None:
     with pytest.raises(JqlError, match=re.escape(message)):
         parse(query, fake.context())
+
+
+@pytest.mark.parametrize(
+    "query",
+    [
+        "sprint = 1",
+        "status = Closed",
+        "project = NOPE",
+        "summary = crash",
+        "status ~ done",
+        "priority > Lowish",
+        "assignee = me()",
+        "created > yesterday",
+        "sprint is EMPTY",
+    ],
+)
+def test_clauses_that_cannot_match_find_nothing(fake: JiraFake, query: str) -> None:
+    """Live /search/jql answers these with 200 and no issues, not with an error."""
+    assert keys(fake, query) == []
+
+
+def test_unknown_sort_field_is_ignored(fake: JiraFake) -> None:
+    assert keys(fake, "status = Done ORDER BY rank") == keys(fake, "status = Done")
+
+
+def test_priority_compares_by_rank(fake: JiraFake) -> None:
+    high = set(keys(fake, "priority > Medium"))
+    assert high
+    assert high == set(keys(fake, "priority in (High, Highest)"))
 
 
 @pytest.mark.anyio

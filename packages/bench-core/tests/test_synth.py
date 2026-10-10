@@ -1,4 +1,4 @@
-"""Cassette suites: synthesis from a fake, manifest handling, staleness check and replay."""
+"""Cassette suites: synthesis from a fake, live recording, manifest, staleness and replay."""
 
 from pathlib import Path
 
@@ -15,9 +15,12 @@ from bench_core.testing import (
     FakeClock,
     FakeRequest,
     Scenario,
+    SecretsFound,
     expect_tool_error,
     read_manifest,
+    record_live,
     stale_cassettes,
+    synth,
     synthesize,
     write_manifest,
 )
@@ -152,6 +155,70 @@ async def test_prepare_shapes_the_fake(tmp_path: Path) -> None:
 
     await synthesize(suite(tmp_path, extra=Scenario(run, prepare)))
     assert len(seen) == 1
+
+
+def live_fake() -> FakeBackend:
+    """Stands in for the sandbox: `/notes` creates, `DELETE /notes/{id}` cleans up."""
+    fake = FakeBackend(require_auth=False)
+    notes: dict[str, str] = {}
+
+    @fake.route("POST", "/notes")
+    def create(r: FakeRequest) -> dict[str, str]:
+        notes["1"] = "note"
+        return {"id": "1"}
+
+    @fake.route("DELETE", "/notes/{id}")
+    def delete(r: FakeRequest) -> httpx2.Response:
+        del notes[r.params["id"]]
+        return httpx2.Response(204)
+
+    fake.notes = notes  # type: ignore[attr-defined]
+    return fake
+
+
+async def create_note(api: ApiClient) -> str:
+    return (await api.post("/notes")).json()["id"]
+
+
+async def delete_note(api: ApiClient, note: str) -> None:
+    await api.delete(f"/notes/{note}")
+
+
+async def test_record_live_marks_recorded_and_tears_down_outside_the_cassette(
+    tmp_path: Path,
+) -> None:
+    s = suite(
+        tmp_path,
+        create=Scenario(create_note, teardown=delete_note),
+        shaped=Scenario(read_file, prepare=lambda fake: None),
+    )
+    live = live_fake()
+    async with make_api(live.transport(), FakeClock()) as api:
+        result = await record_live(s, api)
+    assert (result.recorded, result.synthetic_only) == (("create",), ("shaped",))
+    assert read_manifest(s.cassette_dir) == {"create": "recorded"}
+    assert live.notes == {}  # type: ignore[attr-defined]
+    cassette = yaml.safe_load(s.path("create").read_text(encoding="utf-8"))
+    assert [i["request"]["method"] for i in cassette["interactions"]] == ["POST"]
+    assert b"\r\n" not in s.path("create").read_bytes()
+
+
+async def test_record_live_deletes_cassettes_that_still_hold_secrets(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(synth, "find_secrets", lambda text: ["github_token"])
+    s = suite(tmp_path)
+    async with make_api(make_fake(FakeClock()).transport(), FakeClock()) as api:
+        with pytest.raises(SecretsFound, match="read_file: cassette matched github_token"):
+            await record_live(s, api)
+    assert not s.path("read_file").exists()
+    assert read_manifest(s.cassette_dir) == {}
+
+
+async def test_record_live_rejects_unknown_scenarios(tmp_path: Path) -> None:
+    async with make_api(None, FakeClock()) as api:
+        with pytest.raises(KeyError, match="unknown scenario"):
+            await record_live(suite(tmp_path), api, only=["nope"])
 
 
 async def test_path_params_span_slashes() -> None:

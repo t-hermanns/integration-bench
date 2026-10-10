@@ -246,6 +246,18 @@ def test_find_secrets_detects_private_keys() -> None:
     assert scrub(pem) == REDACTED
 
 
+def test_scrub_replaces_credentials_in_urls_but_not_cursors() -> None:
+    body = (
+        '{"download_url": "https://raw.githubusercontent.com/o/r/main/a.md?token=CRG3EJ7VOF",'
+        ' "next": "https://x.test/search?nextPageToken=EAEY&access_token=at&page=2"}'
+    )
+    assert find_secrets(body) == ["url_credential"]
+    clean = scrub(body)
+    assert "a.md?token=REDACTED" in clean
+    assert "?nextPageToken=EAEY&access_token=REDACTED&page=2" in clean
+    assert find_secrets(clean) == []
+
+
 def test_redact_request_headers_query_and_form_body() -> None:
     request = Request(
         "POST",

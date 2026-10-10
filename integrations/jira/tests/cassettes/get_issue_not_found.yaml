@@ -6,6 +6,8 @@ interactions:
       - application/json
       authorization:
       - REDACTED
+      cookie:
+      - REDACTED
       host:
       - bench-sandbox.atlassian.net
       user-agent:
@@ -17,10 +19,60 @@ interactions:
       string: '{"errorMessages":["Issue does not exist or you do not have permission
         to see it."],"errors":{}}'
     headers:
+      atl-request-id:
+      - 226ded60-bc94-4923-ab4f-cf31c7db4b9c
+      atl-traceid:
+      - 226ded60bc944923ab4fcf31c7db4b9c
+      cache-control:
+      - no-cache, no-store, no-transform
+      connection:
+      - keep-alive
       content-length:
       - '95'
       content-type:
-      - application/json
+      - application/json;charset=UTF-8
+      date:
+      - Sat, 10 Oct 2026 16:19:23 GMT
+      nel:
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
+        "endpoint-1"}'
+      ratelimit:
+      - '"jira-burst-based";r=398;t=1'
+      ratelimit-policy:
+      - '"jira-burst-based";q=150;w=1'
+      report-to:
+      - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
+        "endpoint-1", "include_subdomains": true, "max_age": 600}'
+      server:
+      - AtlassianEdge
+      server-timing:
+      - atl-edge;dur=92,atl-edge-internal;dur=22,atl-edge-upstream;dur=70,atl-edge-pop;desc="aws-eu-central-1"
+      strict-transport-security:
+      - max-age=63072000; includeSubDomains; preload
+      timing-allow-origin:
+      - '*'
+      transfer-encoding:
+      - chunked
+      via:
+      - 1.1 b05a5dd80bc2a2f1773b586f1714217a.cloudfront.net (CloudFront)
+      x-aaccountid:
+      - 712020%3Afd9e126a-a8bb-47aa-bd2a-d83ab0d90083
+      x-amz-cf-id:
+      - R5OW3E69bZJd0x-idZij_zlvImpgpCH3fK7Irg131h58c7mDt0vNPQ==
+      x-amz-cf-pop:
+      - FRA60-P12
+      x-arequestid:
+      - 0a7a03e0b62e731ce3ca25b6e38eeeab
+      x-cache:
+      - Error from cloudfront
+      x-content-type-options:
+      - nosniff
+      x-ratelimit-limit:
+      - '400'
+      x-ratelimit-remaining:
+      - '398'
+      x-xss-protection:
+      - 1; mode=block
     status:
       code: 404
       message: Not Found

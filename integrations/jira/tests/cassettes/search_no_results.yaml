@@ -6,6 +6,8 @@ interactions:
       - application/json
       authorization:
       - REDACTED
+      cookie:
+      - REDACTED
       host:
       - bench-sandbox.atlassian.net
       user-agent:
@@ -16,10 +18,62 @@ interactions:
     body:
       string: '{"issues":[],"isLast":true}'
     headers:
+      atl-request-id:
+      - efe543ea-25af-46b2-972f-25f945d75bcf
+      atl-traceid:
+      - efe543ea25af46b2972f25f945d75bcf
+      cache-control:
+      - no-cache, no-store, no-transform
+      connection:
+      - keep-alive
       content-length:
       - '27'
       content-type:
-      - application/json
+      - application/json;charset=UTF-8
+      date:
+      - Sat, 10 Oct 2026 16:19:24 GMT
+      nel:
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
+        "endpoint-1"}'
+      ratelimit:
+      - '"jira-burst-based";r=346;t=1'
+      ratelimit-policy:
+      - '"jira-burst-based";q=100;w=1'
+      report-to:
+      - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
+        "endpoint-1", "include_subdomains": true, "max_age": 600}'
+      server:
+      - AtlassianEdge
+      server-timing:
+      - cdn-upstream-layer;desc="EDGE",cdn-upstream-dns;dur=0,cdn-upstream-connect;dur=0,cdn-upstream-fbl;dur=114,atl-edge;dur=113,atl-edge-internal;dur=15,atl-edge-upstream;dur=98,atl-edge-pop;desc="aws-eu-central-1",cdn-cache-miss,cdn-pop;desc="FRA60-P12",cdn-rid;desc="P__zBENa27K8nhiwKd_LPdjx5bnT9SPqtMPYQDqNtlBpkZ5I4HZq-g==",cdn-downstream-fbl;dur=120
+      strict-transport-security:
+      - max-age=63072000; includeSubDomains; preload
+      timing-allow-origin:
+      - '*'
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      via:
+      - 1.1 b05a5dd80bc2a2f1773b586f1714217a.cloudfront.net (CloudFront)
+      x-aaccountid:
+      - 712020%3Afd9e126a-a8bb-47aa-bd2a-d83ab0d90083
+      x-amz-cf-id:
+      - P__zBENa27K8nhiwKd_LPdjx5bnT9SPqtMPYQDqNtlBpkZ5I4HZq-g==
+      x-amz-cf-pop:
+      - FRA60-P12
+      x-arequestid:
+      - 9d5c2bfe273e90872045f04c0fb6f137
+      x-cache:
+      - Miss from cloudfront
+      x-content-type-options:
+      - nosniff
+      x-ratelimit-limit:
+      - '350'
+      x-ratelimit-remaining:
+      - '346'
+      x-xss-protection:
+      - 1; mode=block
     status:
       code: 200
       message: OK

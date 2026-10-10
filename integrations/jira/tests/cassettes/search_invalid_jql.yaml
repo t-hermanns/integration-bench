@@ -6,21 +6,71 @@ interactions:
       - application/json
       authorization:
       - REDACTED
+      cookie:
+      - REDACTED
       host:
       - bench-sandbox.atlassian.net
       user-agent:
       - integration-bench
     method: GET
-    uri: https://bench-sandbox.atlassian.net/rest/api/3/search/jql?jql=project+%3D+BENCH+AND+sprint_name+%3D+4&fields=summary%2Cstatus%2Cissuetype%2Cpriority%2Cassignee%2Clabels%2Ccreated%2Cupdated&maxResults=20
+    uri: https://bench-sandbox.atlassian.net/rest/api/3/search/jql?jql=project+%3D+BENCH+AND+%28summary+~+crash&fields=summary%2Cstatus%2Cissuetype%2Cpriority%2Cassignee%2Clabels%2Ccreated%2Cupdated&maxResults=20
   response:
     body:
-      string: '{"errorMessages":["Field ''sprint_name'' does not exist or you do not
-        have permission to view it."],"errors":{}}'
+      string: '{"errorMessages":["Error in the JQL Query: Expecting '')'' before the
+        end of the query."],"errors":{}}'
     headers:
-      content-length:
-      - '110'
+      atl-request-id:
+      - 99ee760e-3265-4fdf-a28d-c123cdd1df90
+      atl-traceid:
+      - 99ee760e32654fdfa28dc123cdd1df90
+      cache-control:
+      - no-cache, no-store, no-transform
+      connection:
+      - keep-alive
       content-type:
-      - application/json
+      - application/json;charset=UTF-8
+      date:
+      - Sat, 10 Oct 2026 16:19:23 GMT
+      nel:
+      - '{"failure_fraction": 0.01, "include_subdomains": true, "max_age": 600, "report_to":
+        "endpoint-1"}'
+      ratelimit:
+      - '"jira-burst-based";r=349;t=1'
+      ratelimit-policy:
+      - '"jira-burst-based";q=100;w=1'
+      report-to:
+      - '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group":
+        "endpoint-1", "include_subdomains": true, "max_age": 600}'
+      server:
+      - AtlassianEdge
+      server-timing:
+      - atl-edge;dur=50,atl-edge-internal;dur=15,atl-edge-upstream;dur=35,atl-edge-pop;desc="aws-eu-central-1"
+      strict-transport-security:
+      - max-age=63072000; includeSubDomains; preload
+      timing-allow-origin:
+      - '*'
+      transfer-encoding:
+      - chunked
+      via:
+      - 1.1 b05a5dd80bc2a2f1773b586f1714217a.cloudfront.net (CloudFront)
+      x-aaccountid:
+      - 712020%3Afd9e126a-a8bb-47aa-bd2a-d83ab0d90083
+      x-amz-cf-id:
+      - c7JT2o2rJviqD06nZ1HN1i9zhdqGg9sM8gs-U9FNw1vxiZKpYFwrJg==
+      x-amz-cf-pop:
+      - FRA60-P12
+      x-arequestid:
+      - 2d288a1e1bc46f2eef2e637a1e7769c3
+      x-cache:
+      - Error from cloudfront
+      x-content-type-options:
+      - nosniff
+      x-ratelimit-limit:
+      - '350'
+      x-ratelimit-remaining:
+      - '349'
+      x-xss-protection:
+      - 1; mode=block
     status:
       code: 400
       message: Bad Request

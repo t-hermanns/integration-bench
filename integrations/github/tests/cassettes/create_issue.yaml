@@ -21,24 +21,73 @@ interactions:
     uri: https://api.github.com/repos/bench-sandbox/widgets/issues
   response:
     body:
-      string: '{"url":"https://api.github.com/repos/bench-sandbox/widgets/issues/17","repository_url":"https://api.github.com/repos/bench-sandbox/widgets","html_url":"https://github.com/bench-sandbox/widgets/issues/17","id":1000026,"number":17,"title":"Export
-        button does nothing in Firefox","user":{"login":"bench-bot[bot]","id":1391,"type":"Bot","html_url":"https://github.com/bench-bot[bot]"},"labels":[{"id":318,"name":"bug"}],"state":"open","state_reason":null,"assignees":[],"milestone":null,"comments":0,"created_at":"2027-01-15T08:00:00Z","updated_at":"2027-01-15T08:00:00Z","closed_at":null,"author_association":"CONTRIBUTOR","body":"Clicking
-        *Export* in Firefox 131 has no effect; Chrome works."}'
+      string: '{"url":"https://api.github.com/repos/bench-sandbox/widgets/issues/17","repository_url":"https://api.github.com/repos/bench-sandbox/widgets","labels_url":"https://api.github.com/repos/bench-sandbox/widgets/issues/17/labels{/name}","comments_url":"https://api.github.com/repos/bench-sandbox/widgets/issues/17/comments","events_url":"https://api.github.com/repos/bench-sandbox/widgets/issues/17/events","html_url":"https://github.com/bench-sandbox/widgets/issues/17","id":5793079204,"node_id":"I_kwDOVD11K88AAAABWUtfpA","number":17,"title":"Export
+        button does nothing in Firefox","user":{"login":"integration-bench-th[bot]","id":340636199,"node_id":"BOT_kgDOFE2yJw","avatar_url":"https://avatars.githubusercontent.com/u/340634723?v=4","gravatar_id":"","url":"https://api.github.com/users/integration-bench-th%5Bbot%5D","html_url":"https://github.com/apps/integration-bench-th","followers_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/followers","following_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/following{/other_user}","gists_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/gists{/gist_id}","starred_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/subscriptions","organizations_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/orgs","repos_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/repos","events_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/events{/privacy}","received_events_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/received_events","type":"Bot","user_view_type":"public","site_admin":false},"labels":[{"id":12627697195,"node_id":"LA_kwDOVD11K88AAAAC8KteKw","url":"https://api.github.com/repos/bench-sandbox/widgets/labels/bug","name":"bug","color":"d73a4a","default":true,"description":"Something
+        isn''t working","archived_at":null,"archived_by":null}],"state":"open","locked":false,"assignees":[],"milestone":null,"comments":0,"created_at":"2026-10-10T16:21:46Z","updated_at":"2026-10-10T16:21:46Z","closed_at":null,"assignee":null,"author_association":"NONE","issue_field_values":[],"type":null,"active_lock_reason":null,"sub_issues_summary":{"total":0,"completed":0,"percent_completed":0},"issue_dependencies_summary":{"blocked_by":0,"total_blocked_by":0,"blocking":0,"total_blocking":0},"body":"Clicking
+        *Export* in Firefox 131 has no effect; Chrome works.","closed_by":null,"reactions":{"url":"https://api.github.com/repos/bench-sandbox/widgets/issues/17/reactions","total_count":0,"+1":0,"-1":0,"laugh":0,"hooray":0,"confused":0,"heart":0,"rocket":0,"eyes":0},"timeline_url":"https://api.github.com/repos/bench-sandbox/widgets/issues/17/timeline","performed_via_github_app":null,"state_reason":null,"pinned_comment":null}'
     headers:
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset, Warning
+      cache-control:
+      - private, max-age=60, s-maxage=60
       content-length:
-      - '691'
+      - '2892'
+      content-security-policy:
+      - default-src 'none'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
+      date:
+      - Sat, 10 Oct 2026 16:21:46 GMT
+      deprecation:
+      - Tue, 10 Mar 2026 00:00:00 GMT
+      etag:
+      - '"30276e7ede6d7f7ba410ab95823a5377dd0b3e06af3e2771b45c51f996ad5aff"'
+      link:
+      - <https://docs.github.com/en/rest/about-the-rest-api/api-versions>; rel="deprecation";
+        type="text/html"
+      location:
+      - https://api.github.com/repos/bench-sandbox/widgets/issues/17
+      referrer-policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      server:
+      - github.com
+      strict-transport-security:
+      - max-age=31536000; includeSubdomains; preload
+      sunset:
+      - Fri, 10 Mar 2028 00:00:00 GMT
+      vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With
+      x-accepted-github-permissions:
+      - issues=write
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - deny
       x-github-api-version-selected:
       - '2022-11-28'
+      x-github-edge-region:
+      - fra
+      x-github-media-type:
+      - github.v3; format=json
+      x-github-request-id:
+      - F047:2F4446:AF2D6CA:10689D07:6ACA6619
       x-ratelimit-limit:
       - '5000'
       x-ratelimit-remaining:
-      - '4999'
+      - '4940'
       x-ratelimit-reset:
-      - '1800003600'
+      - '1791652052'
       x-ratelimit-resource:
       - core
+      x-ratelimit-used:
+      - '60'
+      x-xss-protection:
+      - '0'
     status:
       code: 201
       message: Created

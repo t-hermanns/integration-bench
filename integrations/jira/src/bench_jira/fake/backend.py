@@ -34,16 +34,18 @@ TOKEN_PARAM = "nextPageToken"
 
 CATEGORIES = {"new": "To Do", "indeterminate": "In Progress", "done": "Done"}
 STATUSES = {
-    "To Do": ("10000", "new"),
-    "In Progress": ("3", "indeterminate"),
-    "Done": ("10001", "done"),
+    "To Do": ("10001", "new"),
+    "In Progress": ("10002", "indeterminate"),
+    "In Review": ("10003", "indeterminate"),
+    "Done": ("10000", "done"),
 }
 TRANSITIONS = [
-    ("11", "Back to To Do", "To Do"),
-    ("21", "Start progress", "In Progress"),
-    ("31", "Done", "Done"),
+    ("11", "To Do", "To Do"),
+    ("21", "In Progress", "In Progress"),
+    ("31", "In Review", "In Review"),
+    ("41", "Done", "Done"),
 ]
-"""(id, name, target status): the simplified workflow, every status reachable from any other."""
+"""(id, name, target status): the team-managed default workflow, any status to any other."""
 ISSUE_TYPES = {"Task": "10001", "Bug": "10002", "Story": "10003"}
 PRIORITIES = {"Highest": "1", "High": "2", "Medium": "3", "Low": "4", "Lowest": "5"}
 
@@ -209,11 +211,6 @@ class JiraFake(FakeBackend):
         return jql.Context(
             current_user=BOT["accountId"],
             now=datetime.fromtimestamp(self.clock.time(), UTC),
-            projects=self.projects,
-            statuses={name: category for name, (_, category) in STATUSES.items()},
-            categories=CATEGORIES,
-            issue_types=list(ISSUE_TYPES),
-            priorities=list(PRIORITIES),
         )
 
     # --- provider error format ------------------------------------------------------------

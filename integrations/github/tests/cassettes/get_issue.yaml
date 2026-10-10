@@ -16,24 +16,68 @@ interactions:
     uri: https://api.github.com/repos/bench-sandbox/widgets/issues/1
   response:
     body:
-      string: '{"url":"https://api.github.com/repos/bench-sandbox/widgets/issues/1","repository_url":"https://api.github.com/repos/bench-sandbox/widgets","html_url":"https://github.com/bench-sandbox/widgets/issues/1","id":1000001,"number":1,"title":"Crash
-        when config file is empty","user":{"login":"bench-contributor","id":1768,"type":"User","html_url":"https://github.com/bench-contributor"},"labels":[{"id":318,"name":"bug"}],"state":"open","state_reason":null,"assignees":[{"login":"bench-maintainer","id":1621,"type":"User","html_url":"https://github.com/bench-maintainer"}],"milestone":{"number":1,"title":"v2.4"},"comments":3,"created_at":"2026-09-01T14:00:00Z","updated_at":"2026-09-06T01:00:00Z","closed_at":null,"author_association":"CONTRIBUTOR","body":"Starting
-        with an empty `widgets.toml` raises `KeyError: ''name''`."}'
+      string: '{"url":"https://api.github.com/repos/bench-sandbox/widgets/issues/1","repository_url":"https://api.github.com/repos/bench-sandbox/widgets","labels_url":"https://api.github.com/repos/bench-sandbox/widgets/issues/1/labels{/name}","comments_url":"https://api.github.com/repos/bench-sandbox/widgets/issues/1/comments","events_url":"https://api.github.com/repos/bench-sandbox/widgets/issues/1/events","html_url":"https://github.com/bench-sandbox/widgets/issues/1","id":5792962477,"node_id":"I_kwDOVD11K88AAAABWUmXrQ","number":1,"title":"Crash
+        when config file is empty","user":{"login":"integration-bench-th[bot]","id":340636199,"node_id":"BOT_kgDOFE2yJw","avatar_url":"https://avatars.githubusercontent.com/u/340634723?v=4","gravatar_id":"","url":"https://api.github.com/users/integration-bench-th%5Bbot%5D","html_url":"https://github.com/apps/integration-bench-th","followers_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/followers","following_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/following{/other_user}","gists_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/gists{/gist_id}","starred_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/subscriptions","organizations_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/orgs","repos_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/repos","events_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/events{/privacy}","received_events_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/received_events","type":"Bot","user_view_type":"public","site_admin":false},"labels":[{"id":12627697195,"node_id":"LA_kwDOVD11K88AAAAC8KteKw","url":"https://api.github.com/repos/bench-sandbox/widgets/labels/bug","name":"bug","color":"d73a4a","default":true,"description":"Something
+        isn''t working","archived_at":null,"archived_by":null}],"state":"open","locked":false,"assignees":[{"login":"t-hermanns","id":37556412,"node_id":"MDQ6VXNlcjM3NTU2NDEy","avatar_url":"https://avatars.githubusercontent.com/u/37556412?v=4","gravatar_id":"","url":"https://api.github.com/users/t-hermanns","html_url":"https://github.com/t-hermanns","followers_url":"https://api.github.com/users/t-hermanns/followers","following_url":"https://api.github.com/users/t-hermanns/following{/other_user}","gists_url":"https://api.github.com/users/t-hermanns/gists{/gist_id}","starred_url":"https://api.github.com/users/t-hermanns/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/t-hermanns/subscriptions","organizations_url":"https://api.github.com/users/t-hermanns/orgs","repos_url":"https://api.github.com/users/t-hermanns/repos","events_url":"https://api.github.com/users/t-hermanns/events{/privacy}","received_events_url":"https://api.github.com/users/t-hermanns/received_events","type":"User","user_view_type":"public","site_admin":false}],"milestone":{"url":"https://api.github.com/repos/bench-sandbox/widgets/milestones/1","html_url":"https://github.com/bench-sandbox/widgets/milestone/1","labels_url":"https://api.github.com/repos/bench-sandbox/widgets/milestones/1/labels","id":18471942,"node_id":"MI_kwDOVD11K84BGdwG","number":1,"title":"v2.4","description":null,"creator":{"login":"integration-bench-th[bot]","id":340636199,"node_id":"BOT_kgDOFE2yJw","avatar_url":"https://avatars.githubusercontent.com/u/340634723?v=4","gravatar_id":"","url":"https://api.github.com/users/integration-bench-th%5Bbot%5D","html_url":"https://github.com/apps/integration-bench-th","followers_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/followers","following_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/following{/other_user}","gists_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/gists{/gist_id}","starred_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/subscriptions","organizations_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/orgs","repos_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/repos","events_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/events{/privacy}","received_events_url":"https://api.github.com/users/integration-bench-th%5Bbot%5D/received_events","type":"Bot","user_view_type":"public","site_admin":false},"open_issues":5,"closed_issues":2,"state":"open","created_at":"2026-10-10T16:07:34Z","updated_at":"2026-10-10T16:07:58Z","due_on":null,"closed_at":null},"comments":3,"created_at":"2026-10-10T16:07:42Z","updated_at":"2026-10-10T16:21:46Z","closed_at":null,"assignee":{"login":"t-hermanns","id":37556412,"node_id":"MDQ6VXNlcjM3NTU2NDEy","avatar_url":"https://avatars.githubusercontent.com/u/37556412?v=4","gravatar_id":"","url":"https://api.github.com/users/t-hermanns","html_url":"https://github.com/t-hermanns","followers_url":"https://api.github.com/users/t-hermanns/followers","following_url":"https://api.github.com/users/t-hermanns/following{/other_user}","gists_url":"https://api.github.com/users/t-hermanns/gists{/gist_id}","starred_url":"https://api.github.com/users/t-hermanns/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/t-hermanns/subscriptions","organizations_url":"https://api.github.com/users/t-hermanns/orgs","repos_url":"https://api.github.com/users/t-hermanns/repos","events_url":"https://api.github.com/users/t-hermanns/events{/privacy}","received_events_url":"https://api.github.com/users/t-hermanns/received_events","type":"User","user_view_type":"public","site_admin":false},"author_association":"NONE","issue_field_values":[],"type":null,"active_lock_reason":null,"sub_issues_summary":{"total":0,"completed":0,"percent_completed":0},"issue_dependencies_summary":{"blocked_by":0,"total_blocked_by":0,"blocking":0,"total_blocking":0},"body":"Starting
+        with an empty `widgets.toml` raises `KeyError: ''name''`.","closed_by":null,"reactions":{"url":"https://api.github.com/repos/bench-sandbox/widgets/issues/1/reactions","total_count":0,"+1":0,"-1":0,"laugh":0,"hooray":0,"confused":0,"heart":0,"rocket":0,"eyes":0},"timeline_url":"https://api.github.com/repos/bench-sandbox/widgets/issues/1/timeline","performed_via_github_app":null,"state_reason":null,"pinned_comment":null}'
     headers:
+      access-control-allow-origin:
+      - '*'
+      access-control-expose-headers:
+      - ETag, Link, Location, Retry-After, X-GitHub-OTP, X-RateLimit-Limit, X-RateLimit-Remaining,
+        X-RateLimit-Used, X-RateLimit-Resource, X-RateLimit-Reset, X-OAuth-Scopes,
+        X-Accepted-OAuth-Scopes, X-Poll-Interval, X-GitHub-Media-Type, X-GitHub-SSO,
+        X-GitHub-Request-Id, Deprecation, Sunset, Warning
+      cache-control:
+      - private, max-age=60, s-maxage=60
       content-length:
-      - '816'
+      - '6438'
+      content-security-policy:
+      - default-src 'none'
       content-type:
-      - application/json
+      - application/json; charset=utf-8
+      date:
+      - Sat, 10 Oct 2026 16:21:48 GMT
+      etag:
+      - W/"1bafb68c0d643a77472e8a43a7b38a4add771bbbc4b61bdfc145aa52a70dbaa2"
+      last-modified:
+      - Sat, 10 Oct 2026 16:21:46 GMT
+      referrer-policy:
+      - origin-when-cross-origin, strict-origin-when-cross-origin
+      server:
+      - github.com
+      strict-transport-security:
+      - max-age=31536000; includeSubdomains; preload
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept, Authorization, Cookie, X-GitHub-OTP,Accept-Encoding, Accept, X-Requested-With
+      x-accepted-github-permissions:
+      - issues=read
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - deny
       x-github-api-version-selected:
       - '2022-11-28'
+      x-github-edge-region:
+      - fra
+      x-github-media-type:
+      - github.v3; format=json
+      x-github-request-id:
+      - F047:2F4446:AF2EA85:1068BB48:6ACA661C
       x-ratelimit-limit:
       - '5000'
       x-ratelimit-remaining:
-      - '4999'
+      - '4932'
       x-ratelimit-reset:
-      - '1800003600'
+      - '1791652052'
       x-ratelimit-resource:
       - core
+      x-ratelimit-used:
+      - '68'
+      x-xss-protection:
+      - '0'
     status:
       code: 200
       message: OK
