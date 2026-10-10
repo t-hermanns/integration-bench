@@ -85,11 +85,6 @@ def test_replay_sync_without_network(recorded: tuple[Path, str]) -> None:
         assert cass.all_played
 
 
-@pytest.fixture
-def anyio_backend() -> str:
-    return "asyncio"
-
-
 # On Windows the asyncio proactor loop builds its self-pipe via a loopback socketpair,
 # so loopback must stay allowed or the event loop cannot even start.
 @pytest.mark.anyio

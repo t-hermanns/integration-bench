@@ -18,11 +18,6 @@ pytestmark = pytest.mark.anyio
 Step = httpx2.Response | Exception
 
 
-@pytest.fixture
-def anyio_backend() -> str:
-    return "asyncio"
-
-
 class Scripted:
     """MockTransport handler that replays a fixed sequence of responses/exceptions."""
 

@@ -20,11 +20,6 @@ from mcp.types import TextContent, ToolAnnotations
 from pydantic import BaseModel
 
 
-@pytest.fixture
-def anyio_backend() -> str:
-    return "asyncio"
-
-
 @dataclass
 class AppState:
     http: httpx2.AsyncClient
