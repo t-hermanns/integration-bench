@@ -1,0 +1,22 @@
+__pycache__/
+*.py[cod]
+.venv/
+build/
+dist/
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Secrets / local tokens
+.env
+.env.*
+*.token.json
+.bench/
+
+.idea/
+.vscode/
+
+# Local working plan (not published)
+PLAN.md

@@ -1,0 +1,47 @@
+[project]
+name = "integration-bench"
+version = "0.1.0"
+description = "Build, test, evaluate and monitor MCP integrations (Jira, GitHub, Google Drive, Slack)."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = ["bench-core"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4",
+    "ruff>=0.13",
+    "pyright>=1.1.405",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["packages/*", "integrations/*"]
+exclude = ["integrations/.gitkeep"]
+
+[tool.uv.sources]
+bench-core = { workspace = true }
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+extend-exclude = ["templates"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B", "SIM", "RUF", "PT", "ASYNC"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["bench_*"]
+
+[tool.pyright]
+pythonVersion = "3.13"
+typeCheckingMode = "standard"
+include = ["packages", "integrations"]
+exclude = ["**/.venv", "**/__pycache__", "templates"]
+venvPath = "."
+venv = ".venv"
+
+[tool.pytest.ini_options]
+addopts = ["-ra", "--strict-markers", "--import-mode=importlib"]
+testpaths = ["packages", "integrations"]
