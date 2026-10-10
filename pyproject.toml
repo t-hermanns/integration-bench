@@ -7,6 +7,7 @@ requires-python = ">=3.13"
 dependencies = [
     "bench-cli",
     "bench-core",
+    "bench-evals",
     "bench-gdrive",
     "bench-github",
     "bench-jira",
@@ -31,6 +32,7 @@ members = ["packages/*", "integrations/*"]
 [tool.uv.sources]
 bench-cli = { workspace = true }
 bench-core = { workspace = true }
+bench-evals = { workspace = true }
 bench-gdrive = { workspace = true }
 bench-github = { workspace = true }
 bench-jira = { workspace = true }

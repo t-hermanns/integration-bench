@@ -1,80 +1,19 @@
-"""`bench doctor`: integration accounts (`bench_<name>.doctor`) plus the eval model keys.
-
-Model checks fetch the pinned model's metadata: one free, read-only call per provider
-that proves the key works and the model still exists (provider line-ups change often).
-They move next to the model adapters once those exist.
-"""
+"""`bench doctor`: integration accounts (`bench_<name>.doctor`) plus the eval models
+(`bench_evals.doctor`)."""
 
 import importlib
 import pkgutil
 from collections.abc import Awaitable, Callable, Mapping
-from dataclasses import dataclass
 from types import ModuleType
 
 import httpx2
 
-from bench_core.doctor import Check, http_failure, missing, not_configured, ok, probe
+from bench_core.doctor import Check, probe
 
-NOT_INTEGRATIONS = {"bench_core", "bench_cli"}
+from bench_evals.doctor import check_model
+from bench_evals.models import PROVIDERS, Provider
 
-
-@dataclass(frozen=True)
-class ModelProvider:
-    name: str
-    key_var: str
-    model_var: str
-    default_model: str
-    url: str
-    """Model metadata endpoint; `{model}` is filled in."""
-    auth_header: str
-    auth_prefix: str = "Bearer "
-
-
-MODEL_PROVIDERS = [
-    ModelProvider(
-        "cohere",
-        "COHERE_API_KEY",
-        "COHERE_MODEL",
-        "command-a-03-2025",
-        "https://api.cohere.com/v1/models/{model}",
-        "Authorization",
-    ),
-    ModelProvider(
-        "gemini",
-        "GEMINI_API_KEY",
-        "GEMINI_MODEL",
-        "gemini-3.5-flash-lite",
-        "https://generativelanguage.googleapis.com/v1beta/models/{model}",
-        "x-goog-api-key",
-        auth_prefix="",
-    ),
-    ModelProvider(
-        "groq",
-        "GROQ_API_KEY",
-        "GROQ_MODEL",
-        "qwen/qwen3.8-27b",
-        "https://api.groq.com/openai/v1/models/{model}",
-        "Authorization",
-    ),
-]
-
-
-async def check_model(
-    provider: ModelProvider,
-    env: Mapping[str, str],
-    transport: httpx2.AsyncBaseTransport | None = None,
-) -> Check:
-    target = f"{provider.name} model"
-    absent = missing(env, provider.key_var)
-    if absent:
-        return not_configured(target, absent)
-    model = env.get(provider.model_var) or provider.default_model
-    headers = {provider.auth_header: provider.auth_prefix + env[provider.key_var]}
-    async with httpx2.AsyncClient(transport=transport, timeout=30) as client:
-        response = await client.get(provider.url.format(model=model), headers=headers)
-    if response.status_code != 200:
-        return http_failure(target, response, model)
-    return ok(target, f"key valid; {model} available")
+NOT_INTEGRATIONS = {"bench_core", "bench_cli", "bench_evals"}
 
 
 def integration_modules() -> dict[str, ModuleType]:
@@ -99,9 +38,9 @@ def runners(transport: httpx2.AsyncBaseTransport | None = None) -> dict[str, Che
     out: dict[str, CheckRunner] = {}
     for name, module in integration_modules().items():
         out[name] = lambda env, module=module: module.checks(env, transport=transport)
-    for provider in MODEL_PROVIDERS:
+    for provider in PROVIDERS.values():
 
-        async def model(env: Mapping[str, str], provider: ModelProvider = provider) -> list[Check]:
+        async def model(env: Mapping[str, str], provider: Provider = provider) -> list[Check]:
             target = f"{provider.name} model"
             return [await probe(target, check_model(provider, env, transport))]
 
