@@ -1,0 +1,64 @@
+# Baseline tool descriptions (v1). The description experiment compares this against v2.
+# Only text lives here; behaviour and argument types are in tools.py.
+instructions: >-
+  Tools for a Slack workspace: list public channels, read a channel's messages and
+  threads, post messages and thread replies. Channels and messages are addressed by id:
+  a channel id from slack_list_channels and a message ts from a history result. List
+  results come one page at a time; pass next_cursor back to get the next page.
+
+tools:
+  slack_list_channels:
+    title: List channels
+    description: >-
+      List the workspace's public channels with their ids. is_member tells whether the
+      app can read and post in a channel.
+    params:
+      cursor: next_cursor from a previous call to get the next page; omit for page one.
+      page_size: Channels per page (1-100).
+      response_format: >-
+        "concise" (default) for id, name and is_member; "detailed" adds topic, purpose
+        and member count.
+
+  slack_read_channel_history:
+    title: Read channel history
+    description: >-
+      Read the top-level messages of a channel, newest first. Thread replies are not
+      included; messages with reply_count have a thread you can read with
+      slack_read_thread.
+    params:
+      channel_id: Channel id from slack_list_channels, e.g. "C0123456789" (not the name).
+      cursor: next_cursor from a previous call to get older messages; omit for the newest.
+      page_size: Messages per page (1-100).
+      response_format: >-
+        "concise" (default) for ts, author, text and thread info; "detailed" adds the
+        posting time.
+
+  slack_read_thread:
+    title: Read thread
+    description: >-
+      Read a thread: the parent message followed by its replies, oldest first.
+    params:
+      channel_id: Channel id of the thread, e.g. "C0123456789".
+      thread_ts: ts of the thread's parent message, from a history result.
+      cursor: next_cursor from a previous call to get the next page; omit for page one.
+      page_size: Messages per page (1-100).
+      response_format: >-
+        "concise" (default) for ts, author, text; "detailed" adds the posting time.
+
+  slack_post_message:
+    title: Post message
+    description: >-
+      Post a new top-level message to a channel the app is a member of. To answer an
+      existing message, use slack_reply_in_thread instead.
+    params:
+      channel_id: Channel id from slack_list_channels, e.g. "C0123456789".
+      text: Message text (Slack mrkdwn, at most 4000 characters).
+
+  slack_reply_in_thread:
+    title: Reply in thread
+    description: >-
+      Reply to a top-level message, in its thread.
+    params:
+      channel_id: Channel id of the message, e.g. "C0123456789".
+      thread_ts: ts of the top-level message to reply to, from a history result.
+      text: Reply text (Slack mrkdwn, at most 4000 characters).

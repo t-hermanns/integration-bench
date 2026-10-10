@@ -96,6 +96,10 @@ class TokenEndpoint:
                 body.get("error_description"),
                 response.status_code,
             )
+        user = body.get("authed_user")
+        if "access_token" not in body and isinstance(user, dict) and "access_token" in user:
+            # Slack's user-token installs (no bot scopes) nest the tokens in `authed_user`.
+            body = user
         access = body.get("access_token")
         if not isinstance(access, str) or not access:
             raise OAuthError(

@@ -1,0 +1,12 @@
+# Changes here will be overwritten by Copier; do not edit manually.
+_commit: b616b0b
+_src_path: .
+auth: oauth_refresh
+authorize_url: https://slack.com/oauth/v2/authorize
+base_url: https://slack.com/api
+error_format: slack
+name: slack
+pagination: cursor
+provider: Slack
+retry: slack
+token_url: https://slack.com/api/oauth.v2.access

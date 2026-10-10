@@ -13,6 +13,7 @@ members = [
     "bench-gdrive",
     "bench-github",
     "bench-jira",
+    "bench-slack",
     "integration-bench",
 ]
 
@@ -122,6 +123,17 @@ requires-dist = [{ name = "bench-core", editable = "packages/bench-core" }]
 name = "bench-jira"
 version = "0.1.0"
 source = { editable = "integrations/jira" }
+dependencies = [
+    { name = "bench-core" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "bench-core", editable = "packages/bench-core" }]
+
+[[package]]
+name = "bench-slack"
+version = "0.1.0"
+source = { editable = "integrations/slack" }
 dependencies = [
     { name = "bench-core" },
 ]
@@ -403,6 +415,7 @@ dependencies = [
     { name = "bench-gdrive" },
     { name = "bench-github" },
     { name = "bench-jira" },
+    { name = "bench-slack" },
 ]
 
 [package.dev-dependencies]
@@ -421,6 +434,7 @@ requires-dist = [
     { name = "bench-gdrive", editable = "integrations/gdrive" },
     { name = "bench-github", editable = "integrations/github" },
     { name = "bench-jira", editable = "integrations/jira" },
+    { name = "bench-slack", editable = "integrations/slack" },
 ]
 
 [package.metadata.requires-dev]

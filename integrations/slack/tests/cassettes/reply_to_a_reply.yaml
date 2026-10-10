@@ -1,0 +1,108 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      host:
+      - slack.com
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://slack.com/api/conversations.list?limit=100&types=public_channel&exclude_archived=true
+  response:
+    body:
+      string: '{"ok":true,"channels":[{"id":"C0FAKE00001","name":"general","is_channel":true,"is_private":false,"is_archived":false,"is_general":true,"is_member":false,"num_members":1,"topic":{"value":"","creator":"","last_set":0},"purpose":{"value":"","creator":"","last_set":0}},{"id":"C0FAKE00002","name":"random","is_channel":true,"is_private":false,"is_archived":false,"is_general":false,"is_member":false,"num_members":1,"topic":{"value":"","creator":"","last_set":0},"purpose":{"value":"","creator":"","last_set":0}},{"id":"C0FAKE00003","name":"bench-sandbox","is_channel":true,"is_private":false,"is_archived":false,"is_general":false,"is_member":true,"num_members":2,"topic":{"value":"","creator":"","last_set":0},"purpose":{"value":"Test
+        channel for integration-bench.","creator":"","last_set":0}}],"response_metadata":{"next_cursor":""}}'
+    headers:
+      content-length:
+      - '833'
+      content-type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      host:
+      - slack.com
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://slack.com/api/conversations.history?limit=10&channel=C0FAKE00003
+  response:
+    body:
+      string: '{"ok":true,"messages":[{"user":"U0FAKEBOT","type":"message","ts":"1791600008.000008","bot_id":"B0FAKEBOT","text":"Standup
+        moves to 9:30 starting next week.","team":"T0FAKETEAM"},{"user":"U0FAKEBOT","type":"message","ts":"1791600006.000006","bot_id":"B0FAKEBOT","text":"Who
+        owns the flaky export test?","team":"T0FAKETEAM","thread_ts":"1791600006.000006","reply_count":1,"latest_reply":"1791600007.000007"},{"user":"U0FAKEBOT","type":"message","ts":"1791600005.000005","bot_id":"B0FAKEBOT","text":"Reminder:
+        the staging database is read-only until Monday.","team":"T0FAKETEAM"},{"user":"U0FAKEBOT","type":"message","ts":"1791600002.000002","bot_id":"B0FAKEBOT","text":"Release
+        2.4 is planned for Thursday. Anything still blocking?","team":"T0FAKETEAM","thread_ts":"1791600002.000002","reply_count":2,"latest_reply":"1791600004.000004"},{"user":"U0FAKEBOT","type":"message","ts":"1791600001.000001","bot_id":"B0FAKEBOT","text":"Welcome
+        to #bench-sandbox. integration-bench tests read and write here.","team":"T0FAKETEAM"}],"has_more":false,"response_metadata":{"next_cursor":""}}'
+    headers:
+      content-length:
+      - '1077'
+      content-type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      host:
+      - slack.com
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://slack.com/api/conversations.replies?limit=20&channel=C0FAKE00003&ts=1791600002.000002
+  response:
+    body:
+      string: '{"ok":true,"messages":[{"user":"U0FAKEBOT","type":"message","ts":"1791600002.000002","bot_id":"B0FAKEBOT","text":"Release
+        2.4 is planned for Thursday. Anything still blocking?","team":"T0FAKETEAM","thread_ts":"1791600002.000002","reply_count":2,"latest_reply":"1791600004.000004"},{"user":"U0FAKEBOT","type":"message","ts":"1791600003.000003","bot_id":"B0FAKEBOT","text":"QA
+        sign-off for the export fix is still missing.","team":"T0FAKETEAM","thread_ts":"1791600002.000002","parent_user_id":"U0FAKEBOT"},{"user":"U0FAKEBOT","type":"message","ts":"1791600004.000004","bot_id":"B0FAKEBOT","text":"I
+        will finish QA by Wednesday noon.","team":"T0FAKETEAM","thread_ts":"1791600002.000002","parent_user_id":"U0FAKEBOT"}],"has_more":false,"response_metadata":{"next_cursor":""}}'
+    headers:
+      content-length:
+      - '771'
+      content-type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      host:
+      - slack.com
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://slack.com/api/conversations.replies?limit=1&channel=C0FAKE00003&ts=1791600004.000004
+  response:
+    body:
+      string: '{"ok":true,"messages":[{"user":"U0FAKEBOT","type":"message","ts":"1791600004.000004","bot_id":"B0FAKEBOT","text":"I
+        will finish QA by Wednesday noon.","team":"T0FAKETEAM","thread_ts":"1791600002.000002","parent_user_id":"U0FAKEBOT"}],"has_more":false,"response_metadata":{"next_cursor":""}}'
+    headers:
+      content-length:
+      - '290'
+      content-type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+version: 1

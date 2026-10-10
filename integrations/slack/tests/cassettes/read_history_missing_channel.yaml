@@ -1,0 +1,26 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      host:
+      - slack.com
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://slack.com/api/conversations.history?limit=20&channel=C0000000000
+  response:
+    body:
+      string: '{"ok":false,"error":"channel_not_found"}'
+    headers:
+      content-length:
+      - '40'
+      content-type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+version: 1

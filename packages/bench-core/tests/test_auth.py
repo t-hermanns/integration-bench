@@ -280,6 +280,31 @@ async def test_slack_ok_false_on_http_200_is_an_error() -> None:
 
 
 @pytest.mark.anyio
+async def test_slack_user_token_install_reads_authed_user() -> None:
+    body = {
+        "ok": True,
+        "app_id": "A1",
+        "authed_user": {
+            "id": "U1",
+            "scope": "channels:read,chat:write",
+            "access_token": "xoxe.xoxp-1",
+            "refresh_token": "xoxe-1-r",
+            "expires_in": 43200,
+            "token_type": "user",
+        },
+    }
+    transport = httpx2.MockTransport(lambda _: httpx2.Response(200, json=body))
+    endpoint = TokenEndpoint(TOKEN_URL, client_id="c", transport=transport)
+    tokens = await endpoint.authorization_code(
+        "code", redirect_uri="http://x", code_verifier="v", clock=FakeClock()
+    )
+    assert tokens.access_token == "xoxe.xoxp-1"
+    assert tokens.refresh_token == "xoxe-1-r"
+    assert tokens.scopes == {"channels:read", "chat:write"}
+    assert tokens.expires_at is not None
+
+
+@pytest.mark.anyio
 async def test_basic_client_auth_and_non_json_response() -> None:
     seen: list[httpx2.Request] = []
 
