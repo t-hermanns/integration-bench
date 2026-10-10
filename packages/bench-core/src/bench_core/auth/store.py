@@ -205,3 +205,13 @@ class EnvTokenStore:
                 "read-only. Use a non-rotating credential in CI."
             )
         self._cache[account] = replace(tokens, refresh_token=current.refresh_token)
+
+
+TOKEN_DIR_VAR = "BENCH_TOKEN_DIR"
+
+
+def default_store(env: Mapping[str, str]) -> TokenStore:
+    """Where `bench auth login` keeps user tokens: the OS keyring, or JSON files in
+    `BENCH_TOKEN_DIR` when set (tests, machines without a keyring backend)."""
+    directory = env.get(TOKEN_DIR_VAR)
+    return FileTokenStore(Path(directory)) if directory else KeyringTokenStore()

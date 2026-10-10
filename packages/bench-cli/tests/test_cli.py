@@ -36,6 +36,7 @@ DOCTOR_VARS = (
     "GITHUB_APP_ID", "GITHUB_INSTALLATION_ID", "GITHUB_PRIVATE_KEY", "GITHUB_PRIVATE_KEY_PATH",
     "GITHUB_CLIENT_ID", "GITHUB_CLIENT_SECRET", "JIRA_SITE", "JIRA_EMAIL", "JIRA_API_TOKEN",
     "JIRA_CLIENT_ID", "JIRA_CLIENT_SECRET", "COHERE_API_KEY", "GEMINI_API_KEY", "GROQ_API_KEY",
+    "BENCH_TOKEN_DIR",
 )  # fmt: skip
 
 
@@ -59,7 +60,11 @@ def test_doctor_without_settings_skips_everything(tmp_path: Path) -> None:
 @pytest.mark.usefixtures("clean_env")
 def test_doctor_selects_targets_and_rejects_unknown_ones(tmp_path: Path) -> None:
     env_file = tmp_path / ".env"
-    env_file.write_text("JIRA_CLIENT_ID=id\nJIRA_CLIENT_SECRET=s\n", encoding="utf-8")
+    env_file.write_text(
+        "JIRA_SITE=bench-sandbox\nJIRA_CLIENT_ID=id\nJIRA_CLIENT_SECRET=s\n"
+        f"BENCH_TOKEN_DIR={tmp_path / 'tokens'}\n",
+        encoding="utf-8",
+    )
     result = runner.invoke(app, ["doctor", "jira", "--env-file", str(env_file)])
     assert result.exit_code == 0, result.output
     assert [line.split()[1] for line in result.output.splitlines()[:-1]] == ["jira", "jira"]
@@ -107,3 +112,19 @@ async def test_model_checks_fail_on_bad_key_or_unknown_model() -> None:
     assert [r.status for r in results] == ["fail", "fail"]
     assert results[0].detail.startswith("command-a-03-2025: HTTP 401")
     assert results[1].detail.startswith("missing-model: HTTP 404")
+
+
+# --- bench auth login ----------------------------------------------------------------------
+
+
+@pytest.mark.usefixtures("clean_env")
+def test_auth_login_needs_the_client_settings(tmp_path: Path) -> None:
+    result = runner.invoke(app, ["auth", "login", "jira", "--env-file", str(tmp_path / "x.env")])
+    assert result.exit_code == 1
+    assert "set JIRA_CLIENT_ID, JIRA_CLIENT_SECRET" in result.output
+
+
+def test_auth_login_rejects_unknown_integrations() -> None:
+    result = runner.invoke(app, ["auth", "login", "nope"])
+    assert result.exit_code == 2
+    assert "no integration 'nope'" in result.output

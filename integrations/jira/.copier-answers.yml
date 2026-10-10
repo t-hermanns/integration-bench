@@ -2,6 +2,7 @@
 _commit: e77790e
 _src_path: .
 auth: oauth_refresh
+authorize_url: https://auth.atlassian.com/authorize
 base_url: https://bench-sandbox.atlassian.net/rest/api/3
 error_format: jira
 name: jira

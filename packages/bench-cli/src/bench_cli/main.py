@@ -4,12 +4,15 @@ import importlib
 import subprocess
 import sys
 import tempfile
+import time
+import webbrowser
 from pathlib import Path
 from typing import Annotated
 
 import anyio
 import typer
 
+from bench_core.auth import LoginError, LoginSpec, OAuthError, default_store, login
 from bench_core.doctor import load_env
 from bench_core.testing import CassetteSuite, stale_cassettes, synthesize
 
@@ -17,6 +20,8 @@ from bench_cli import doctor as doctor_checks
 from bench_cli import scaffold
 
 app = typer.Typer(no_args_is_help=True, add_completion=False)
+auth_app = typer.Typer(no_args_is_help=True, help="Sign in to the integrations' APIs.")
+app.add_typer(auth_app, name="auth")
 
 
 @app.callback()
@@ -136,6 +141,76 @@ def update(
     typer.echo(f"updated integrations/{name}; review the diff, then `bench synth {name} --check`")
 
 
+def env_settings(env_file: Path | None) -> dict[str, str]:
+    """Process environment over `.env` (default: the repo root's)."""
+    if env_file is None:
+        try:
+            env_file = scaffold.find_root(Path.cwd()) / ".env"
+        except scaffold.ScaffoldError:
+            env_file = Path(".env")
+    return load_env(env_file)
+
+
+def load_login(name: str) -> LoginSpec:
+    try:
+        module = importlib.import_module(f"bench_{name}.auth")
+    except ModuleNotFoundError as exc:
+        if exc.name not in (f"bench_{name}", f"bench_{name}.auth"):
+            raise
+        raise typer.BadParameter(f"no integration {name!r}") from None
+    spec = getattr(module, "LOGIN", None)
+    if not isinstance(spec, LoginSpec):
+        raise typer.BadParameter(f"bench_{name} has no browser sign-in (auth.LOGIN)")
+    return spec
+
+
+@auth_app.command("login")
+def auth_login(
+    name: Annotated[str, typer.Argument(help="Integration, e.g. jira")],
+    env_file: Annotated[
+        Path | None, typer.Option(help="Settings file (default: .env in the repo root)")
+    ] = None,
+    browser: Annotated[
+        bool, typer.Option(help="Open the browser (else only print the sign-in URL)")
+    ] = True,
+) -> None:
+    """Sign in through the browser and keep the tokens in the token store."""
+    spec = load_login(name)
+    env = env_settings(env_file)
+    needed = [spec.client_id_var, *([spec.client_secret_var] if spec.client_secret_var else [])]
+    absent = [var for var in needed if not env.get(var)]
+    if absent:
+        typer.echo(f"error: set {', '.join(absent)} (see docs/SETUP.md)", err=True)
+        raise typer.Exit(1)
+
+    def show(url: str) -> None:
+        typer.echo(f"Sign in here if no browser opens:\n{url}\nWaiting for the redirect ...")
+        if browser:
+            webbrowser.open(url)
+
+    try:
+        tokens = anyio.run(
+            lambda: login(
+                spec,
+                client_id=env[spec.client_id_var],
+                client_secret=env[spec.client_secret_var] if spec.client_secret_var else None,
+                open_browser=show,
+            )
+        )
+        default_store(env).save(spec.account, tokens)
+    except (LoginError, OAuthError) as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(1) from None
+    details = []
+    if tokens.expires_at is not None:
+        details.append(f"access token valid for {(tokens.expires_at - time.time()) / 60:.0f} min")
+    details.append("refresh token stored" if tokens.refresh_token else "no refresh token")
+    if tokens.scopes:
+        details.append(f"scopes {', '.join(sorted(tokens.scopes))}")
+    typer.echo(f"{name}: signed in; {'; '.join(details)}")
+    typer.echo(f"next: `bench doctor {name}`")
+
+
 @app.command()
 def doctor(
     targets: Annotated[
@@ -147,13 +222,8 @@ def doctor(
     ] = None,
 ) -> None:
     """Check that the configured accounts and model keys work (read-only calls)."""
-    if env_file is None:
-        try:
-            env_file = scaffold.find_root(Path.cwd()) / ".env"
-        except scaffold.ScaffoldError:
-            env_file = Path(".env")
     try:
-        env = load_env(env_file)
+        env = env_settings(env_file)
         results = anyio.run(doctor_checks.run, env, targets)
     except (KeyError, ValueError) as exc:
         raise typer.BadParameter(str(exc.args[0])) from None

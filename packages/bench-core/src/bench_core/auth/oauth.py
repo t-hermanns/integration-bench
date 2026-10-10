@@ -1,4 +1,5 @@
-"""Minimal OAuth 2 token endpoint client (refresh_token and client_credentials grants).
+"""Minimal OAuth 2 token endpoint client (authorization_code, refresh_token and
+client_credentials grants).
 
 Handles provider quirks seen in our four APIs: GitHub answers form-encoded unless asked
 for JSON, Slack reports errors as HTTP 200 with `ok: false` and lists scopes comma-
@@ -49,6 +50,14 @@ class TokenEndpoint:
         self.client_auth = client_auth
         self.transport = transport
         self.timeout = timeout
+
+    async def authorization_code(
+        self, code: str, *, redirect_uri: str, code_verifier: str | None, clock: Clock
+    ) -> TokenSet:
+        form = {"grant_type": "authorization_code", "code": code, "redirect_uri": redirect_uri}
+        if code_verifier is not None:
+            form["code_verifier"] = code_verifier
+        return await self._grant(form, clock)
 
     async def refresh(self, refresh_token: str, clock: Clock) -> TokenSet:
         return await self._grant(

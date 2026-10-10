@@ -6,6 +6,7 @@ import pytest
 from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import rsa
 
+from bench_core.auth import MemoryTokenStore, TokenSet
 from bench_core.testing import FakeClock
 
 from bench_github.doctor import checks
@@ -84,7 +85,9 @@ async def test_private_key_from_file(
 async def test_not_configured_makes_no_calls(clock: FakeClock, app_key: tuple[str, str]) -> None:
     fake = fake_with(clock, app_key[1], FULL)
     app, login = await checks(
-        {"GITHUB_CLIENT_ID": "id", "GITHUB_CLIENT_SECRET": "secret"}, transport=fake.transport()
+        {"GITHUB_CLIENT_ID": "id", "GITHUB_CLIENT_SECRET": "secret"},
+        transport=fake.transport(),
+        store=MemoryTokenStore(),
     )
     assert app.status == "skip"
     assert "GITHUB_APP_ID" in app.detail
@@ -128,3 +131,29 @@ async def test_broken_settings_fail_instead_of_crashing(
     ):
         app, _ = await checks(env, transport=fake.transport(), clock=clock)
         assert app.status == "fail", env
+
+
+async def test_stored_login_is_used_and_refreshed(
+    clock: FakeClock, app_key: tuple[str, str]
+) -> None:
+    fake = fake_with(clock, app_key[1], FULL)
+    fake.oauth_clients["id"] = "secret"
+    _, refresh = fake.user_tokens(["issues:write"])
+    store = MemoryTokenStore({"github": TokenSet(access_token="expired", refresh_token=refresh)})
+    env = {"GITHUB_CLIENT_ID": "id", "GITHUB_CLIENT_SECRET": "secret"}
+    _, login = await checks(env, transport=fake.transport(), clock=clock, store=store)
+    assert login.status == "ok", login.detail
+    assert login.detail == "signed in as bench-tester; sees bench-sandbox/widgets"
+    stored = store.load("github")
+    assert stored is not None
+    assert stored.refresh_token != refresh
+
+
+async def test_revoked_login_fails_with_a_hint(clock: FakeClock, app_key: tuple[str, str]) -> None:
+    fake = fake_with(clock, app_key[1], FULL)
+    fake.oauth_clients["id"] = "secret"
+    store = MemoryTokenStore({"github": TokenSet(access_token="x", refresh_token="used")})
+    env = {"GITHUB_CLIENT_ID": "id", "GITHUB_CLIENT_SECRET": "secret"}
+    _, login = await checks(env, transport=fake.transport(), clock=clock, store=store)
+    assert login.status == "fail"
+    assert "bench auth login" in login.detail

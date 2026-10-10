@@ -49,6 +49,12 @@ token_url:
   default: "https://{{ name }}.example.com/oauth/token"
   when: "{{ auth in ['oauth_refresh', 'client_credentials'] }}"
 
+authorize_url:
+  type: str
+  help: OAuth authorize endpoint (browser sign-in, `bench auth login`)
+  default: "https://{{ name }}.example.com/oauth/authorize"
+  when: "{{ auth == 'oauth_refresh' }}"
+
 pagination:
   type: str
   help: How list endpoints hand out the next page

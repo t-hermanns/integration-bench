@@ -31,6 +31,8 @@ API = "https://api.github.com"
 WEB = "https://github.com"
 DOCS = "https://docs.github.com/rest"
 RATE_LIMIT = 5000
+VIEWER = "bench-tester"
+"""Who `GET /user` reports for any token."""
 
 
 def _sha(data: bytes) -> str:
@@ -109,6 +111,7 @@ class GitHubFake(FakeBackend):
         )
         self.route("GET", "/search/issues")(self._search_issues)
         self.route("GET", "/repos/{owner}/{repo}")(self._get_repo)  # `bench doctor` only
+        self.route("GET", "/user")(self._get_user)  # `bench doctor` only
         self.route("GET", "/repos/{owner}/{repo}/issues/{number}", scopes=["issues:read"])(
             self._get_issue
         )
@@ -496,6 +499,9 @@ class GitHubFake(FakeBackend):
         if not isinstance(body, str) or not body:
             return self._validation("IssueComment", "body", "missing_field")
         return self._ok(self.add_comment(repo, number, body, author=self._actor(r)), status=201)
+
+    def _get_user(self, r: FakeRequest) -> Any:
+        return httpx2.Response(200, json=user(VIEWER))
 
     def _get_repo(self, r: FakeRequest) -> Any:
         repo = self._repo(r)

@@ -14,9 +14,10 @@ from pathlib import Path
 from typing import Literal
 
 import httpx2
+import keyring.errors
 from mcp.server.mcpserver.exceptions import ToolError
 
-from bench_core.auth import OAuthError
+from bench_core.auth import OAuthError, TokenSet, TokenStore
 
 Status = Literal["ok", "fail", "skip"]
 
@@ -62,6 +63,17 @@ async def probe(target: str, check: Awaitable[Check]) -> Check:
         return fail(target, f"{type(exc).__name__}: {exc}")
     except ValueError as exc:  # malformed setting, e.g. a broken private key or site name
         return fail(target, f"invalid setting: {exc}")
+
+
+def stored_login(target: str, store: TokenStore, account: str) -> TokenSet | Check:
+    """The tokens from `bench auth login <account>`, or a `skip` saying why there are none."""
+    try:
+        tokens = store.load(account)
+    except keyring.errors.KeyringError as exc:
+        return skip(target, f"no usable keyring ({exc}); set BENCH_TOKEN_DIR")
+    if tokens is None or not (tokens.access_token or tokens.refresh_token):
+        return skip(target, f"not signed in; run `bench auth login {account}`")
+    return tokens
 
 
 def http_failure(target: str, response: httpx2.Response, what: str) -> Check:

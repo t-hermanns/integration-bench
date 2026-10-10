@@ -9,6 +9,15 @@ from bench_core.auth.credentials import (
     RotatingRefresh,
     StaticToken,
 )
+from bench_core.auth.login import (
+    REDIRECT_URI,
+    CallbackReceiver,
+    LoginError,
+    LoginSpec,
+    authorization_url,
+    login,
+    pkce_pair,
+)
 from bench_core.auth.oauth import OAuthError, TokenEndpoint, parse_scopes
 from bench_core.auth.store import (
     EnvTokenStore,
@@ -18,17 +27,22 @@ from bench_core.auth.store import (
     ReadOnlyStoreError,
     TokenSet,
     TokenStore,
+    default_store,
 )
 
 __all__ = [
+    "REDIRECT_URI",
     "AppInstallation",
     "AuthError",
+    "CallbackReceiver",
     "ClientCredentials",
     "Credential",
     "CredentialAuth",
     "EnvTokenStore",
     "FileTokenStore",
     "KeyringTokenStore",
+    "LoginError",
+    "LoginSpec",
     "MemoryTokenStore",
     "OAuthError",
     "ReadOnlyStoreError",
@@ -37,5 +51,9 @@ __all__ = [
     "TokenEndpoint",
     "TokenSet",
     "TokenStore",
+    "authorization_url",
+    "default_store",
+    "login",
     "parse_scopes",
+    "pkce_pair",
 ]

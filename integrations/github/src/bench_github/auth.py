@@ -10,13 +10,30 @@
 
 import httpx2
 
-from bench_core.auth import AppInstallation, Credential, RotatingRefresh, TokenEndpoint, TokenStore
+from bench_core.auth import (
+    AppInstallation,
+    Credential,
+    LoginSpec,
+    RotatingRefresh,
+    TokenEndpoint,
+    TokenStore,
+)
 from bench_core.clock import Clock
 from bench_core.permissions import Granted
 
 from bench_github.client import BASE_URL
 
 TOKEN_URL = "https://github.com/login/oauth/access_token"
+AUTHORIZE_URL = "https://github.com/login/oauth/authorize"
+
+LOGIN = LoginSpec(
+    account="github",
+    authorize_url=AUTHORIZE_URL,
+    token_url=TOKEN_URL,
+    client_id_var="GITHUB_CLIENT_ID",
+    client_secret_var="GITHUB_CLIENT_SECRET",
+)
+"""App user sign-in: no scopes (the App's permissions apply), PKCE supported."""
 
 
 def user_token(

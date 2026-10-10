@@ -21,13 +21,15 @@ from bench_core.clock import Clock
 from bench_core.testing import FakeBackend, FakeClock, FakeRequest
 
 from bench_jira.adf import text_to_adf
-from bench_jira.auth import TOKEN_URL
-from bench_jira.client import BASE_URL, MAX_SUMMARY, PAGE_SIZE_PARAM
+from bench_jira.auth import ACCESSIBLE_RESOURCES_URL, TOKEN_URL
+from bench_jira.client import BASE_URL, GATEWAY_URL, MAX_SUMMARY, PAGE_SIZE_PARAM, SITE_URL
 from bench_jira.fake import jql
 from bench_jira.scopes import READ, WRITE
 
 BASE_PATH = urlsplit(BASE_URL).path
 TOKEN_PATH = urlsplit(TOKEN_URL).path
+CLOUD_ID = "11111111-2222-3333-4444-555555555555"
+"""Cloud id of the fake site behind the gateway (OAuth user tokens)."""
 TOKEN_PARAM = "nextPageToken"
 
 CATEGORIES = {"new": "To Do", "indeterminate": "In Progress", "done": "Done"}
@@ -96,9 +98,12 @@ class JiraFake(FakeBackend):
         self.route("POST", base + "/issue/{key}/comment", scopes=[WRITE])(self._add_comment)
         self.route("GET", base + "/issue/{key}/transitions", scopes=[READ])(self._transitions)
         self.route("POST", base + "/issue/{key}/transitions", scopes=[WRITE])(self._transition)
-        # `bench doctor` only.
-        self.route("GET", base + "/myself")(self._myself)
-        self.route("GET", base + "/project/{key}", scopes=[READ])(self._get_project)
+        # `bench doctor` only: the site (API token) and the gateway (OAuth user token).
+        gateway = urlsplit(GATEWAY_URL).path + "/{cloud_id}/rest/api/3"
+        self.route("GET", urlsplit(ACCESSIBLE_RESOURCES_URL).path)(self._accessible_resources)
+        for prefix in (base, gateway):
+            self.route("GET", prefix + "/myself")(self._myself)
+            self.route("GET", prefix + "/project/{key}", scopes=[READ])(self._get_project)
 
     # --- setup ----------------------------------------------------------------------------
 
@@ -298,6 +303,10 @@ class JiraFake(FakeBackend):
         if more:
             body["nextPageToken"] = f"page-{offset + size}"
         return httpx2.Response(200, json=body)
+
+    def _accessible_resources(self, r: FakeRequest) -> httpx2.Response:
+        site = {"id": CLOUD_ID, "url": SITE_URL, "name": "bench-sandbox", "scopes": []}
+        return httpx2.Response(200, json=[site])
 
     def _myself(self, r: FakeRequest) -> httpx2.Response:
         return httpx2.Response(200, json=BOT)

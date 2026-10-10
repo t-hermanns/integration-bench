@@ -23,11 +23,22 @@ registered.
 {% if auth == 'oauth_refresh' %}
 import httpx2
 
-from bench_core.auth import Credential, RotatingRefresh, TokenEndpoint, TokenStore
+from bench_core.auth import Credential, LoginSpec, RotatingRefresh, TokenEndpoint, TokenStore
 from bench_core.clock import Clock
 from bench_core.permissions import Granted
 
 TOKEN_URL = "{{ token_url }}"
+AUTHORIZE_URL = "{{ authorize_url }}"
+
+LOGIN = LoginSpec(
+    account="{{ name }}",
+    authorize_url=AUTHORIZE_URL,
+    token_url=TOKEN_URL,
+    client_id_var="{{ name | upper }}_CLIENT_ID",
+    client_secret_var="{{ name | upper }}_CLIENT_SECRET",
+    scopes=(),  # what the sign-in asks for, e.g. the scopes the tools require
+)
+"""`bench auth login {{ name }}`; set `pkce=False` if the provider rejects PKCE."""
 
 
 def user_token(
