@@ -1,0 +1,635 @@
+[
+ {
+  "name": "gdrive_search_files",
+  "description": "Search files and folders whose name or text contains a search text, newest first.",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "query": {
+     "type": "string",
+     "description": "Text to look for in file names and contents."
+    },
+    "folder_id": {
+     "type": "string",
+     "description": "Only search directly inside this folder; omit to search everywhere."
+    },
+    "cursor": {
+     "type": "string",
+     "description": "next_cursor from a previous call to get the next page; omit for page one."
+    },
+    "page_size": {
+     "type": "integer",
+     "description": "Results per page (1-50). Default: 10. Maximum: 50. Minimum: 1."
+    },
+    "response_format": {
+     "enum": [
+      "concise",
+      "detailed"
+     ],
+     "type": "string",
+     "description": "\"concise\" (default) for id, name and kind; \"detailed\" adds modified time, size, parent folder and link. Default: \"concise\"."
+    }
+   },
+   "required": [
+    "query"
+   ]
+  }
+ },
+ {
+  "name": "gdrive_get_file_metadata",
+  "description": "Get the metadata of one file or folder by id: name, kind, parent folder and modified time.",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "file_id": {
+     "type": "string",
+     "description": "File id from a search or folder listing."
+    },
+    "response_format": {
+     "enum": [
+      "concise",
+      "detailed"
+     ],
+     "type": "string",
+     "description": "\"concise\" (default) for the essentials; \"detailed\" adds MIME type, created time, size, description and link. Default: \"concise\"."
+    }
+   },
+   "required": [
+    "file_id"
+   ]
+  }
+ },
+ {
+  "name": "gdrive_read_file_content",
+  "description": "Read the text of a Google Doc, Sheet (as CSV), Slides deck or plain text file.",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "file_id": {
+     "type": "string",
+     "description": "File id from a search or folder listing."
+    },
+    "max_chars": {
+     "type": "integer",
+     "description": "Return at most this many characters (100-50000); longer texts are cut. Default: 8000. Maximum: 50000. Minimum: 100."
+    }
+   },
+   "required": [
+    "file_id"
+   ]
+  }
+ },
+ {
+  "name": "gdrive_list_folder",
+  "description": "List the files and folders directly inside a folder, folders first.",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "folder_id": {
+     "type": "string",
+     "description": "Folder id from a search or listing; \"root\" (default) for My Drive. Default: \"root\"."
+    },
+    "cursor": {
+     "type": "string",
+     "description": "next_cursor from a previous call to get the next page; omit for page one."
+    },
+    "page_size": {
+     "type": "integer",
+     "description": "Results per page (1-50). Default: 20. Maximum: 50. Minimum: 1."
+    },
+    "response_format": {
+     "enum": [
+      "concise",
+      "detailed"
+     ],
+     "type": "string",
+     "description": "\"concise\" (default) for id, name and kind; \"detailed\" adds modified time, size, parent folder and link. Default: \"concise\"."
+    }
+   }
+  }
+ },
+ {
+  "name": "gdrive_create_document",
+  "description": "Create a new Google Doc with the given plain text as its content.",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "name": {
+     "type": "string",
+     "description": "Document name (at most 200 characters)."
+    },
+    "content": {
+     "type": "string",
+     "description": "Document text in plain text; line breaks are kept."
+    },
+    "folder_id": {
+     "type": "string",
+     "description": "Folder to create the document in; omit for My Drive."
+    }
+   },
+   "required": [
+    "name",
+    "content"
+   ]
+  }
+ },
+ {
+  "name": "github_search_issues",
+  "description": "Search issues across GitHub with GitHub search syntax and return matching issues. Only issues are returned unless the query contains is:pr.",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "query": {
+     "type": "string",
+     "description": "GitHub search query, e.g. \"repo:octocat/hello-world is:open label:bug crash\"."
+    },
+    "cursor": {
+     "type": "string",
+     "description": "next_cursor from a previous call to get the next page; omit for page one."
+    },
+    "per_page": {
+     "type": "integer",
+     "description": "Results per page (1-50). Default: 10. Maximum: 50. Minimum: 1."
+    },
+    "response_format": {
+     "enum": [
+      "concise",
+      "detailed"
+     ],
+     "type": "string",
+     "description": "\"concise\" (default) for number, title, state and labels; \"detailed\" adds author, comment count, timestamps and URL. Default: \"concise\"."
+    }
+   },
+   "required": [
+    "query"
+   ]
+  }
+ },
+ {
+  "name": "github_get_issue",
+  "description": "Get one issue (or pull request) by number, including its body.",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "owner": {
+     "type": "string",
+     "description": "Repository owner (user or organization login)."
+    },
+    "repo": {
+     "type": "string",
+     "description": "Repository name without the owner."
+    },
+    "number": {
+     "type": "integer",
+     "description": "Issue number. Minimum: 1."
+    },
+    "response_format": {
+     "enum": [
+      "concise",
+      "detailed"
+     ],
+     "type": "string",
+     "description": "\"concise\" (default) for the issue itself; \"detailed\" adds author, timestamps, milestone and the first comments. Default: \"concise\"."
+    }
+   },
+   "required": [
+    "owner",
+    "repo",
+    "number"
+   ]
+  }
+ },
+ {
+  "name": "github_create_issue",
+  "description": "Create a new issue in a repository.",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "owner": {
+     "type": "string",
+     "description": "Repository owner (user or organization login)."
+    },
+    "repo": {
+     "type": "string",
+     "description": "Repository name without the owner."
+    },
+    "title": {
+     "type": "string",
+     "description": "Issue title."
+    },
+    "body": {
+     "type": "string",
+     "description": "Issue description in Markdown."
+    },
+    "labels": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array",
+     "description": "Label names to add."
+    },
+    "assignees": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array",
+     "description": "Logins of users to assign."
+    }
+   },
+   "required": [
+    "owner",
+    "repo",
+    "title"
+   ]
+  }
+ },
+ {
+  "name": "github_add_issue_comment",
+  "description": "Add a comment to an issue or pull request.",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "owner": {
+     "type": "string",
+     "description": "Repository owner (user or organization login)."
+    },
+    "repo": {
+     "type": "string",
+     "description": "Repository name without the owner."
+    },
+    "number": {
+     "type": "integer",
+     "description": "Issue or pull request number. Minimum: 1."
+    },
+    "body": {
+     "type": "string",
+     "description": "Comment text in Markdown."
+    }
+   },
+   "required": [
+    "owner",
+    "repo",
+    "number",
+    "body"
+   ]
+  }
+ },
+ {
+  "name": "github_list_pull_requests",
+  "description": "List pull requests of a repository, most recently updated first.",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "owner": {
+     "type": "string",
+     "description": "Repository owner (user or organization login)."
+    },
+    "repo": {
+     "type": "string",
+     "description": "Repository name without the owner."
+    },
+    "state": {
+     "enum": [
+      "open",
+      "closed",
+      "all"
+     ],
+     "type": "string",
+     "description": "open (default), closed or all. Default: \"open\"."
+    },
+    "cursor": {
+     "type": "string",
+     "description": "next_cursor from a previous call to get the next page; omit for page one."
+    },
+    "per_page": {
+     "type": "integer",
+     "description": "Results per page (1-50). Default: 10. Maximum: 50. Minimum: 1."
+    },
+    "response_format": {
+     "enum": [
+      "concise",
+      "detailed"
+     ],
+     "type": "string",
+     "description": "\"concise\" (default) or \"detailed\" (adds creation time, labels and URL). Default: \"concise\"."
+    }
+   },
+   "required": [
+    "owner",
+    "repo"
+   ]
+  }
+ },
+ {
+  "name": "github_get_file_contents",
+  "description": "Read a file from a repository, or list a directory.",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "owner": {
+     "type": "string",
+     "description": "Repository owner (user or organization login)."
+    },
+    "repo": {
+     "type": "string",
+     "description": "Repository name without the owner."
+    },
+    "path": {
+     "type": "string",
+     "description": "Path inside the repository, e.g. \"src/main.py\"; empty for the root directory. Default: \"\"."
+    },
+    "ref": {
+     "type": "string",
+     "description": "Branch, tag or commit SHA; omit for the default branch."
+    },
+    "response_format": {
+     "enum": [
+      "concise",
+      "detailed"
+     ],
+     "type": "string",
+     "description": "\"concise\" (default) returns up to 4,000 characters; \"detailed\" up to 40,000 plus size, SHA and URL. Default: \"concise\"."
+    }
+   },
+   "required": [
+    "owner",
+    "repo"
+   ]
+  }
+ },
+ {
+  "name": "jira_search_issues",
+  "description": "Search for issues using JQL (enhanced search).",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "jql": {
+     "type": "string",
+     "description": "JQL query, e.g. 'project = BENCH AND status = \"In Progress\"'."
+    },
+    "cursor": {
+     "type": "string",
+     "description": "next_cursor from a previous call to get the next page; omit for page one."
+    },
+    "page_size": {
+     "type": "integer",
+     "description": "Results per page (1-50). Default: 10. Maximum: 50. Minimum: 1."
+    },
+    "response_format": {
+     "enum": [
+      "concise",
+      "detailed"
+     ],
+     "type": "string",
+     "description": "\"concise\" (default) for key, summary, status and type; \"detailed\" adds priority, assignee, labels, last update and URL. Default: \"concise\"."
+    }
+   },
+   "required": [
+    "jql"
+   ]
+  }
+ },
+ {
+  "name": "jira_get_issue",
+  "description": "Get an issue by key, including its description.",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "issue_key": {
+     "type": "string",
+     "description": "Issue key, e.g. \"BENCH-12\"."
+    },
+    "response_format": {
+     "enum": [
+      "concise",
+      "detailed"
+     ],
+     "type": "string",
+     "description": "\"concise\" (default) for the issue itself; \"detailed\" adds reporter, timestamps, URL and the comments. Default: \"concise\"."
+    }
+   },
+   "required": [
+    "issue_key"
+   ]
+  }
+ },
+ {
+  "name": "jira_create_issue",
+  "description": "Create an issue in a project.",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "project_key": {
+     "type": "string",
+     "description": "Project key, e.g. \"BENCH\"."
+    },
+    "summary": {
+     "type": "string",
+     "description": "One-line summary (at most 255 characters)."
+    },
+    "issue_type": {
+     "type": "string",
+     "description": "Issue type name, e.g. \"Task\", \"Bug\" or \"Story\". Default: \"Task\"."
+    },
+    "description": {
+     "type": "string",
+     "description": "Description in plain text."
+    },
+    "labels": {
+     "items": {
+      "type": "string"
+     },
+     "type": "array",
+     "description": "Labels without spaces."
+    }
+   },
+   "required": [
+    "project_key",
+    "summary"
+   ]
+  }
+ },
+ {
+  "name": "jira_add_comment",
+  "description": "Add a comment to an issue.",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "issue_key": {
+     "type": "string",
+     "description": "Issue key, e.g. \"BENCH-12\"."
+    },
+    "body": {
+     "type": "string",
+     "description": "Comment text in plain text."
+    }
+   },
+   "required": [
+    "issue_key",
+    "body"
+   ]
+  }
+ },
+ {
+  "name": "jira_transition_issue",
+  "description": "Move an issue to another workflow status.",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "issue_key": {
+     "type": "string",
+     "description": "Issue key, e.g. \"BENCH-12\"."
+    },
+    "status": {
+     "type": "string",
+     "description": "Target status, e.g. \"In Progress\" or \"Done\"."
+    }
+   },
+   "required": [
+    "issue_key",
+    "status"
+   ]
+  }
+ },
+ {
+  "name": "slack_list_channels",
+  "description": "List the workspace's public channels with their ids. is_member tells whether the app can read and post in a channel.",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "cursor": {
+     "type": "string",
+     "description": "next_cursor from a previous call to get the next page; omit for page one."
+    },
+    "page_size": {
+     "type": "integer",
+     "description": "Channels per page (1-100). Default: 50. Maximum: 100. Minimum: 1."
+    },
+    "response_format": {
+     "enum": [
+      "concise",
+      "detailed"
+     ],
+     "type": "string",
+     "description": "\"concise\" (default) for id, name and is_member; \"detailed\" adds topic, purpose and member count. Default: \"concise\"."
+    }
+   }
+  }
+ },
+ {
+  "name": "slack_read_channel_history",
+  "description": "Read the top-level messages of a channel, newest first. Thread replies are not included; messages with reply_count have a thread you can read with slack_read_thread.",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "channel_id": {
+     "type": "string",
+     "description": "Channel id from slack_list_channels, e.g. \"C0123456789\" (not the name)."
+    },
+    "cursor": {
+     "type": "string",
+     "description": "next_cursor from a previous call to get older messages; omit for the newest."
+    },
+    "page_size": {
+     "type": "integer",
+     "description": "Messages per page (1-100). Default: 20. Maximum: 100. Minimum: 1."
+    },
+    "response_format": {
+     "enum": [
+      "concise",
+      "detailed"
+     ],
+     "type": "string",
+     "description": "\"concise\" (default) for ts, author, text and thread info; \"detailed\" adds the posting time. Default: \"concise\"."
+    }
+   },
+   "required": [
+    "channel_id"
+   ]
+  }
+ },
+ {
+  "name": "slack_read_thread",
+  "description": "Read a thread: the parent message followed by its replies, oldest first.",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "channel_id": {
+     "type": "string",
+     "description": "Channel id of the thread, e.g. \"C0123456789\"."
+    },
+    "thread_ts": {
+     "type": "string",
+     "description": "ts of the thread's parent message, from a history result."
+    },
+    "cursor": {
+     "type": "string",
+     "description": "next_cursor from a previous call to get the next page; omit for page one."
+    },
+    "page_size": {
+     "type": "integer",
+     "description": "Messages per page (1-100). Default: 50. Maximum: 100. Minimum: 1."
+    },
+    "response_format": {
+     "enum": [
+      "concise",
+      "detailed"
+     ],
+     "type": "string",
+     "description": "\"concise\" (default) for ts, author, text; \"detailed\" adds the posting time. Default: \"concise\"."
+    }
+   },
+   "required": [
+    "channel_id",
+    "thread_ts"
+   ]
+  }
+ },
+ {
+  "name": "slack_post_message",
+  "description": "Post a new top-level message to a channel the app is a member of. To answer an existing message, use slack_reply_in_thread instead.",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "channel_id": {
+     "type": "string",
+     "description": "Channel id from slack_list_channels, e.g. \"C0123456789\"."
+    },
+    "text": {
+     "type": "string",
+     "description": "Message text (Slack mrkdwn, at most 4000 characters)."
+    }
+   },
+   "required": [
+    "channel_id",
+    "text"
+   ]
+  }
+ },
+ {
+  "name": "slack_reply_in_thread",
+  "description": "Reply to a top-level message, in its thread.",
+  "parameters": {
+   "type": "object",
+   "properties": {
+    "channel_id": {
+     "type": "string",
+     "description": "Channel id of the message, e.g. \"C0123456789\"."
+    },
+    "thread_ts": {
+     "type": "string",
+     "description": "ts of the top-level message to reply to, from a history result."
+    },
+    "text": {
+     "type": "string",
+     "description": "Reply text (Slack mrkdwn, at most 4000 characters)."
+    }
+   },
+   "required": [
+    "channel_id",
+    "thread_ts",
+    "text"
+   ]
+  }
+ }
+]

@@ -107,12 +107,14 @@ source = { editable = "packages/bench-evals" }
 dependencies = [
     { name = "bench-core" },
     { name = "httpx2" },
+    { name = "mcp" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "bench-core", editable = "packages/bench-core" },
     { name = "httpx2", specifier = ">=2.13.1" },
+    { name = "mcp", specifier = ">=2.3,<3" },
 ]
 
 [[package]]
