@@ -26,6 +26,9 @@ REDACTED_EMAIL = "redacted@example.invalid"
 SENSITIVE_HEADERS = frozenset(
     {"authorization", "proxy-authorization", "cookie", "set-cookie", "x-api-key"}
 )
+# Set by the HTTP stack, not by our code; `accept-encoding` even differs by Python version
+# (zstd), which would make regenerated cassettes differ across CI jobs. Never matched on.
+TRANSPORT_HEADERS = frozenset({"accept-encoding", "connection"})
 # Query and form parameters (OAuth grants, Slack's `token=`, Google's `key=`).
 SENSITIVE_PARAMS = frozenset(
     {
@@ -138,7 +141,9 @@ def _redact_body(body: bytes | str | None, content_type: str) -> bytes | str | N
 def redact_request(request: Request) -> Request:
     request = copy.deepcopy(request)
     for name in list(request.headers):
-        if name.lower() in SENSITIVE_HEADERS:
+        if name.lower() in TRANSPORT_HEADERS:
+            del request.headers[name]
+        elif name.lower() in SENSITIVE_HEADERS:
             request.headers[name] = REDACTED
         else:
             request.headers[name] = scrub(request.headers[name])

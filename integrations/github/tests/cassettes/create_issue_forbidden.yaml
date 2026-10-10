@@ -1,0 +1,34 @@
+interactions:
+- request:
+    body: '{"title":"Should not be created"}'
+    headers:
+      accept:
+      - application/vnd.github+json
+      authorization:
+      - REDACTED
+      content-length:
+      - '33'
+      content-type:
+      - application/json
+      host:
+      - api.github.com
+      user-agent:
+      - integration-bench
+      x-github-api-version:
+      - '2022-11-28'
+    method: POST
+    uri: https://api.github.com/repos/bench-sandbox/widgets/issues
+  response:
+    body:
+      string: '{"message":"Resource not accessible by integration","documentation_url":"https://docs.github.com/rest","status":"403"}'
+    headers:
+      content-length:
+      - '118'
+      content-type:
+      - application/json
+      x-accepted-github-permissions:
+      - issues=write
+    status:
+      code: 403
+      message: Forbidden
+version: 1

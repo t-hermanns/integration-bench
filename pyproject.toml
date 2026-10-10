@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Build, test, evaluate and monitor MCP integrations (Jira, GitHub, Google Drive, Slack)."
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = ["bench-core", "bench-github"]
+dependencies = ["bench-cli", "bench-core", "bench-github"]
 
 [dependency-groups]
 dev = [
@@ -22,6 +22,7 @@ package = false
 members = ["packages/*", "integrations/*"]
 
 [tool.uv.sources]
+bench-cli = { workspace = true }
 bench-core = { workspace = true }
 bench-github = { workspace = true }
 

@@ -1,0 +1,40 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/vnd.github+json
+      authorization:
+      - REDACTED
+      host:
+      - api.github.com
+      user-agent:
+      - integration-bench
+      x-github-api-version:
+      - '2022-11-28'
+    method: GET
+    uri: https://api.github.com/repos/bench-sandbox/widgets/issues/1
+  response:
+    body:
+      string: '{"url":"https://api.github.com/repos/bench-sandbox/widgets/issues/1","repository_url":"https://api.github.com/repos/bench-sandbox/widgets","html_url":"https://github.com/bench-sandbox/widgets/issues/1","id":1000001,"number":1,"title":"Crash
+        when config file is empty","user":{"login":"bench-contributor","id":1768,"type":"User","html_url":"https://github.com/bench-contributor"},"labels":[{"id":318,"name":"bug"}],"state":"open","state_reason":null,"assignees":[{"login":"bench-maintainer","id":1621,"type":"User","html_url":"https://github.com/bench-maintainer"}],"milestone":{"number":1,"title":"v2.4"},"comments":3,"created_at":"2026-09-01T14:00:00Z","updated_at":"2026-09-06T01:00:00Z","closed_at":null,"author_association":"CONTRIBUTOR","body":"Starting
+        with an empty `widgets.toml` raises `KeyError: ''name''`."}'
+    headers:
+      content-length:
+      - '816'
+      content-type:
+      - application/json
+      x-github-api-version-selected:
+      - '2022-11-28'
+      x-ratelimit-limit:
+      - '5000'
+      x-ratelimit-remaining:
+      - '4999'
+      x-ratelimit-reset:
+      - '1800003600'
+      x-ratelimit-resource:
+      - core
+    status:
+      code: 200
+      message: OK
+version: 1

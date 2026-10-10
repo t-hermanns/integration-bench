@@ -85,10 +85,16 @@ class Fault:
 
 
 def _compile(template: str) -> re.Pattern[str]:
-    parts = re.split(r"\{(\w+)\}", template)
-    regex = "".join(
-        f"(?P<{part}>[^/]+)" if i % 2 else re.escape(part) for i, part in enumerate(parts)
-    )
+    """`/repos/{owner}/{repo}` matches one segment per param; `{path:path}` spans slashes."""
+    parts = re.split(r"\{(\w+(?::path)?)\}", template)
+    regex = ""
+    for i, part in enumerate(parts):
+        if i % 2 == 0:
+            regex += re.escape(part)
+        elif part.endswith(":path"):
+            regex += f"(?P<{part.removesuffix(':path')}>.+)"
+        else:
+            regex += f"(?P<{part}>[^/]+)"
     return re.compile(f"^{regex}$")
 
 
@@ -128,7 +134,10 @@ class FakeBackend:
     def route(
         self, method: str, template: str, *, scopes: Sequence[str] = ()
     ) -> Callable[[Handler], Handler]:
-        """Decorator: `@backend.route("GET", "/repos/{owner}/{repo}", scopes=["repo"])`."""
+        """Decorator: `@backend.route("GET", "/repos/{owner}/{repo}", scopes=["repo"])`.
+
+        `{name:path}` matches the rest of the path including slashes.
+        """
 
         def register(handler: Handler) -> Handler:
             self.add_route(method, template, handler, scopes=scopes)

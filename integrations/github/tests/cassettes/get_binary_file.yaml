@@ -1,0 +1,38 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/vnd.github+json
+      authorization:
+      - REDACTED
+      host:
+      - api.github.com
+      user-agent:
+      - integration-bench
+      x-github-api-version:
+      - '2022-11-28'
+    method: GET
+    uri: https://api.github.com/repos/bench-sandbox/widgets/contents/assets/logo.png
+  response:
+    body:
+      string: '{"type":"file","name":"logo.png","path":"assets/logo.png","sha":"f2832104c14b337b66b5bf3a27e6dd11af918f9c","size":29,"encoding":"base64","content":"iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAA=\n","html_url":"https://github.com/bench-sandbox/widgets/blob/main/assets/logo.png"}'
+    headers:
+      content-length:
+      - '272'
+      content-type:
+      - application/json
+      x-github-api-version-selected:
+      - '2022-11-28'
+      x-ratelimit-limit:
+      - '5000'
+      x-ratelimit-remaining:
+      - '4999'
+      x-ratelimit-reset:
+      - '1800003600'
+      x-ratelimit-resource:
+      - core
+    status:
+      code: 200
+      message: OK
+version: 1

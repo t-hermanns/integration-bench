@@ -1,0 +1,38 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/vnd.github+json
+      authorization:
+      - REDACTED
+      host:
+      - api.github.com
+      user-agent:
+      - integration-bench
+      x-github-api-version:
+      - '2022-11-28'
+    method: GET
+    uri: https://api.github.com/repos/bench-sandbox/widgets/contents/data/large.csv
+  response:
+    body:
+      string: '{"type":"file","name":"large.csv","path":"data/large.csv","sha":"ec0f15cacf5b2b8fef2191b3adfee7f5ec48b4f2","size":1170008,"encoding":"none","content":"","html_url":"https://github.com/bench-sandbox/widgets/blob/main/data/large.csv"}'
+    headers:
+      content-length:
+      - '232'
+      content-type:
+      - application/json
+      x-github-api-version-selected:
+      - '2022-11-28'
+      x-ratelimit-limit:
+      - '5000'
+      x-ratelimit-remaining:
+      - '4999'
+      x-ratelimit-reset:
+      - '1800003600'
+      x-ratelimit-resource:
+      - core
+    status:
+      code: 200
+      message: OK
+version: 1

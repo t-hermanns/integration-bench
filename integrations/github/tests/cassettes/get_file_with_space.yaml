@@ -1,0 +1,39 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/vnd.github+json
+      authorization:
+      - REDACTED
+      host:
+      - api.github.com
+      user-agent:
+      - integration-bench
+      x-github-api-version:
+      - '2022-11-28'
+    method: GET
+    uri: https://api.github.com/repos/bench-sandbox/widgets/contents/docs/user%20guide.md?ref=main
+  response:
+    body:
+      string: '{"type":"file","name":"user guide.md","path":"docs/user guide.md","sha":"10b3c2a06810c0448499412751416997995079b4","size":41,"encoding":"base64","content":"IyBVc2VyIGd1aWRlCgpTZWUgdGhlIFJFQURNRSBmb3IgYmFzaWNzLgo=\n","html_url":"https://github.com/bench-sandbox/widgets/blob/main/docs/user
+        guide.md"}'
+    headers:
+      content-length:
+      - '299'
+      content-type:
+      - application/json
+      x-github-api-version-selected:
+      - '2022-11-28'
+      x-ratelimit-limit:
+      - '5000'
+      x-ratelimit-remaining:
+      - '4999'
+      x-ratelimit-reset:
+      - '1800003600'
+      x-ratelimit-resource:
+      - core
+    status:
+      code: 200
+      message: OK
+version: 1

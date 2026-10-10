@@ -1,0 +1,86 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/vnd.github+json
+      authorization:
+      - REDACTED
+      host:
+      - api.github.com
+      user-agent:
+      - integration-bench
+      x-github-api-version:
+      - '2022-11-28'
+    method: GET
+    uri: https://api.github.com/repos/bench-sandbox/widgets/pulls?state=all&sort=updated&direction=desc&per_page=3
+  response:
+    body:
+      string: '[{"url":"https://api.github.com/repos/bench-sandbox/widgets/pulls/16","id":1000025,"html_url":"https://github.com/bench-sandbox/widgets/pull/16","number":16,"state":"closed","title":"Experiment:
+        new cache backend","user":{"login":"bench-contributor","id":1768,"type":"User","html_url":"https://github.com/bench-contributor"},"body":null,"labels":[],"draft":false,"head":{"ref":"exp/cache","label":"bench-sandbox:exp/cache","sha":"0000000000000000000000000000000000000010"},"base":{"ref":"main","label":"bench-sandbox:main","sha":"0000000000000000000000000000000000000000"},"created_at":"2026-09-05T01:00:00Z","updated_at":"2026-09-06T07:00:00Z","closed_at":"2026-09-06T07:00:00Z","merged_at":null},{"url":"https://api.github.com/repos/bench-sandbox/widgets/pulls/15","id":1000023,"html_url":"https://github.com/bench-sandbox/widgets/pull/15","number":15,"state":"closed","title":"Fix
+        login button layout","user":{"login":"bench-contributor","id":1768,"type":"User","html_url":"https://github.com/bench-contributor"},"body":null,"labels":[],"draft":false,"head":{"ref":"fix/login-mobile","label":"bench-sandbox:fix/login-mobile","sha":"000000000000000000000000000000000000000f"},"base":{"ref":"main","label":"bench-sandbox:main","sha":"0000000000000000000000000000000000000000"},"created_at":"2026-09-04T18:00:00Z","updated_at":"2026-09-06T00:00:00Z","closed_at":"2026-09-06T00:00:00Z","merged_at":"2026-09-06T00:00:00Z"},{"url":"https://api.github.com/repos/bench-sandbox/widgets/pulls/14","id":1000021,"html_url":"https://github.com/bench-sandbox/widgets/pull/14","number":14,"state":"open","title":"Stream
+        report exports","user":{"login":"bench-maintainer","id":1621,"type":"User","html_url":"https://github.com/bench-maintainer"},"body":null,"labels":[],"draft":true,"head":{"ref":"perf/stream-export","label":"bench-sandbox:perf/stream-export","sha":"000000000000000000000000000000000000000e"},"base":{"ref":"main","label":"bench-sandbox:main","sha":"0000000000000000000000000000000000000000"},"created_at":"2026-09-04T11:00:00Z","updated_at":"2026-09-05T17:00:00Z","closed_at":null,"merged_at":null}]'
+    headers:
+      content-length:
+      - '2105'
+      content-type:
+      - application/json
+      link:
+      - <https://api.github.com/repos/bench-sandbox/widgets/pulls?state=all&sort=updated&direction=desc&per_page=3&page=2>;
+        rel="next", <https://api.github.com/repos/bench-sandbox/widgets/pulls?state=all&sort=updated&direction=desc&per_page=3&page=2>;
+        rel="last"
+      x-github-api-version-selected:
+      - '2022-11-28'
+      x-ratelimit-limit:
+      - '5000'
+      x-ratelimit-remaining:
+      - '4999'
+      x-ratelimit-reset:
+      - '1800003600'
+      x-ratelimit-resource:
+      - core
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/vnd.github+json
+      authorization:
+      - REDACTED
+      host:
+      - api.github.com
+      user-agent:
+      - integration-bench
+      x-github-api-version:
+      - '2022-11-28'
+    method: GET
+    uri: https://api.github.com/repos/bench-sandbox/widgets/pulls?state=all&sort=updated&direction=desc&per_page=3&page=2
+  response:
+    body:
+      string: '[{"url":"https://api.github.com/repos/bench-sandbox/widgets/pulls/13","id":1000019,"html_url":"https://github.com/bench-sandbox/widgets/pull/13","number":13,"state":"open","title":"Fall
+        back to defaults for empty config","user":{"login":"bench-contributor","id":1768,"type":"User","html_url":"https://github.com/bench-contributor"},"body":null,"labels":[],"draft":false,"head":{"ref":"fix/empty-config","label":"bench-sandbox:fix/empty-config","sha":"000000000000000000000000000000000000000d"},"base":{"ref":"main","label":"bench-sandbox:main","sha":"0000000000000000000000000000000000000000"},"created_at":"2026-09-04T04:00:00Z","updated_at":"2026-09-05T10:00:00Z","closed_at":null,"merged_at":null}]'
+    headers:
+      content-length:
+      - '701'
+      content-type:
+      - application/json
+      link:
+      - <https://api.github.com/repos/bench-sandbox/widgets/pulls?state=all&sort=updated&direction=desc&per_page=3&page=1>;
+        rel="first", <https://api.github.com/repos/bench-sandbox/widgets/pulls?state=all&sort=updated&direction=desc&per_page=3&page=1>;
+        rel="prev"
+      x-github-api-version-selected:
+      - '2022-11-28'
+      x-ratelimit-limit:
+      - '5000'
+      x-ratelimit-remaining:
+      - '4998'
+      x-ratelimit-reset:
+      - '1800003600'
+      x-ratelimit-resource:
+      - core
+    status:
+      code: 200
+      message: OK
+version: 1

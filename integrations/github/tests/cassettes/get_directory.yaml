@@ -1,0 +1,74 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/vnd.github+json
+      authorization:
+      - REDACTED
+      host:
+      - api.github.com
+      user-agent:
+      - integration-bench
+      x-github-api-version:
+      - '2022-11-28'
+    method: GET
+    uri: https://api.github.com/repos/bench-sandbox/widgets/contents
+  response:
+    body:
+      string: '[{"name":"README.md","path":"README.md","sha":"8ec9a00bfd09b3190ac6b22251dbb1aa95a0579d","size":149,"type":"file"},{"name":"assets","path":"assets","sha":"3685e330ec5277a9dd5661c61f2bc55811f5a628","size":0,"type":"dir"},{"name":"data","path":"data","sha":"a17c9aaa61e80a1bf71d0d850af4e5baa9800bbd","size":0,"type":"dir"},{"name":"docs","path":"docs","sha":"71ab8b6afb1bae3df247e0286da35e0da16564ff","size":0,"type":"dir"},{"name":"src","path":"src","sha":"f27fede2220bcd326aee3e86ddfd4ebd0fe58cb9","size":0,"type":"dir"}]'
+    headers:
+      content-length:
+      - '521'
+      content-type:
+      - application/json
+      x-github-api-version-selected:
+      - '2022-11-28'
+      x-ratelimit-limit:
+      - '5000'
+      x-ratelimit-remaining:
+      - '4999'
+      x-ratelimit-reset:
+      - '1800003600'
+      x-ratelimit-resource:
+      - core
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/vnd.github+json
+      authorization:
+      - REDACTED
+      host:
+      - api.github.com
+      user-agent:
+      - integration-bench
+      x-github-api-version:
+      - '2022-11-28'
+    method: GET
+    uri: https://api.github.com/repos/bench-sandbox/widgets/contents/src/widgets
+  response:
+    body:
+      string: '[{"name":"__init__.py","path":"src/widgets/__init__.py","sha":"41b04479ad68fc24eef8375711f842f6694297ca","size":39,"type":"file"},{"name":"core.py","path":"src/widgets/core.py","sha":"f34653b846c853cf258b069d377e1065544eeccb","size":138,"type":"file"}]'
+    headers:
+      content-length:
+      - '252'
+      content-type:
+      - application/json
+      x-github-api-version-selected:
+      - '2022-11-28'
+      x-ratelimit-limit:
+      - '5000'
+      x-ratelimit-remaining:
+      - '4998'
+      x-ratelimit-reset:
+      - '1800003600'
+      x-ratelimit-resource:
+      - core
+    status:
+      code: 200
+      message: OK
+version: 1

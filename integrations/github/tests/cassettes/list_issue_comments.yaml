@@ -1,0 +1,85 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/vnd.github+json
+      authorization:
+      - REDACTED
+      host:
+      - api.github.com
+      user-agent:
+      - integration-bench
+      x-github-api-version:
+      - '2022-11-28'
+    method: GET
+    uri: https://api.github.com/repos/bench-sandbox/widgets/issues/1/comments?per_page=2
+  response:
+    body:
+      string: '[{"id":1000013,"url":"https://api.github.com/repos/bench-sandbox/widgets/issues/comments/1000013","html_url":"https://github.com/bench-sandbox/widgets/issues/1#issuecomment-1000013","issue_url":"https://api.github.com/repos/bench-sandbox/widgets/issues/1","user":{"login":"bench-contributor","id":1768,"type":"User","html_url":"https://github.com/bench-contributor"},"body":"I
+        can reproduce this on 2.3.1.","created_at":"2026-09-05T23:00:00Z","updated_at":"2026-09-05T23:00:00Z","author_association":"CONTRIBUTOR"},{"id":1000014,"url":"https://api.github.com/repos/bench-sandbox/widgets/issues/comments/1000014","html_url":"https://github.com/bench-sandbox/widgets/issues/1#issuecomment-1000014","issue_url":"https://api.github.com/repos/bench-sandbox/widgets/issues/1","user":{"login":"bench-maintainer","id":1621,"type":"User","html_url":"https://github.com/bench-maintainer"},"body":"Thanks!
+        We should fall back to defaults when the file is empty.","created_at":"2026-09-06T00:00:00Z","updated_at":"2026-09-06T00:00:00Z","author_association":"CONTRIBUTOR"}]'
+    headers:
+      content-length:
+      - '1060'
+      content-type:
+      - application/json
+      link:
+      - <https://api.github.com/repos/bench-sandbox/widgets/issues/1/comments?per_page=2&page=2>;
+        rel="next", <https://api.github.com/repos/bench-sandbox/widgets/issues/1/comments?per_page=2&page=2>;
+        rel="last"
+      x-github-api-version-selected:
+      - '2022-11-28'
+      x-ratelimit-limit:
+      - '5000'
+      x-ratelimit-remaining:
+      - '4999'
+      x-ratelimit-reset:
+      - '1800003600'
+      x-ratelimit-resource:
+      - core
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/vnd.github+json
+      authorization:
+      - REDACTED
+      host:
+      - api.github.com
+      user-agent:
+      - integration-bench
+      x-github-api-version:
+      - '2022-11-28'
+    method: GET
+    uri: https://api.github.com/repos/bench-sandbox/widgets/issues/1/comments?per_page=2&page=2
+  response:
+    body:
+      string: '[{"id":1000015,"url":"https://api.github.com/repos/bench-sandbox/widgets/issues/comments/1000015","html_url":"https://github.com/bench-sandbox/widgets/issues/1#issuecomment-1000015","issue_url":"https://api.github.com/repos/bench-sandbox/widgets/issues/1","user":{"login":"bench-contributor","id":1768,"type":"User","html_url":"https://github.com/bench-contributor"},"body":"I
+        opened a pull request for the fallback.","created_at":"2026-09-06T01:00:00Z","updated_at":"2026-09-06T01:00:00Z","author_association":"CONTRIBUTOR"}]'
+    headers:
+      content-length:
+      - '526'
+      content-type:
+      - application/json
+      link:
+      - <https://api.github.com/repos/bench-sandbox/widgets/issues/1/comments?per_page=2&page=1>;
+        rel="first", <https://api.github.com/repos/bench-sandbox/widgets/issues/1/comments?per_page=2&page=1>;
+        rel="prev"
+      x-github-api-version-selected:
+      - '2022-11-28'
+      x-ratelimit-limit:
+      - '5000'
+      x-ratelimit-remaining:
+      - '4998'
+      x-ratelimit-reset:
+      - '1800003600'
+      x-ratelimit-resource:
+      - core
+    status:
+      code: 200
+      message: OK
+version: 1
