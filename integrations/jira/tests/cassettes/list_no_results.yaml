@@ -1,0 +1,26 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      host:
+      - bench-sandbox.atlassian.net
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://bench-sandbox.atlassian.net/rest/api/3/items?maxResults=20&q=kubernetes
+  response:
+    body:
+      string: '{"items":[],"isLast":true}'
+    headers:
+      content-length:
+      - '26'
+      content-type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+version: 1

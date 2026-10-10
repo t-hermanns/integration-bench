@@ -1,0 +1,30 @@
+interactions:
+- request:
+    body: '{"title":"Should not be created"}'
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      content-length:
+      - '33'
+      content-type:
+      - application/json
+      host:
+      - bench-sandbox.atlassian.net
+      user-agent:
+      - integration-bench
+    method: POST
+    uri: https://bench-sandbox.atlassian.net/rest/api/3/items
+  response:
+    body:
+      string: '{"errorMessages":["The token lacks the scope for this call."],"errors":{}}'
+    headers:
+      content-length:
+      - '74'
+      content-type:
+      - application/json
+    status:
+      code: 403
+      message: Forbidden
+version: 1

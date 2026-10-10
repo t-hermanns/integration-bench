@@ -1,0 +1,11 @@
+# Changes here will be overwritten by Copier; do not edit manually.
+_commit: e77790e
+_src_path: .
+auth: oauth_refresh
+base_url: https://bench-sandbox.atlassian.net/rest/api/3
+error_format: jira
+name: jira
+pagination: next_page_token
+provider: Jira
+retry: jira
+token_url: https://auth.atlassian.com/oauth/token

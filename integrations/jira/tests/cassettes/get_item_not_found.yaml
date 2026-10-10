@@ -1,0 +1,26 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      host:
+      - bench-sandbox.atlassian.net
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://bench-sandbox.atlassian.net/rest/api/3/items/9999
+  response:
+    body:
+      string: '{"errorMessages":["Item 9999 does not exist."],"errors":{}}'
+    headers:
+      content-length:
+      - '59'
+      content-type:
+      - application/json
+    status:
+      code: 404
+      message: Not Found
+version: 1

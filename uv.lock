@@ -11,6 +11,7 @@ members = [
     "bench-cli",
     "bench-core",
     "bench-github",
+    "bench-jira",
     "integration-bench",
 ]
 
@@ -98,6 +99,17 @@ requires-dist = [
 name = "bench-github"
 version = "0.1.0"
 source = { editable = "integrations/github" }
+dependencies = [
+    { name = "bench-core" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "bench-core", editable = "packages/bench-core" }]
+
+[[package]]
+name = "bench-jira"
+version = "0.1.0"
+source = { editable = "integrations/jira" }
 dependencies = [
     { name = "bench-core" },
 ]
@@ -377,6 +389,7 @@ dependencies = [
     { name = "bench-cli" },
     { name = "bench-core" },
     { name = "bench-github" },
+    { name = "bench-jira" },
 ]
 
 [package.dev-dependencies]
@@ -393,6 +406,7 @@ requires-dist = [
     { name = "bench-cli", editable = "packages/bench-cli" },
     { name = "bench-core", editable = "packages/bench-core" },
     { name = "bench-github", editable = "integrations/github" },
+    { name = "bench-jira", editable = "integrations/jira" },
 ]
 
 [package.metadata.requires-dev]

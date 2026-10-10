@@ -1,0 +1,30 @@
+interactions:
+- request:
+    body: '{"title":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}'
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      content-length:
+      - '213'
+      content-type:
+      - application/json
+      host:
+      - bench-sandbox.atlassian.net
+      user-agent:
+      - integration-bench
+    method: POST
+    uri: https://bench-sandbox.atlassian.net/rest/api/3/items
+  response:
+    body:
+      string: '{"errorMessages":["title is too long (maximum is 200 characters)."],"errors":{}}'
+    headers:
+      content-length:
+      - '80'
+      content-type:
+      - application/json
+    status:
+      code: 400
+      message: Bad Request
+version: 1
