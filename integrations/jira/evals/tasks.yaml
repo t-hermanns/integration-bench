@@ -1,0 +1,187 @@
+# Eval tasks for the Jira server against project BENCH of the live test site, seeded by
+# `bench sandbox seed jira` (data: bench_jira/fake/seed.py). Format and matchers:
+# bench_evals.tasks. Writes carry {run_id} so they can be found and cleaned up; they never
+# change the seed issues' fields or status, only add comments to them.
+# Split: 9 dev (used to iterate the v2 descriptions), 6 test (measured once).
+integrations: [jira]
+tasks:
+  # --- read -----------------------------------------------------------------------------
+  - id: jira-read-error
+    category: read
+    split: dev
+    prompt: Which error message does Jira issue BENCH-1 report?
+    expected_calls:
+      - tool: jira_get_issue
+        args: {issue_key: BENCH-1}
+    answer_contains: [KeyError]
+
+  - id: jira-read-latest-comment
+    category: read
+    split: dev
+    prompt: What does the comment on BENCH-3 propose?
+    expected_calls:
+      - tool: jira_get_issue
+        args: {issue_key: BENCH-3, response_format: detailed}
+    answer_contains: [stream]
+
+  - id: jira-read-status-and-platform
+    category: read
+    split: test
+    prompt: What is the status of BENCH-12, and on which operating system does it occur?
+    expected_calls:
+      - tool: jira_get_issue
+        args: {issue_key: BENCH-12}
+    answer_contains: [in progress, windows]
+
+  # --- arguments ------------------------------------------------------------------------
+  - id: jira-args-high-open-bugs
+    category: arguments
+    split: dev
+    prompt: >-
+      Which bugs in project BENCH have priority High and are not done yet?
+    expected_calls:
+      - tool: jira_search_issues
+        args:
+          jql:
+            $all:
+              - $regex: 'project\s*(=|in)\s*\(?\s*"?BENCH'
+              - $regex: 'priority\s*(=|in)\s*\(?\s*"?High\b'
+              - $regex: 'status|resolution'
+              - $regex: 'bug'
+    answer_contains: [BENCH-3, BENCH-7]
+
+  - id: jira-args-assigned-to-me
+    category: arguments
+    split: dev
+    prompt: Which issues in BENCH are assigned to me and not done yet?
+    expected_calls:
+      - tool: jira_search_issues
+        args:
+          jql:
+            $all:
+              - $regex: 'assignee\s*(=|in)\s*\(?\s*currentUser\(\)'
+              - $regex: 'status|resolution'
+    answer_contains: [BENCH-8, BENCH-10]
+
+  - id: jira-args-open-crashes
+    category: arguments
+    split: test
+    prompt: List the issues in BENCH labelled "crash" that are not done yet.
+    expected_calls:
+      - tool: jira_search_issues
+        args:
+          jql:
+            $all:
+              - $regex: 'labels\s*(=|in)\s*\(?\s*"?crash'
+              - $regex: 'status|resolution'
+    answer_contains: [BENCH-7, BENCH-12]
+
+  - id: jira-args-in-progress-detailed
+    category: arguments
+    split: test
+    prompt: >-
+      Show me everything that is In Progress in project BENCH, with each issue's priority.
+    expected_calls:
+      - tool: jira_search_issues
+        args:
+          jql: {$regex: 'status\s*(=|in)\s*\(?\s*"In Progress"'}
+          response_format: detailed
+    answer_contains: [BENCH-3, BENCH-8, BENCH-12]
+
+  # --- multi-step writes ----------------------------------------------------------------
+  - id: jira-write-find-and-comment
+    category: multi_step_write
+    split: dev
+    prompt: >-
+      Find the BENCH bug about the app crashing on startup without network and comment on
+      it: "Offline fallback planned ({run_id})."
+    expected_calls:
+      - tool: jira_search_issues
+      - tool: jira_add_comment
+        args: {issue_key: BENCH-7, body: {$contains: "{run_id}"}}
+    forbidden_tools: [jira_create_issue, jira_transition_issue]
+    answer_contains: [BENCH-7]
+
+  - id: jira-write-follow-up-bug
+    category: multi_step_write
+    split: dev
+    prompt: >-
+      BENCH-10 says report totals are off by one. Create a follow-up bug in BENCH titled
+      "Add a regression test for report totals ({run_id})" with the label "reports", and
+      mention BENCH-10 in its description.
+    expected_calls:
+      - tool: jira_create_issue
+        args:
+          project_key: BENCH
+          summary: {$contains: "{run_id}"}
+          issue_type: Bug
+          labels: {$contains: reports}
+          description: {$contains: BENCH-10}
+    forbidden_tools: [jira_add_comment, jira_transition_issue]
+    answer_contains: [BENCH-]
+
+  - id: jira-write-create-and-start
+    category: multi_step_write
+    split: test
+    prompt: >-
+      Create a task in BENCH titled "Review export limits ({run_id})" and move it to In
+      Progress.
+    expected_calls:
+      - tool: jira_create_issue
+        args: {project_key: BENCH, summary: {$contains: "{run_id}"}}
+      - tool: jira_transition_issue
+        args: {issue_key: {$regex: '^BENCH-\d+$'}, status: In Progress}
+    answer_contains: [BENCH-, in progress]
+
+  # --- pagination -----------------------------------------------------------------------
+  - id: jira-page-all-keys
+    category: pagination
+    split: dev
+    prompt: List the keys of all issues in project BENCH.
+    expected_calls:
+      - tool: jira_search_issues
+        args: {jql: {$regex: 'project\s*(=|in)\s*\(?\s*"?BENCH'}}
+    answer_contains: [BENCH-2, BENCH-11, BENCH-12]
+
+  - id: jira-page-done
+    category: pagination
+    split: test
+    prompt: >-
+      Go through all issues in BENCH, four per page, and tell me which of them are Done.
+    expected_calls:
+      - tool: jira_search_issues
+        args: {page_size: 4}
+      - tool: jira_search_issues
+        args: {cursor: {$present: true}}
+    answer_contains: [BENCH-5, BENCH-6, BENCH-9]
+
+  # --- permission -----------------------------------------------------------------------
+  - id: jira-perm-other-project
+    category: permission
+    split: dev
+    prompt: Create a task "Rotate the API keys ({run_id})" in the Jira project OPS.
+    expected_calls:
+      - tool: jira_create_issue
+        args: {project_key: OPS}
+        error: true
+    answer_contains: [[not, could not, couldn't, unable, failed, error]]
+
+  # --- abstention -----------------------------------------------------------------------
+  - id: jira-abstain-delete
+    category: abstention
+    split: test
+    prompt: Delete the Jira issue BENCH-4.
+    forbidden_tools: [jira_create_issue, jira_add_comment, jira_transition_issue]
+    answer_contains: [[can't, cannot, unable, not able, no tool, don't have, do not have,
+                       not possible, isn't possible]]
+
+  # --- confusable tools -----------------------------------------------------------------
+  - id: jira-confuse-read-comments
+    category: confusable
+    split: dev
+    prompt: Has anyone commented on BENCH-12, and what did they say?
+    expected_calls:
+      - tool: jira_get_issue
+        args: {issue_key: BENCH-12, response_format: detailed}
+    forbidden_tools: [jira_add_comment]
+    answer_contains: [windows 11]

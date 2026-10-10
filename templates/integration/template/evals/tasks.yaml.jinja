@@ -1,0 +1,16 @@
+# Eval tasks for the {{ provider }} server against the live sandbox, seeded by
+# `bench sandbox seed {{ name }}` (data: bench_{{ name }}/fake/seed.py). Format and
+# matchers: bench_evals.tasks; examples: integrations/jira/evals/tasks.yaml. Writes carry
+# {run_id} so they can be found and cleaned up. Aim for ~15 tasks covering every category,
+# 60 % dev and 40 % test, and add a worked solution for each to
+# packages/bench-evals/tests/test_task_files.py.
+integrations: [{{ name }}]
+tasks: []
+#  - id: {{ name }}-read-item
+#    category: read
+#    split: dev
+#    prompt: What is the title of item 1001?
+#    expected_calls:
+#      - tool: {{ name }}_get_item
+#        args: {item_id: "1001"}
+#    answer_contains: [<title of item 1001 in the seed>]

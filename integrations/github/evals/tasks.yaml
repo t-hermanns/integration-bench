@@ -1,0 +1,185 @@
+# Eval tasks for the GitHub server against the live sandbox repo bench-sandbox/widgets,
+# seeded by `bench sandbox seed github` (data: bench_github/fake/seed.py). Format and
+# matchers: bench_evals.tasks. Writes carry {run_id} so they can be found and cleaned up.
+# Split: 9 dev (used to iterate the v2 descriptions), 6 test (measured once).
+integrations: [github]
+tasks:
+  # --- read -----------------------------------------------------------------------------
+  - id: github-read-issue-error
+    category: read
+    split: dev
+    prompt: In bench-sandbox/widgets, which error does issue #1 report?
+    expected_calls:
+      - tool: github_get_issue
+        args: {owner: bench-sandbox, repo: widgets, number: 1}
+    answer_contains: [KeyError]
+
+  - id: github-read-comment
+    category: read
+    split: dev
+    prompt: >-
+      Someone attached a heap profile to issue #7 in bench-sandbox/widgets. What did it
+      show?
+    expected_calls:
+      - tool: github_get_issue
+        args: {owner: bench-sandbox, repo: widgets, number: 7, response_format: detailed}
+    answer_contains: [[every widget, all widgets, ever loaded]]
+
+  - id: github-read-readme-install
+    category: read
+    split: test
+    prompt: >-
+      According to the README of bench-sandbox/widgets, which command installs the
+      library?
+    expected_calls:
+      - tool: github_get_file_contents
+        args: {owner: bench-sandbox, repo: widgets, path: README.md}
+    answer_contains: [pip install widgets]
+
+  # --- arguments ------------------------------------------------------------------------
+  - id: github-args-label-performance
+    category: arguments
+    split: dev
+    prompt: List the open issues labelled "performance" in bench-sandbox/widgets.
+    expected_calls:
+      - tool: github_search_issues
+        args:
+          query:
+            $all:
+              - $contains: repo:bench-sandbox/widgets
+              - $regex: 'label:"?performance'
+              - $regex: 'is:open|state:open'
+    answer_contains: [[timeout, timing out, times out], memory leak]
+
+  - id: github-args-path-with-space
+    category: arguments
+    split: dev
+    prompt: >-
+      Read the user guide in the docs folder of bench-sandbox/widgets (the file is called
+      "user guide.md"). Where does it send readers for the basics?
+    expected_calls:
+      - tool: github_get_file_contents
+        args: {owner: bench-sandbox, repo: widgets, path: docs/user guide.md}
+    answer_contains: [README]
+
+  - id: github-args-label-with-spaces
+    category: arguments
+    split: test
+    prompt: >-
+      Find the open issues in bench-sandbox/widgets that are labelled "good first issue".
+    expected_calls:
+      - tool: github_search_issues
+        args:
+          query:
+            $all:
+              - $contains: repo:bench-sandbox/widgets
+              - $contains: label:"good first issue"
+    answer_contains: [typo]
+
+  # --- multi-step writes ----------------------------------------------------------------
+  - id: github-write-find-and-comment
+    category: multi_step_write
+    split: dev
+    prompt: >-
+      Find the open issue about rate limit errors in bench-sandbox/widgets and comment on
+      it: "Retry with backoff is planned ({run_id})."
+    expected_calls:
+      - tool: github_search_issues
+        args: {query: {$contains: repo:bench-sandbox/widgets}}
+      - tool: github_add_issue_comment
+        args: {owner: bench-sandbox, repo: widgets, number: 9, body: {$contains: "{run_id}"}}
+    forbidden_tools: [github_create_issue]
+    answer_contains: [["#9", issue 9, rate limit]]
+
+  - id: github-write-follow-up-issue
+    category: multi_step_write
+    split: test
+    prompt: >-
+      Issue #12 in bench-sandbox/widgets is a crash with Unicode paths. Open a follow-up
+      issue there titled "Add a test for Unicode paths ({run_id})" with the label "bug"
+      whose body links back to #12.
+    expected_calls:
+      - tool: github_create_issue
+        args:
+          owner: bench-sandbox
+          repo: widgets
+          title: {$contains: "{run_id}"}
+          labels: {$contains: bug}
+          body: {$contains: "#12"}
+    forbidden_tools: [github_add_issue_comment]
+    answer_contains: [[created, opened]]
+
+  # --- pagination -----------------------------------------------------------------------
+  - id: github-page-open-issues
+    category: pagination
+    split: dev
+    prompt: >-
+      List the titles of all open issues in bench-sandbox/widgets. Fetch them 5 per page.
+    expected_calls:
+      - tool: github_search_issues
+        args: {query: {$contains: repo:bench-sandbox/widgets}, per_page: 5}
+      - tool: github_search_issues
+        args: {cursor: {$present: true}}
+    answer_contains: [Crash when config file is empty, Crash on startup with Unicode paths]
+
+  - id: github-page-all-pulls
+    category: pagination
+    split: test
+    prompt: >-
+      List every pull request in bench-sandbox/widgets, open or closed, two per page.
+    expected_calls:
+      - tool: github_list_pull_requests
+        args: {owner: bench-sandbox, repo: widgets, state: all, per_page: 2}
+      - tool: github_list_pull_requests
+        args: {cursor: {$present: true}}
+    answer_contains: [Fall back to defaults, Stream report exports, Fix login button layout,
+                      new cache backend]
+
+  # --- permission -----------------------------------------------------------------------
+  - id: github-perm-unknown-repo
+    category: permission
+    split: dev
+    prompt: What does README.md in the repository bench-sandbox/billing say?
+    expected_calls:
+      - tool: github_get_file_contents
+        args: {owner: bench-sandbox, repo: billing, path: README.md}
+        error: true
+    answer_contains: [[not found, no access, not accessible, access, does not exist,
+                       doesn't exist, could not, couldn't, unable]]
+
+  # --- abstention -----------------------------------------------------------------------
+  - id: github-abstain-merge
+    category: abstention
+    split: dev
+    prompt: Merge pull request #13 in bench-sandbox/widgets.
+    forbidden_tools: [github_create_issue, github_add_issue_comment]
+    answer_contains: [[can't, cannot, unable, not able, no tool, don't have, do not have,
+                       not possible, isn't possible]]
+
+  - id: github-abstain-missing-details
+    category: abstention
+    split: test
+    prompt: Create an issue for the bug we talked about earlier.
+    forbidden_tools: [github_create_issue]
+    answer_contains: [["?", which, more information, more details]]
+
+  # --- confusable tools -----------------------------------------------------------------
+  - id: github-confuse-open-pulls
+    category: confusable
+    split: dev
+    prompt: Which pull requests are open in bench-sandbox/widgets right now?
+    expected_calls:
+      - tool: github_list_pull_requests
+        args: {owner: bench-sandbox, repo: widgets, state: {$any_of: [null, open]}}
+    answer_contains: [Fall back to defaults, Stream report exports]
+
+  - id: github-confuse-note-on-issue
+    category: confusable
+    split: test
+    prompt: >-
+      Leave a note on issue #4 in bench-sandbox/widgets: "Plugin docs draft started
+      ({run_id})."
+    expected_calls:
+      - tool: github_add_issue_comment
+        args: {owner: bench-sandbox, repo: widgets, number: 4, body: {$contains: "{run_id}"}}
+    forbidden_tools: [github_create_issue]
