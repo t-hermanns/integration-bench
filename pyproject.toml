@@ -45,5 +45,14 @@ venvPath = "."
 venv = ".venv"
 
 [tool.pytest.ini_options]
-addopts = ["-ra", "--strict-markers", "--import-mode=importlib"]
+# Offline by default: cassettes replay only, no sockets except loopback (Windows asyncio
+# needs a loopback socketpair). `bench record` overrides --record-mode.
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--import-mode=importlib",
+    "--record-mode=none",
+    "--block-network",
+    "--allowed-hosts=127.0.0.1,::1",
+]
 testpaths = ["packages", "integrations"]

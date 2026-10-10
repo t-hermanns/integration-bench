@@ -116,4 +116,4 @@ def test_unrecorded_request_fails(recorded: tuple[Path, str]) -> None:
 @pytest.mark.block_network
 def test_live_network_is_blocked() -> None:
     with httpx2.Client() as c, pytest.raises(Exception, match=r"(?i)network|socket"):
-        c.get("http://127.0.0.1:9/")
+        c.get("http://192.0.2.1/")  # TEST-NET-1, never routable

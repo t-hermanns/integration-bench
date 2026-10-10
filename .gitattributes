@@ -1,0 +1,6 @@
+# Normalize line endings: LF in the repo and in working copies (core.autocrlf is on locally).
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.ico binary
