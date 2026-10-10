@@ -50,3 +50,24 @@ tested.
 Implementation: `bench_evals.stats` (`task_outcomes` → `rate` / `compare`). Ties (1 of 2
 runs) count as not solved; tasks with no valid run, or with an outcome in only one
 variant, are left out of the comparison and counted as `unpaired`.
+
+## Description variants
+
+Each integration has `descriptions/v1.yaml` (short, OpenAPI-summary style) and
+`descriptions/v2.yaml`, written for every tool after Anthropic's guide "Writing
+effective tools for agents": what the tool is for and when a sibling tool fits better,
+argument formats with examples, limits, the response shape, pagination and errors. v2
+was tuned only on failures in the dev split (with Gemini); a tool whose v2 text did
+clearly worse there than v1 would have kept its v1 text. The test split stays untouched
+until the one measurement.
+
+## Running
+
+```bash
+bench eval gemini --split dev --descriptions v2
+```
+
+runs the tasks live against the sandbox (writes leave `{run_id}` objects behind), appends
+one JSON line per run to `.bench/results/` and prints the score. `--k 3` repeats every
+task, `--task ID` picks single tasks. `bench score a.jsonl b.jsonl` scores saved logs and
+compares b against a (exact McNemar).

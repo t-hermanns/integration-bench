@@ -497,6 +497,12 @@ async def test_task_files_name_real_tools_and_arguments():
     assert check_tools(tasks(), tools) == []
 
 
+def test_prompts_are_whole_sentences():
+    """An unquoted ` #12` starts a YAML comment and silently cuts the prompt off."""
+    cut = [t.id for t in tasks() if not t.prompt.rstrip().endswith((".", "?", "!", '"'))]
+    assert cut == []
+
+
 def test_every_task_has_a_solution():
     assert sorted(SOLUTIONS) == sorted(t.id for t in tasks())
 

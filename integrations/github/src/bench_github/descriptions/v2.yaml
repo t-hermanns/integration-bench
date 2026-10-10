@@ -1,0 +1,121 @@
+# Tool descriptions v2, written after Anthropic's guide "Writing effective tools for
+# agents": what each tool is for and when a sibling tool fits better, argument formats
+# with examples, limits, the response shape, pagination and errors. Only text lives
+# here; behaviour and argument types are in tools.py.
+instructions: >-
+  Tools for GitHub issues, pull requests and repository files: search and read issues,
+  open issues, comment, list pull requests and read files. There are no tools to merge,
+  close, label or edit anything. Repositories are addressed by owner and repo name
+  separately ("bench-sandbox/widgets" is owner "bench-sandbox", repo "widgets"). List
+  results come one page at a time; pass next_cursor back to get the next page.
+
+tools:
+  github_search_issues:
+    title: Search issues
+    description: >-
+      Find issues with GitHub search syntax and return one page of matches (number,
+      title, state, labels) plus total_count. Use it to list or filter issues, or to
+      find an issue's number when you only know what it is about. Pull requests are
+      left out unless the query contains is:pr; to list a repository's pull requests,
+      github_list_pull_requests is simpler. To read one issue's body or comments, use
+      github_get_issue. When the result has a next_cursor, more issues match: call again
+      with the same query and that cursor until next_cursor is missing if the user wants
+      all of them.
+    params:
+      query: >-
+        GitHub search query. Always scope it with repo:owner/name, e.g.
+        'repo:bench-sandbox/widgets is:open label:bug crash'. Qualifiers: is:open,
+        is:closed, label:NAME (quote names with spaces: label:"help wanted"),
+        author:LOGIN, in:title; other words match title and body.
+      cursor: next_cursor from the previous result, with the same query; omit for page one.
+      per_page: Results per page, 1-50 (default 10). Use the page size the user asks for.
+      response_format: >-
+        "concise" (default) for number, title, state and labels; "detailed" adds
+        author, comment count, timestamps and URL.
+
+  github_get_issue:
+    title: Get issue
+    description: >-
+      Read one issue (or pull request) by number: title, state, labels and the full body
+      text (error messages, steps, details). Use it whenever the answer is inside an
+      issue rather than in a list. Comments are only included with response_format
+      "detailed"; use that for any question about comments or what someone replied.
+      Reading never changes the issue; to write a comment use github_add_issue_comment.
+      A missing repository or issue returns a not-found error (also when the token has
+      no access to it); report that, do not guess.
+    params:
+      owner: Repository owner (user or organization login), e.g. "bench-sandbox".
+      repo: Repository name without the owner, e.g. "widgets".
+      number: Issue or pull request number without "#", e.g. 12.
+      response_format: >-
+        "concise" (default) for the issue itself; "detailed" adds author, timestamps,
+        milestone and the first comments (author, time, text).
+
+  github_create_issue:
+    title: Create issue
+    description: >-
+      Open a new issue in a repository and return its number and URL. Only use it when
+      the user asks for a new issue (bug report, follow-up, task) and gives enough to
+      write a title; if what the issue should say is unknown, ask instead of inventing
+      it. To add information to an existing issue, use github_add_issue_comment.
+    params:
+      owner: Repository owner (user or organization login), e.g. "bench-sandbox".
+      repo: Repository name without the owner, e.g. "widgets".
+      title: Issue title, exactly as the user worded it.
+      body: Issue description in Markdown; omit if the user gave none.
+      labels: >-
+        Existing label names as a list, e.g. ["bug", "good first issue"]; omit for none.
+      assignees: Logins of users to assign, e.g. ["octocat"]; omit for none.
+
+  github_add_issue_comment:
+    title: Comment on issue
+    description: >-
+      Add a comment to an existing issue or pull request and return the comment URL.
+      Use it to leave a note, answer or update on an issue; it does not change state,
+      labels or anything else. Needs the number: if you only know what the issue is
+      about, find it with github_search_issues first. Do not use it to read comments
+      (that is github_get_issue with "detailed").
+    params:
+      owner: Repository owner (user or organization login), e.g. "bench-sandbox".
+      repo: Repository name without the owner, e.g. "widgets".
+      number: Issue or pull request number without "#", e.g. 12.
+      body: Comment text in Markdown, exactly as the user wants it.
+
+  github_list_pull_requests:
+    title: List pull requests
+    description: >-
+      List a repository's pull requests (number, title, state, author, branches), most
+      recently updated first. Use it for any question about pull requests; issues are
+      not included (use github_search_issues for those). By default only open pull
+      requests are returned; pass state "closed" or "all" for others. When the result
+      has a next_cursor, call again with the same state and that cursor to get the
+      rest. Read-only: there is no tool to merge or close pull requests.
+    params:
+      owner: Repository owner (user or organization login), e.g. "bench-sandbox".
+      repo: Repository name without the owner, e.g. "widgets".
+      state: '"open" (default), "closed" or "all" (open and closed).'
+      cursor: next_cursor from the previous result, with the same state; omit for page one.
+      per_page: Results per page, 1-50 (default 10). Use the page size the user asks for.
+      response_format: >-
+        "concise" (default) or "detailed" (adds creation time, labels and URL).
+
+  github_get_file_contents:
+    title: Get file contents
+    description: >-
+      Read a text file from a repository (README, docs, code, config), or list a
+      directory's entries when the path is a directory. Use an empty path to see the
+      repository root, then pick the file from the listing. Long files are cut; the
+      result says when. A missing file or repository returns a not-found error (also
+      when the token has no access to the repository); report that, do not guess the
+      content.
+    params:
+      owner: Repository owner (user or organization login), e.g. "bench-sandbox".
+      repo: Repository name without the owner, e.g. "widgets".
+      path: >-
+        Path inside the repository as plain text, e.g. "README.md" or
+        "docs/user guide.md" (keep spaces, do not URL-encode); empty for the root
+        directory.
+      ref: Branch, tag or commit SHA; omit for the default branch.
+      response_format: >-
+        "concise" (default) returns up to 4,000 characters; "detailed" up to 40,000
+        plus size, SHA and URL.

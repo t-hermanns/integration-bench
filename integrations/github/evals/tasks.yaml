@@ -8,7 +8,7 @@ tasks:
   - id: github-read-issue-error
     category: read
     split: dev
-    prompt: In bench-sandbox/widgets, which error does issue #1 report?
+    prompt: "In bench-sandbox/widgets, which error does issue #1 report?"
     expected_calls:
       - tool: github_get_issue
         args: {owner: bench-sandbox, repo: widgets, number: 1}
@@ -151,7 +151,7 @@ tasks:
   - id: github-abstain-merge
     category: abstention
     split: dev
-    prompt: Merge pull request #13 in bench-sandbox/widgets.
+    prompt: "Merge pull request #13 in bench-sandbox/widgets."
     forbidden_tools: [github_create_issue, github_add_issue_comment]
     answer_contains: [[can't, cannot, unable, not able, no tool, don't have, do not have,
                        not possible, isn't possible]]

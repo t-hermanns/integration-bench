@@ -175,16 +175,19 @@ async def open_toolbox(servers: Mapping[str, MCPServer[Any]]) -> AsyncIterator[T
 
 @asynccontextmanager
 async def live_servers(
-    names: Sequence[str], env: Mapping[str, str]
+    names: Sequence[str], env: Mapping[str, str], variant: str | None = None
 ) -> AsyncIterator[dict[str, MCPServer[Any]]]:
-    """Read-write servers against the live sandbox, like `bench smoke` but for writes too."""
+    """Read-write servers against the live sandbox, like `bench smoke` but for writes too.
+
+    `variant` picks the tool descriptions (None reads `BENCH_DESCRIPTIONS`).
+    """
     async with AsyncExitStack() as stack:
         servers = {}
         for name in names:
             sandbox = importlib.import_module(f"bench_{name}.sandbox")
             server = importlib.import_module(f"bench_{name}.server")
             api = await stack.enter_async_context(sandbox.live_api(env))
-            servers[name] = server.create_server(api=api, read_only=False)
+            servers[name] = server.create_server(api=api, read_only=False, variant=variant)
         yield servers
 
 

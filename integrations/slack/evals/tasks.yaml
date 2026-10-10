@@ -10,7 +10,7 @@ tasks:
   - id: slack-read-staging-db
     category: read
     split: dev
-    prompt: What was announced in the Slack channel #bench-sandbox about the staging database?
+    prompt: "What was announced in the Slack channel #bench-sandbox about the staging database?"
     expected_calls:
       - tool: slack_read_channel_history
         args: {channel_id: {$present: true}}
@@ -30,7 +30,7 @@ tasks:
   - id: slack-read-standup
     category: read
     split: test
-    prompt: From next week on, when is standup? It was posted in the Slack channel #bench-sandbox.
+    prompt: "From next week on, when is standup? It was posted in the Slack channel #bench-sandbox."
     expected_calls:
       - tool: slack_read_channel_history
         args: {channel_id: {$present: true}}
@@ -131,11 +131,9 @@ tasks:
   - id: slack-perm-not-member
     category: permission
     split: dev
-    prompt: What are the latest messages in the Slack channel #sozial?
-    expected_calls:
-      - tool: slack_read_channel_history
-        args: {channel_id: {$present: true}}
-        error: true
+    prompt: "What are the latest messages in the Slack channel #sozial?"
+    # is_member false in slack_list_channels already tells the app it cannot read there;
+    # refusing on that is as right as trying and getting not_in_channel.
     answer_contains: [[not a member, not in the channel, invite, no access, access, could not,
                        couldn't, unable, cannot, can't]]
 

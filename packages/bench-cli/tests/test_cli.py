@@ -1,5 +1,6 @@
 """`bench` CLI wiring (the synthesis itself is tested in bench-core)."""
 
+import json
 import os
 from pathlib import Path
 
@@ -167,3 +168,59 @@ def test_record_rejects_unknown_integrations() -> None:
     result = runner.invoke(app, ["record", "nope"])
     assert result.exit_code == 2
     assert "no integration 'nope'" in result.output
+
+
+# --- bench eval / bench score ----------------------------------------------------------------
+
+
+def eval_log(path: Path, answers: dict[str, str]) -> Path:
+    """A runner log with one answered run per task and no tool calls."""
+    lines = [
+        json.dumps(
+            {
+                "run_id": "r1",
+                "task": task,
+                "outcome": "answered",
+                "answer": answer,
+                "turns": [],
+                "tool_calls": 0,
+            }
+        )
+        for task, answer in answers.items()
+    ]
+    path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return path
+
+
+def test_score_one_log_and_compare_two(tmp_path: Path) -> None:
+    a = eval_log(tmp_path / "a.jsonl", {"jira-abstain-delete": "Done, deleted."})
+    b = eval_log(tmp_path / "b.jsonl", {"jira-abstain-delete": "I cannot delete issues."})
+    result = runner.invoke(app, ["score", str(a), "--verbose"])
+    assert result.exit_code == 0, result.output
+    assert "FAIL jira-abstain-delete  answer lacks" in result.output
+    assert "solved: 0/1 = 0%" in result.output
+    result = runner.invoke(app, ["score", str(a), str(b)])
+    assert result.exit_code == 0, result.output
+    assert "only b: jira-abstain-delete" in result.output
+    assert "paired n=1" in result.output
+    assert "only b 1" in result.output
+
+
+def test_score_rejects_logs_of_unknown_tasks(tmp_path: Path) -> None:
+    log = eval_log(tmp_path / "a.jsonl", {"nope": "hi"})
+    result = runner.invoke(app, ["score", str(log)])
+    assert result.exit_code != 0
+
+
+@pytest.mark.parametrize(
+    ("args", "message"),
+    [
+        (["eval", "nope"], "unknown provider"),
+        (["eval", "gemini", "--split", "train"], "unknown split"),
+        (["eval", "gemini", "--task", "nope"], "unknown task(s): nope"),
+    ],
+)
+def test_eval_usage_errors(args: list[str], message: str) -> None:
+    result = runner.invoke(app, args)
+    assert result.exit_code == 2
+    assert message in result.output

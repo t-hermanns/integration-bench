@@ -114,12 +114,14 @@ def test_provider_tools_names_the_tool():
         provider_tools([bad], "gemini")
 
 
-async def all_mcp_tools() -> list[McpTool]:
+async def all_mcp_tools(variant: str = "v1") -> list[McpTool]:
     tools: list[McpTool] = []
     for name in INTEGRATIONS:
         module = importlib.import_module(f"bench_{name}.server")
         server = module.create_server(
-            transport=httpx2.MockTransport(lambda r: httpx2.Response(500)), read_only=False
+            transport=httpx2.MockTransport(lambda r: httpx2.Response(500)),
+            read_only=False,
+            variant=variant,
         )
         async with Client(server) as client:
             tools += (await client.list_tools()).tools
@@ -141,3 +143,18 @@ async def test_snapshot(provider):
         path.parent.mkdir(exist_ok=True)
         path.write_bytes(actual.encode() + b"\n")
     assert path.read_bytes().decode() == actual + "\n"
+
+
+@pytest.mark.anyio
+async def test_v2_rewrites_every_tool_and_converts_for_every_provider():
+    """The description experiment needs a v2 text for every tool and every argument."""
+    v1 = {t.name: t for t in await all_mcp_tools("v1")}
+    v2 = {t.name: t for t in await all_mcp_tools("v2")}
+    assert v2.keys() == v1.keys()
+    for name, tool in v2.items():
+        assert tool.description, name
+        assert tool.description != v1[name].description, name
+        for arg, prop in tool.input_schema["properties"].items():
+            assert prop.get("description"), f"{name}.{arg}"
+    for provider in PROVIDERS:
+        assert len(provider_tools(list(v2.values()), provider)) == len(v2)

@@ -1,0 +1,97 @@
+# Tool descriptions v2, written after Anthropic's guide "Writing effective tools for
+# agents": what each tool is for and when a sibling tool fits better, argument formats
+# with examples, limits, the response shape, pagination and errors. Only text lives
+# here; behaviour and argument types are in tools.py.
+instructions: >-
+  Tools for Google Drive: find files and folders, list a folder, read a file's text or
+  metadata, and create Google Docs. There are no tools to delete, move, rename, share or
+  edit files. The app only sees files it created or that the user opened with it. Every
+  tool except search needs a file or folder id, which comes from a search or folder
+  listing; never make one up. List results come one page at a time; pass next_cursor
+  back to get the next page.
+
+tools:
+  gdrive_search_files:
+    title: Search files
+    description: >-
+      Find files and folders whose name or text contains the search text, newest first;
+      returns one page of id, name and kind. Usually the first step: it turns a file or
+      folder name into the id the other tools need. To see everything inside a folder,
+      use gdrive_list_folder instead; to read what a file says, pass its id to
+      gdrive_read_file_content. To find which files in one folder mention something,
+      search with that folder's folder_id instead of listing the folder and reading
+      every file. When the result has a next_cursor, more files match: call again with
+      the same query and that cursor until next_cursor is missing if the user wants all
+      of them.
+    params:
+      query: >-
+        Words to look for in file names and contents, e.g. "Roadmap 2026" or
+        "dark mode". Plain text, no operators.
+      folder_id: >-
+        Folder id to search only directly inside that folder (find the folder's id with
+        a search for its name first); omit to search everywhere.
+      cursor: next_cursor from the previous result, with the same query; omit for page one.
+      page_size: Results per page, 1-50 (default 10). Use the page size the user asks for.
+      response_format: >-
+        "concise" (default) for id, name and kind; "detailed" adds modified time, size,
+        parent folder and link.
+
+  gdrive_get_file_metadata:
+    title: Get file metadata
+    description: >-
+      Get facts about one file or folder by id, not its content: name, kind, parent
+      folder and modified time; with "detailed" also MIME type, created time, size,
+      description and link. Use it for questions about the file itself (type, size,
+      dates, link). To read what the file says, use gdrive_read_file_content. An id the
+      app cannot see returns a not-found error.
+    params:
+      file_id: File or folder id from a search or folder listing.
+      response_format: >-
+        "concise" (default) for the essentials; "detailed" adds MIME type, created time,
+        size, description and link.
+
+  gdrive_read_file_content:
+    title: Read file content
+    description: >-
+      Read the text of a file by id: Google Docs as plain text, Sheets as CSV, Slides as
+      the slides' text, and plain text files as they are. Use it to answer any question
+      about what a document says (find the id with gdrive_search_files first). Returns
+      the text plus total_chars and truncated, which tells whether the text was cut at
+      max_chars. Folders, images and other binary files cannot be read. An id the app
+      cannot see (not created or opened with it, or nonexistent) returns a not-found
+      error; report that instead of guessing.
+    params:
+      file_id: File id from a search or folder listing, e.g. "1a2B3c...".
+      max_chars: >-
+        Return at most this many characters, 100-50000 (default 8000). Set it when the
+        user wants only the beginning, e.g. 100 for "the first 100 characters".
+
+  gdrive_list_folder:
+    title: List folder
+    description: >-
+      List everything directly inside one folder (not in subfolders), folders first;
+      returns id, name and kind of each entry. Use it for "what is in folder X"; find
+      the folder's id with gdrive_search_files first, or use "root" for My Drive. To
+      find files by name or text anywhere, use gdrive_search_files. When the result has
+      a next_cursor, the folder has more entries: call again with the same folder_id and
+      that cursor until next_cursor is missing. page_size only sets how many entries
+      one call returns; a user who wants everything needs every page.
+    params:
+      folder_id: Folder id from a search or listing; "root" (default) for My Drive.
+      cursor: next_cursor from the previous result, same folder_id; omit for page one.
+      page_size: Entries per page, 1-50 (default 20). Use the page size the user asks for.
+      response_format: >-
+        "concise" (default) for id, name and kind; "detailed" adds modified time, size,
+        parent folder and link.
+
+  gdrive_create_document:
+    title: Create document
+    description: >-
+      Create a new Google Doc with the given plain text and return its id, name and
+      link. Only use it when the user asks for a new document; it cannot change,
+      replace, delete or share existing files. To put the document in a folder, find the
+      folder's id with gdrive_search_files first and pass it as folder_id.
+    params:
+      name: Document name exactly as the user gave it, at most 200 characters.
+      content: Document text in plain text; line breaks are kept, no Markdown formatting.
+      folder_id: Folder id to create the document in; omit for My Drive.

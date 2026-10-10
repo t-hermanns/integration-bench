@@ -1,13 +1,16 @@
 """`bench` command line. Integrations are found by convention: `bench_<name>.scenarios`."""
 
 import importlib
+import json
 import logging
 import shutil
 import subprocess
 import sys
 import tempfile
 import time
+import uuid
 import webbrowser
+from datetime import UTC, datetime
 from pathlib import Path
 from types import ModuleType
 from typing import Annotated
@@ -31,6 +34,11 @@ from bench_core.testing import (
 
 from bench_cli import doctor as doctor_checks
 from bench_cli import scaffold
+from bench_evals.models.providers import PROVIDERS
+from bench_evals.runner import live_servers, run_tasks
+from bench_evals.scorer import score_run
+from bench_evals.stats import Rate, compare, rate, task_outcomes
+from bench_evals.tasks import EvalTask, load_tasks, task_files
 
 app = typer.Typer(no_args_is_help=True, add_completion=False)
 auth_app = typer.Typer(no_args_is_help=True, help="Sign in to the integrations' APIs.")
@@ -261,6 +269,114 @@ def smoke(
         typer.echo(f"smoke failed: {', '.join(failed)}", err=True)
         raise typer.Exit(1)
     typer.echo("smoke ok")
+
+
+def repo_root() -> Path:
+    try:
+        return scaffold.find_root(Path.cwd())
+    except scaffold.ScaffoldError as exc:
+        raise typer.BadParameter(str(exc)) from None
+
+
+def all_tasks() -> list[EvalTask]:
+    return load_tasks(task_files(repo_root()))
+
+
+def pick_tasks(tasks: list[EvalTask], split: str, ids: list[str] | None) -> list[EvalTask]:
+    if ids:
+        unknown = sorted(set(ids) - {t.id for t in tasks})
+        if unknown:
+            raise typer.BadParameter(f"unknown task(s): {', '.join(unknown)}")
+        return [t for t in tasks if t.id in ids]
+    return [t for t in tasks if split == "all" or t.split == split]
+
+
+async def eval_run(
+    provider: str, tasks: list[EvalTask], env: dict[str, str], variant: str, k: int, out: Path
+) -> None:
+    model = PROVIDERS[provider].build(env)
+    names = sorted({i for t in tasks for i in t.integrations})
+    async with live_servers(names, env, variant) as servers:
+        for _ in range(k):
+            run_id = uuid.uuid4().hex[:12]
+            await run_tasks(model, [t.for_run(run_id) for t in tasks], servers, out, run_id=run_id)
+
+
+def read_records(path: Path) -> list[dict[str, object]]:
+    lines = path.read_text(encoding="utf-8").splitlines()
+    return [json.loads(line) for line in lines if line.strip()]
+
+
+def show_rate(r: Rate) -> str:
+    if r.value is None or r.low is None or r.high is None:
+        return "n/a"
+    return f"{r.successes}/{r.n} = {r.value:.0%} (95% CI {r.low:.0%}-{r.high:.0%})"
+
+
+def outcomes_of(path: Path, tasks: list[EvalTask], verbose: bool) -> dict[str, bool | None]:
+    scores = score_run(tasks, read_records(path))
+    if verbose:
+        for s in scores:
+            mark = "ok  " if s.solved else ("FAIL" if s.valid else "INV ")
+            typer.echo(f"  {mark} {s.task}  {'; '.join(s.reasons)}")
+    return task_outcomes(scores)
+
+
+@app.command("eval")
+def eval_(
+    provider: Annotated[str, typer.Argument(help="Model provider: " + ", ".join(PROVIDERS))],
+    split: Annotated[str, typer.Option(help="dev, test or all")] = "dev",
+    descriptions: Annotated[str, typer.Option(help="Tool descriptions variant")] = "v1",
+    k: Annotated[int, typer.Option(min=1, help="Runs per task")] = 1,
+    task: Annotated[list[str] | None, typer.Option(help="Only these task ids")] = None,
+    out: Annotated[Path | None, typer.Option(help="JSONL log (default: .bench/results/)")] = None,
+    env_file: EnvFile = None,
+) -> None:
+    """Run eval tasks live against the sandbox and score them (writes leave {run_id} objects)."""
+    if provider not in PROVIDERS:
+        raise typer.BadParameter(f"unknown provider {provider!r}")
+    if split not in ("dev", "test", "all"):
+        raise typer.BadParameter(f"unknown split {split!r}")
+    logging.getLogger("httpx2").setLevel(logging.WARNING)
+    tasks = pick_tasks(all_tasks(), split, task)
+    if out is None:
+        stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+        out = (
+            repo_root() / ".bench" / "results" / f"{provider}-{descriptions}-{split}-{stamp}.jsonl"
+        )
+    typer.echo(f"{len(tasks)} task(s) x {k} with {provider}, descriptions {descriptions} -> {out}")
+    try:
+        anyio.run(eval_run, provider, tasks, env_settings(env_file), descriptions, k, out)
+    except KeyError as exc:
+        raise typer.BadParameter(f"{exc.args[0]} is not set") from None
+    typer.echo(f"solved: {show_rate(rate(outcomes_of(out, tasks, verbose=True)))}")
+
+
+@app.command()
+def score(
+    logs: Annotated[list[Path], typer.Argument(help="One JSONL log, or two to compare (a b)")],
+    verbose: Annotated[bool, typer.Option(help="One line per run with reasons")] = False,
+) -> None:
+    """Score eval logs: solved rate per log; with two logs, exact McNemar of b against a."""
+    if len(logs) > 2:
+        raise typer.BadParameter("give one or two logs")
+    tasks = all_tasks()
+    outcomes = []
+    for log in logs:
+        typer.echo(f"{log.name}:")
+        outcomes.append(outcomes_of(log, tasks, verbose))
+        typer.echo(f"  solved: {show_rate(rate(outcomes[-1]))}")
+    if len(outcomes) == 2:
+        a, b = outcomes
+        for t in sorted(set(a) & set(b)):
+            if a[t] is not None and b[t] is not None and a[t] != b[t]:
+                typer.echo(f"  {'only b' if b[t] else 'only a'}: {t}")
+        c = compare(a, b)
+        typer.echo(
+            f"paired n={c.n}: a {show_rate(c.a)}, b {show_rate(c.b)}, "
+            f"only a {c.only_a}, only b {c.only_b}, McNemar p={c.p_value:.3f}"
+            + (f", {c.unpaired} unpaired" if c.unpaired else "")
+        )
 
 
 def load_login(name: str) -> LoginSpec:

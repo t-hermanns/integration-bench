@@ -1,0 +1,91 @@
+# Tool descriptions v2, written after Anthropic's guide "Writing effective tools for
+# agents": what each tool is for and when a sibling tool fits better, argument formats
+# with examples, limits, the response shape, pagination and errors. Only text lives
+# here; behaviour and argument types are in tools.py.
+instructions: >-
+  Tools for Jira Cloud issues: find issues with JQL, read one issue with its comments,
+  create issues, comment on them and move them through the workflow. There are no tools
+  to delete, assign or edit issues. Search results come one page at a time; pass
+  next_cursor back to get the next page.
+
+tools:
+  jira_search_issues:
+    title: Search issues
+    description: >-
+      Find issues with a JQL query and return one page of matches (key, summary, status,
+      type). Use it to list or filter issues, or to find an issue's key when you only
+      know what it is about. To read one issue's description or comments, call
+      jira_get_issue with its key instead. When the result has a next_cursor, more
+      issues match: call again with the same jql and that cursor until next_cursor is
+      missing if the user wants all of them. A JQL syntax error comes back as an error
+      that quotes the problem; fix the query and retry.
+    params:
+      jql: >-
+        JQL query. Always name the project, e.g. 'project = BENCH'. Useful clauses:
+        'status = "In Progress"', 'statusCategory != Done' (not finished yet),
+        'issuetype = Bug', 'priority = High', 'labels = crash',
+        'assignee = currentUser()' (the signed-in user, "me"),
+        'text ~ "startup network"' (words in summary, description or comments).
+        Combine with AND / OR and quote values that contain spaces; add
+        'ORDER BY key' for a stable order.
+      cursor: next_cursor from the previous result, with the same jql; omit for page one.
+      page_size: >-
+        Issues per page, 1-50 (default 10). Use the page size the user asks for.
+      response_format: >-
+        "concise" (default) returns key, summary, status and type. "detailed" also
+        returns priority, assignee, labels, last update and URL; use it when the user
+        asks about any of those.
+
+  jira_get_issue:
+    title: Get issue
+    description: >-
+      Read one issue by key: summary, status, type, priority, labels and the full
+      description text (error messages, steps, environment). Use it whenever the answer
+      is inside an issue rather than in a list. Comments are only included with
+      response_format "detailed"; use that for any question about comments or
+      discussion. Reading never changes the issue; to write a comment use
+      jira_add_comment. An unknown key returns a not-found error.
+    params:
+      issue_key: Issue key, project key plus number, e.g. "BENCH-12".
+      response_format: >-
+        "concise" (default) for the issue itself; "detailed" adds reporter, timestamps,
+        URL and the comments (author, time, text).
+
+  jira_create_issue:
+    title: Create issue
+    description: >-
+      Create a new issue and return its key and URL. Only use it when the user asks for
+      a new issue (task, bug, story, follow-up); to add information to an existing issue
+      use jira_add_comment. The new issue starts in the workflow's first status; to
+      start work on it, call jira_transition_issue with the returned key afterwards.
+      Creating in a project the user cannot access fails with an error naming the
+      project; report it instead of trying another project.
+    params:
+      project_key: Project key in capitals, e.g. "BENCH" (not the project name).
+      summary: One-line title, at most 255 characters, exactly as the user worded it.
+      issue_type: Issue type name, e.g. "Task" (default), "Bug" or "Story".
+      description: Longer description in plain text; omit if the user gave none.
+      labels: Labels as a list, e.g. ["crash", "regression"]; labels cannot contain spaces.
+
+  jira_add_comment:
+    title: Add comment
+    description: >-
+      Add a comment to an existing issue and return the comment id. Use it to note,
+      answer or add information on an issue; it does not change the status or any
+      field. Needs the issue key: if you only know what the issue is about, find the key
+      with jira_search_issues first. Do not use it to read comments (that is
+      jira_get_issue with "detailed").
+    params:
+      issue_key: Issue key, e.g. "BENCH-12".
+      body: Comment text in plain text, exactly as the user wants it; line breaks are kept.
+
+  jira_transition_issue:
+    title: Transition issue
+    description: >-
+      Move an issue to another workflow status, e.g. start work ("In Progress") or close
+      it ("Done"). Give the target status name; the tool picks the matching transition.
+      If the issue cannot move there from its current status, the error lists the
+      statuses it can move to now. Only use it when the user asks for a status change.
+    params:
+      issue_key: Issue key, e.g. "BENCH-12".
+      status: Target status name, e.g. "To Do", "In Progress" or "Done" (any case).
