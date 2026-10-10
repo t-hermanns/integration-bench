@@ -8,12 +8,15 @@ instead of being sent as null. Long texts are clipped with a flag that says so.
 Every tool call gets one wait budget for rate-limit retries (`TOOL_WAIT_BUDGET`).
 """
 
-from collections.abc import Awaitable
+from collections.abc import Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Annotated, Any
 
+import httpx2
 from mcp.server.mcpserver import Context
+from mcp.server.mcpserver.exceptions import ToolError
 from pydantic import BaseModel, Field
 
 from bench_core.mcp import ResponseFormat, ToolSpec, lifespan_state
@@ -61,13 +64,20 @@ def _clip(text: str | None, limit: int) -> tuple[str | None, bool | None]:
     return text[:limit], True
 
 
-async def _call[T](ctx: Context[GitHubState], call: Awaitable[T]) -> T:
-    with lifespan_state(ctx).gh.api.wait_budget(TOOL_WAIT_BUDGET):
-        return await call
-
-
-def _gh(ctx: Context[GitHubState]) -> GitHubClient:
-    return lifespan_state(ctx).gh
+@contextmanager
+def _github(ctx: Context[GitHubState]) -> Iterator[GitHubClient]:
+    """The client for one tool call: one wait budget for all its requests."""
+    gh = lifespan_state(ctx).gh
+    with gh.api.wait_budget(TOOL_WAIT_BUDGET):
+        try:
+            yield gh
+        except httpx2.TransportError as exc:
+            # Reads were already retried; writes are not, because the request may have
+            # reached GitHub before the connection broke.
+            raise ToolError(
+                f"Could not reach GitHub ({type(exc).__name__}). Try again later. If this "
+                "call creates something, first check whether it was created."
+            ) from exc
 
 
 # --- Output models ------------------------------------------------------------------------
@@ -283,7 +293,8 @@ async def search_issues(
     per_page: PerPage = 10,
     response_format: ResponseFormat = "concise",
 ) -> SearchResult:
-    page = await _call(ctx, _gh(ctx).search_issues(query, cursor=cursor, per_page=per_page))
+    with _github(ctx) as gh:
+        page = await gh.search_issues(query, cursor=cursor, per_page=per_page)
     return SearchResult(
         total_count=page.total_count or 0,
         items=[_hit(i, response_format) for i in page.items],
@@ -299,13 +310,13 @@ async def get_issue(
     ctx: Context[GitHubState],
     response_format: ResponseFormat = "concise",
 ) -> IssueOut:
-    gh = _gh(ctx)
-    issue = await _call(ctx, gh.get_issue(owner, repo, number))
     comments: list[Comment] | None = None
     more = False
-    if response_format == "detailed" and issue.comments:
-        page = await _call(ctx, gh.list_issue_comments(owner, repo, number, per_page=MAX_COMMENTS))
-        comments, more = page.items, page.next_cursor is not None
+    with _github(ctx) as gh:
+        issue = await gh.get_issue(owner, repo, number)
+        if response_format == "detailed" and issue.comments:
+            page = await gh.list_issue_comments(owner, repo, number, per_page=MAX_COMMENTS)
+            comments, more = page.items, page.next_cursor is not None
     return _issue(issue, response_format, comments, more)
 
 
@@ -318,10 +329,10 @@ async def create_issue(
     labels: list[str] | None = None,
     assignees: list[str] | None = None,
 ) -> CreatedIssue:
-    issue = await _call(
-        ctx,
-        _gh(ctx).create_issue(owner, repo, title, body=body, labels=labels, assignees=assignees),
-    )
+    with _github(ctx) as gh:
+        issue = await gh.create_issue(
+            owner, repo, title, body=body, labels=labels, assignees=assignees
+        )
     return CreatedIssue(
         repository=issue.repository,
         number=issue.number,
@@ -336,7 +347,8 @@ async def create_issue(
 async def add_issue_comment(
     owner: str, repo: str, number: Number, body: str, ctx: Context[GitHubState]
 ) -> CreatedComment:
-    comment = await _call(ctx, _gh(ctx).add_issue_comment(owner, repo, number, body))
+    with _github(ctx) as gh:
+        comment = await gh.add_issue_comment(owner, repo, number, body)
     return CreatedComment(id=comment.id, issue_number=number, html_url=comment.html_url)
 
 
@@ -349,10 +361,10 @@ async def list_pull_requests(
     per_page: PerPage = 10,
     response_format: ResponseFormat = "concise",
 ) -> PullRequestList:
-    page = await _call(
-        ctx,
-        _gh(ctx).list_pull_requests(owner, repo, state=state, cursor=cursor, per_page=per_page),
-    )
+    with _github(ctx) as gh:
+        page = await gh.list_pull_requests(
+            owner, repo, state=state, cursor=cursor, per_page=per_page
+        )
     return PullRequestList(
         items=[_pull(pr, response_format) for pr in page.items], next_cursor=page.next_cursor
     )
@@ -366,7 +378,8 @@ async def get_file_contents(
     ref: str | None = None,
     response_format: ResponseFormat = "concise",
 ) -> FileOut:
-    result = await _call(ctx, _gh(ctx).get_file_contents(owner, repo, path, ref=ref))
+    with _github(ctx) as gh:
+        result = await gh.get_file_contents(owner, repo, path, ref=ref)
     detailed = response_format == "detailed"
     if isinstance(result, DirectoryListing):
         return FileOut(

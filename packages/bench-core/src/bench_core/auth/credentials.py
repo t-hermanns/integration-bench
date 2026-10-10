@@ -95,6 +95,10 @@ class _CachedRenewal:
     def _current(self) -> TokenSet | None:
         raise NotImplementedError
 
+    def tokens(self) -> TokenSet | None:
+        """The tokens in use right now (None before the first renewal)."""
+        return self._current()
+
     async def _renew(self, current: TokenSet | None) -> TokenSet:
         raise NotImplementedError
 

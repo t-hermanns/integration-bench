@@ -23,8 +23,9 @@ class OAuthError(Exception):
 
     @property
     def is_invalid_grant(self) -> bool:
-        # Slack calls an unusable refresh token `invalid_refresh_token`.
-        return self.error in ("invalid_grant", "invalid_refresh_token")
+        # Slack calls an unusable refresh token `invalid_refresh_token`, GitHub
+        # `bad_refresh_token` (sent with HTTP 200).
+        return self.error in ("invalid_grant", "invalid_refresh_token", "bad_refresh_token")
 
 
 def parse_scopes(raw: str | None) -> frozenset[str]:

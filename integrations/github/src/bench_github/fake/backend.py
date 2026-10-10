@@ -7,6 +7,9 @@ by integration" with `X-Accepted-GitHub-Permissions`, and rate limits as 403 wit
 `x-ratelimit-remaining: 0` (primary) or `Retry-After` (secondary).
 
 Tokens carry GitHub App permissions (`issues:write`); write implies read like on GitHub.
+The fake also serves the two token endpoints: the OAuth refresh grant
+(`/login/oauth/access_token`, rotating refresh tokens, errors as HTTP 200) and App
+installation tokens (`/app/installations/{id}/access_tokens`, RS256 App JWT).
 """
 
 import base64
@@ -18,6 +21,7 @@ from datetime import UTC, datetime
 from typing import Any
 
 import httpx2
+import jwt
 
 from bench_core.clock import Clock
 from bench_core.permissions import expand_levels
@@ -71,14 +75,38 @@ class Repo:
         return max(self.issues, default=0) + 1
 
 
+@dataclass(frozen=True)
+class App:
+    public_key_pem: str
+    installations: dict[int, dict[str, str]]
+
+
+def _oauth_error(error: str, description: str) -> dict[str, str]:
+    return {
+        "error": error,
+        "error_description": description,
+        "error_uri": "https://docs.github.com/apps/managing-oauth-apps/troubleshooting-oauth-app-access-token-request-errors",
+    }
+
+
 @dataclass
 class GitHubFake(FakeBackend):
     clock: Clock = field(default_factory=FakeClock)
     repos: dict[str, Repo] = field(default_factory=dict)
     known_users: set[str] = field(default_factory=set)
+    oauth_clients: dict[str, str] = field(default_factory=dict)
+    """client_id -> client_secret of OAuth/GitHub Apps that may refresh user tokens."""
+    refresh_tokens: dict[str, frozenset[str]] = field(default_factory=dict)
+    """Valid (unused) refresh tokens -> permissions of the access tokens they mint."""
+    apps: dict[str, App] = field(default_factory=dict)
     _next_id: int = field(default=1_000_000, init=False, repr=False)
+    _serial: int = field(default=0, init=False, repr=False)
 
     def __post_init__(self) -> None:
+        self.route("POST", "/login/oauth/access_token", public=True)(self._oauth_token)
+        self.route("POST", "/app/installations/{installation_id}/access_tokens", public=True)(
+            self._installation_token
+        )
         self.route("GET", "/search/issues")(self._search_issues)
         self.route("GET", "/repos/{owner}/{repo}/issues/{number}", scopes=["issues:read"])(
             self._get_issue
@@ -106,6 +134,23 @@ class GitHubFake(FakeBackend):
 
     def issue_token(self, token: str, scopes: Sequence[str] = ()) -> str:
         return super().issue_token(token, sorted(expand_levels(scopes)))
+
+    def _mint(self, prefix: str) -> str:
+        self._serial += 1
+        return f"fake-{prefix}-{self._serial}"
+
+    def user_tokens(self, permissions: Sequence[str] = ()) -> tuple[str, str]:
+        """A fresh access + refresh token pair, as after `bench auth login`."""
+        access = self.issue_token(self._mint("user"), permissions)
+        refresh = self._mint("refresh")
+        self.refresh_tokens[refresh] = frozenset(permissions)
+        return access, refresh
+
+    def register_app(
+        self, app_id: str, public_key_pem: str, installations: dict[int, dict[str, str]]
+    ) -> None:
+        """A GitHub App; `installations` maps installation id -> {permission: level}."""
+        self.apps[app_id] = App(public_key_pem, installations)
 
     def new_id(self) -> int:
         self._next_id += 1
@@ -287,6 +332,63 @@ class GitHubFake(FakeBackend):
 
     def server_error_response(self, request: httpx2.Request, status: int) -> httpx2.Response:
         return self._error(status, "Server Error")
+
+    # --- auth endpoints -------------------------------------------------------------------
+
+    def _oauth_token(self, r: FakeRequest) -> Any:
+        """github.com/login/oauth/access_token: errors come back as HTTP 200 with `error`."""
+        form = r.form()
+        if self.oauth_clients.get(form.get("client_id", "")) != form.get("client_secret"):
+            return _oauth_error(
+                "incorrect_client_credentials",
+                "The client_id and/or client_secret passed are incorrect.",
+            )
+        if form.get("grant_type") != "refresh_token":
+            return _oauth_error("unsupported_grant_type", "Only refresh_token is faked.")
+        permissions = self.refresh_tokens.pop(form.get("refresh_token", ""), None)
+        if permissions is None:
+            return _oauth_error(
+                "bad_refresh_token", "The refresh token passed is incorrect or expired."
+            )
+        access, refresh = self.user_tokens(sorted(permissions))
+        return {
+            "access_token": access,
+            "expires_in": 28_800,
+            "refresh_token": refresh,
+            "refresh_token_expires_in": 15_897_600,
+            "scope": "",
+            "token_type": "bearer",
+        }
+
+    def _installation_token(self, r: FakeRequest) -> Any:
+        try:
+            claims = jwt.decode(r.token or "", options={"verify_signature": False})
+            app = self.apps[str(claims["iss"])]
+            jwt.decode(
+                r.token or "",
+                app.public_key_pem,
+                algorithms=["RS256"],
+                # Checked against the fake clock below, not the wall clock.
+                options={"verify_exp": False, "verify_iat": False},
+            )
+        except (jwt.PyJWTError, KeyError):
+            return self._error(401, "A JSON web token could not be decoded")
+        now = self.clock.time()
+        if not claims["iat"] <= now + 60 or not now < claims["exp"] <= now + 600 + 60:
+            return self._error(401, "'Expiration time' claim ('exp') is too far in the future")
+        permissions = app.installations.get(int(r.params["installation_id"]))
+        if permissions is None:
+            return self.not_found_response(r.request)
+        token = self.issue_token(
+            self._mint("installation"), [f"{k}:{v}" for k, v in permissions.items()]
+        )
+        body = {
+            "token": token,
+            "expires_at": timestamp(now + 3600),
+            "permissions": permissions,
+            "repository_selection": "selected",
+        }
+        return httpx2.Response(201, json=body)
 
     # --- helpers --------------------------------------------------------------------------
 

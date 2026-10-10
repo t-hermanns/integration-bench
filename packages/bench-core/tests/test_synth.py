@@ -163,3 +163,13 @@ async def test_path_params_span_slashes() -> None:
         body = (await api.get("/repos/o/r/contents/docs/a b.md")).json()
         assert body == {"owner": "o", "repo": "r", "path": "docs/a b.md"}
         assert (await api.get("/repos/o/r/contents")).status_code == 404
+
+
+async def test_public_routes_skip_the_token_check() -> None:
+    fake = FakeBackend()
+    fake.route("POST", "/oauth/token", public=True)(lambda r: {"token_seen": r.token})
+    fake.route("GET", "/private")(lambda r: {"ok": True})
+    async with ApiClient(BASE, policy=RetryPolicy(), transport=fake.transport()) as api:
+        assert (await api.post("/oauth/token")).json() == {"token_seen": None}
+        assert (await api.get("/private")).status_code == 401
+        assert (await api.get("/unknown")).status_code == 401  # no route leaks existence

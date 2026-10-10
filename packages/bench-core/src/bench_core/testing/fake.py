@@ -104,6 +104,7 @@ class _Route:
     pattern: re.Pattern[str]
     handler: Handler
     scopes: tuple[str, ...]
+    public: bool = False
 
 
 @dataclass
@@ -132,23 +133,33 @@ class FakeBackend:
     # --- setup ----------------------------------------------------------------------------
 
     def route(
-        self, method: str, template: str, *, scopes: Sequence[str] = ()
+        self, method: str, template: str, *, scopes: Sequence[str] = (), public: bool = False
     ) -> Callable[[Handler], Handler]:
         """Decorator: `@backend.route("GET", "/repos/{owner}/{repo}", scopes=["repo"])`.
 
-        `{name:path}` matches the rest of the path including slashes.
+        `{name:path}` matches the rest of the path including slashes. `public=True` skips
+        the bearer-token check (OAuth token endpoints, GitHub's App-JWT endpoints); the
+        handler then checks credentials itself.
         """
 
         def register(handler: Handler) -> Handler:
-            self.add_route(method, template, handler, scopes=scopes)
+            self.add_route(method, template, handler, scopes=scopes, public=public)
             return handler
 
         return register
 
     def add_route(
-        self, method: str, template: str, handler: Handler, *, scopes: Sequence[str] = ()
+        self,
+        method: str,
+        template: str,
+        handler: Handler,
+        *,
+        scopes: Sequence[str] = (),
+        public: bool = False,
     ) -> None:
-        self._routes.append(_Route(method.upper(), _compile(template), handler, tuple(scopes)))
+        self._routes.append(
+            _Route(method.upper(), _compile(template), handler, tuple(scopes), public)
+        )
 
     def issue_token(self, token: str, scopes: Sequence[str] = ()) -> str:
         self.tokens[token] = frozenset(scopes)
@@ -237,24 +248,30 @@ class FakeBackend:
             return self._render(fault, request)
 
         token = self.extract_token(request)
-        if self.require_auth and (token is None or token not in self.tokens):
+        found = self._match(request)
+        public = found is not None and found[0].public
+        if self.require_auth and not public and (token is None or token not in self.tokens):
             return self.unauthorized_response(request)
+        if found is None:
+            return self.not_found_response(request)
+        route, match = found
+        if self.require_auth and not public and token is not None:
+            missing = [s for s in route.scopes if s not in self.tokens[token]]
+            if missing:
+                return self.forbidden_response(request, missing)
+        result = route.handler(FakeRequest(request, match.groupdict(), token))
+        if isinstance(result, httpx2.Response):
+            return result
+        return httpx2.Response(200, json=result)
 
+    def _match(self, request: httpx2.Request) -> tuple[_Route, re.Match[str]] | None:
         for route in self._routes:
             if route.method != request.method:
                 continue
             match = route.pattern.match(request.url.path)
-            if match is None:
-                continue
-            if self.require_auth and token is not None:
-                missing = [s for s in route.scopes if s not in self.tokens[token]]
-                if missing:
-                    return self.forbidden_response(request, missing)
-            result = route.handler(FakeRequest(request, match.groupdict(), token))
-            if isinstance(result, httpx2.Response):
-                return result
-            return httpx2.Response(200, json=result)
-        return self.not_found_response(request)
+            if match is not None:
+                return route, match
+        return None
 
     def _take_fault(self, request: httpx2.Request) -> Fault | None:
         for injection in self._injections:
