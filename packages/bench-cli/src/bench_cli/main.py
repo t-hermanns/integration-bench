@@ -11,9 +11,11 @@ from typing import Annotated
 
 import anyio
 import typer
+from mcp.server.mcpserver.exceptions import ToolError
 
 from bench_core.auth import LoginError, LoginSpec, OAuthError, default_store, login
 from bench_core.doctor import load_env
+from bench_core.sandbox import SandboxError
 from bench_core.testing import CassetteSuite, stale_cassettes, synthesize
 
 from bench_cli import doctor as doctor_checks
@@ -22,6 +24,8 @@ from bench_cli import scaffold
 app = typer.Typer(no_args_is_help=True, add_completion=False)
 auth_app = typer.Typer(no_args_is_help=True, help="Sign in to the integrations' APIs.")
 app.add_typer(auth_app, name="auth")
+sandbox_app = typer.Typer(no_args_is_help=True, help="Prepare the live test accounts.")
+app.add_typer(sandbox_app, name="sandbox")
 
 
 @app.callback()
@@ -149,6 +153,28 @@ def env_settings(env_file: Path | None) -> dict[str, str]:
         except scaffold.ScaffoldError:
             env_file = Path(".env")
     return load_env(env_file)
+
+
+@sandbox_app.command("seed")
+def sandbox_seed(
+    name: Annotated[str, typer.Argument(help="Integration, e.g. jira")],
+    env_file: Annotated[
+        Path | None, typer.Option(help="Settings file (default: .env in the repo root)")
+    ] = None,
+) -> None:
+    """Create the fake's seed data in the live sandbox (once; reruns change nothing)."""
+    try:
+        module = importlib.import_module(f"bench_{name}.sandbox")
+    except ModuleNotFoundError as exc:
+        if exc.name not in (f"bench_{name}", f"bench_{name}.sandbox"):
+            raise
+        raise typer.BadParameter(f"no integration {name!r} with a sandbox module") from None
+    env = env_settings(env_file)
+    try:
+        anyio.run(lambda: module.seed(env, echo=typer.echo))
+    except (SandboxError, ToolError, OAuthError) as exc:
+        typer.echo(f"error: {exc}", err=True)
+        raise typer.Exit(1) from None
 
 
 def load_login(name: str) -> LoginSpec:

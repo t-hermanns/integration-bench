@@ -1,6 +1,6 @@
 """Default data for the fake: one sandbox repository shaped like the live test repo.
 
-`bench sandbox seed` (later) creates the same issues, pull requests and files in the real
+`bench sandbox seed github` creates the same issues, pull requests and files in the real
 test organization, so scenarios and their assertions hold for synthetic and recorded
 cassettes alike. Keep both in sync when changing this data.
 """
@@ -151,23 +151,45 @@ def load(path: str) -> dict[str, str]:
 PNG = bytes.fromhex("89504e470d0a1a0a0000000d4948445200000001000000010806000000")
 
 
+FILES: list[tuple[str, str | bytes]] = [
+    ("README.md", README),
+    ("src/widgets/__init__.py", '"""widgets."""\n\nfrom .core import load\n'),
+    ("src/widgets/core.py", CORE),
+    ("docs/user guide.md", "# User guide\n\nSee the README for basics.\n"),
+    ("assets/logo.png", PNG),
+    ("data/large.csv", b"id,name\n" + b"1,widget\n" * 130_000),
+]
+
+
+def issue_author(number: int) -> str:
+    return CONTRIBUTOR if number % 2 else MAINTAINER
+
+
+def issue_assignees(labels: list[str], state: str) -> list[str]:
+    return [MAINTAINER] if "bug" in labels and state == "open" else []
+
+
+def issue_milestone(labels: list[str]) -> str | None:
+    return "v2.4" if "bug" in labels else None
+
+
 def seed(fake: GitHubFake) -> Repo:
     repo = fake.add_repo(OWNER, REPO, collaborators=[MAINTAINER, CONTRIBUTOR])
     fake.known_users.add(BOT)
     hour = 0
-    for title, labels, state, body in ISSUES:
+    for number, (title, labels, state, body) in enumerate(ISSUES, 1):
         hour += 5
         fake.add_issue(
             repo,
             title,
-            author=CONTRIBUTOR if hour % 2 else MAINTAINER,
+            author=issue_author(number),
             body=body,
             labels=labels,
-            assignees=[MAINTAINER] if "bug" in labels and state == "open" else [],
+            assignees=issue_assignees(labels, state),
             state=state,
             created_at=at(hour),
             updated_at=at(hour + 2),
-            milestone="v2.4" if "bug" in labels else None,
+            milestone=issue_milestone(labels),
         )
     for number, comments in COMMENTS.items():
         for i, (author, text) in enumerate(comments):
@@ -187,12 +209,8 @@ def seed(fake: GitHubFake) -> Repo:
             created_at=at(hour),
             updated_at=at(hour + 30),
         )
-    fake.add_file(repo, "README.md", README)
-    fake.add_file(repo, "src/widgets/__init__.py", '"""widgets."""\n\nfrom .core import load\n')
-    fake.add_file(repo, "src/widgets/core.py", CORE)
-    fake.add_file(repo, "docs/user guide.md", "# User guide\n\nSee the README for basics.\n")
-    fake.add_file(repo, "assets/logo.png", PNG)
-    fake.add_file(repo, "data/large.csv", b"id,name\n" + b"1,widget\n" * 130_000)
+    for path, content in FILES:
+        fake.add_file(repo, path, content)
     return repo
 
 

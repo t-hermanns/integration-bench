@@ -344,6 +344,12 @@ class JiraFake(FakeBackend):
         for label in labels:
             if " " in label:
                 errors["labels"] = f"The label '{label}' contains spaces which is invalid."
+        priority = (fields.get("priority") or {}).get("name", "Medium")
+        if priority not in PRIORITIES:
+            errors["priority"] = f"Specify the Priority (name) in the string format: {priority}"
+        assignee = (fields.get("assignee") or {}).get("accountId")
+        if assignee is not None and assignee not in self.users:
+            errors["assignee"] = f"User '{assignee}' cannot be assigned issues."
         if errors:
             return _error(400, **errors)
         assert isinstance(summary, str)
@@ -353,8 +359,10 @@ class JiraFake(FakeBackend):
             summary,
             project=project,
             issue_type=issue_type,
+            priority=priority,
             description=description,
             labels=labels,
+            assignee=assignee,
         )
         return httpx2.Response(
             201, json={"id": issue["id"], "key": issue["key"], "self": issue["self"]}

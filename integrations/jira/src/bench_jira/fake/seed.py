@@ -1,6 +1,6 @@
 """Default data for the fake, shaped like the live sandbox.
 
-`bench sandbox seed` (later) creates the same issues in project BENCH of the test site,
+`bench sandbox seed jira` creates the same issues in project BENCH of the test site,
 so the scenarios and their assertions hold for synthetic and recorded cassettes alike.
 Keep both in sync when changing this data. Live issue keys depend on creation order:
 create them in list order into an empty project.
