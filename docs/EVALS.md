@@ -71,3 +71,13 @@ runs the tasks live against the sandbox (writes leave `{run_id}` objects behind)
 one JSON line per run to `.bench/results/` and prints the score. `--k 3` repeats every
 task, `--task ID` picks single tasks. `bench score a.jsonl b.jsonl` scores saved logs and
 compares b against a (exact McNemar).
+
+## Call budget
+
+The Cohere trial key allows 1,000 calls per month and reports no remaining count, so `bench eval cohere`
+counts every request itself (retries and failed requests included) per UTC calendar month and stops
+before call 900. The counter is `budget/cohere.json` in the orphan branch `bench-results`, checked out
+as a worktree in `.bench/bench-results` and pushed after each run. `bench budget` shows it;
+`bench budget --add N` records calls made elsewhere (the remaining 100 cover `bench doctor` and manual
+checks). Whether the cap is per endpoint and when it resets is not documented; the counter assumes
+one shared cap that resets with the calendar month.

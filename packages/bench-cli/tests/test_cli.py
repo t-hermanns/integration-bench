@@ -212,6 +212,12 @@ def test_score_rejects_logs_of_unknown_tasks(tmp_path: Path) -> None:
     assert result.exit_code != 0
 
 
+def test_budget_exists_only_for_capped_providers() -> None:
+    result = runner.invoke(app, ["budget", "gemini"])
+    assert result.exit_code != 0
+    assert "no budget" in result.output
+
+
 @pytest.mark.parametrize(
     ("args", "message"),
     [

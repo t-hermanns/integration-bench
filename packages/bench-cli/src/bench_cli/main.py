@@ -34,6 +34,8 @@ from bench_core.testing import (
 
 from bench_cli import doctor as doctor_checks
 from bench_cli import scaffold
+from bench_evals import results_branch
+from bench_evals.budget import BUDGETS, BudgetedModel, BudgetExhausted, CallBudget
 from bench_evals.models.providers import PROVIDERS
 from bench_evals.runner import live_servers, run_tasks
 from bench_evals.scorer import score_run
@@ -295,11 +297,33 @@ async def eval_run(
     provider: str, tasks: list[EvalTask], env: dict[str, str], variant: str, k: int, out: Path
 ) -> None:
     model = PROVIDERS[provider].build(env)
+    budget = None
+    if provider in BUDGETS:
+        tree = results_branch.checkout(repo_root())
+        budget = CallBudget(tree / budget_file(provider), BUDGETS[provider])
+        typer.echo(f"{provider} budget: {budget.used()}/{budget.stop_at} used this month")
+        model = BudgetedModel(model, budget)
     names = sorted({i for t in tasks for i in t.integrations})
-    async with live_servers(names, env, variant) as servers:
-        for _ in range(k):
-            run_id = uuid.uuid4().hex[:12]
-            await run_tasks(model, [t.for_run(run_id) for t in tasks], servers, out, run_id=run_id)
+    try:
+        async with live_servers(names, env, variant) as servers:
+            for _ in range(k):
+                run_id = uuid.uuid4().hex[:12]
+                runs = [t.for_run(run_id) for t in tasks]
+                await run_tasks(model, runs, servers, out, run_id=run_id)
+    finally:
+        if budget is not None:
+            save_budget(provider, budget)
+
+
+def budget_file(provider: str) -> str:
+    return f"budget/{provider}.json"
+
+
+def save_budget(provider: str, budget: CallBudget) -> None:
+    tree = budget.path.parent.parent
+    message = f"budget: {provider} {budget.used()}/{budget.stop_at} in {budget.month()}"
+    results_branch.publish(tree, [budget_file(provider)], message)
+    typer.echo(f"{message} (pushed to {results_branch.BRANCH})")
 
 
 def read_records(path: Path) -> list[dict[str, object]]:
@@ -349,7 +373,29 @@ def eval_(
         anyio.run(eval_run, provider, tasks, env_settings(env_file), descriptions, k, out)
     except KeyError as exc:
         raise typer.BadParameter(f"{exc.args[0]} is not set") from None
+    except BudgetExhausted as exc:
+        typer.echo(f"stopped: {exc}", err=True)
+        if not out.exists():
+            raise typer.Exit(1) from None
     typer.echo(f"solved: {show_rate(rate(outcomes_of(out, tasks, verbose=True)))}")
+
+
+@app.command()
+def budget(
+    provider: Annotated[str, typer.Argument(help="Budgeted provider")] = "cohere",
+    add: Annotated[int, typer.Option(help="Record calls made outside `bench eval`")] = 0,
+) -> None:
+    """Show (or correct) the monthly call budget kept in the bench-results branch."""
+    if provider not in BUDGETS:
+        raise typer.BadParameter(f"no budget for {provider!r} (only {', '.join(BUDGETS)})")
+    tree = results_branch.checkout(repo_root())
+    calls = CallBudget(tree / budget_file(provider), BUDGETS[provider])
+    if add:
+        calls.add(add)
+        save_budget(provider, calls)
+    typer.echo(
+        f"{provider}: {calls.used()}/{calls.stop_at} used in {calls.month()}, {calls.left()} left"
+    )
 
 
 @app.command()
