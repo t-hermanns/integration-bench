@@ -108,6 +108,7 @@ class GitHubFake(FakeBackend):
             self._installation_token
         )
         self.route("GET", "/search/issues")(self._search_issues)
+        self.route("GET", "/repos/{owner}/{repo}")(self._get_repo)  # `bench doctor` only
         self.route("GET", "/repos/{owner}/{repo}/issues/{number}", scopes=["issues:read"])(
             self._get_issue
         )
@@ -495,6 +496,12 @@ class GitHubFake(FakeBackend):
         if not isinstance(body, str) or not body:
             return self._validation("IssueComment", "body", "missing_field")
         return self._ok(self.add_comment(repo, number, body, author=self._actor(r)), status=201)
+
+    def _get_repo(self, r: FakeRequest) -> Any:
+        repo = self._repo(r)
+        if not repo:
+            return self.not_found_response(r.request)
+        return self._ok({"full_name": repo.full_name, "private": True, "default_branch": "main"})
 
     def _list_pulls(self, r: FakeRequest) -> Any:
         repo = self._repo(r)

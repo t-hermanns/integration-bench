@@ -225,7 +225,14 @@ class AppInstallation(_CachedRenewal):
         now = int(self.clock.time())
         # Backdate iat for clock drift; GitHub allows at most 10 minutes of validity.
         claims = {"iat": now - 60, "exp": now + 540, "iss": self.app_id}
-        return jwt.encode(claims, self.private_key_pem, algorithm="RS256")
+        try:
+            return jwt.encode(claims, self.private_key_pem, algorithm="RS256")
+        except jwt.InvalidKeyError:
+            raise AuthError(
+                self.account,
+                "the GitHub App private key is not a valid PEM RSA key",
+                "Use the .pem file generated in the App settings.",
+            ) from None
 
     async def _renew(self, current: TokenSet | None) -> TokenSet:
         url = f"{self.api_base}/app/installations/{self.installation_id}/access_tokens"

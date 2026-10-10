@@ -21,4 +21,8 @@ python -m uv run bench new <name>
 ## Test accounts
 
 Live evals and recordings need real test accounts; [docs/SETUP.md](docs/SETUP.md) walks
-through creating them (free plans only).
+through creating them (free plans only). Settings go into a gitignored `.env`; check them with
+
+```bash
+python -m uv run bench doctor
+```

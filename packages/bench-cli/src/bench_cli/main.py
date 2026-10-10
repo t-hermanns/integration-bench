@@ -10,8 +10,10 @@ from typing import Annotated
 import anyio
 import typer
 
+from bench_core.doctor import load_env
 from bench_core.testing import CassetteSuite, stale_cassettes, synthesize
 
+from bench_cli import doctor as doctor_checks
 from bench_cli import scaffold
 
 app = typer.Typer(no_args_is_help=True, add_completion=False)
@@ -132,3 +134,34 @@ def update(
         typer.echo(f"error: {exc}", err=True)
         raise typer.Exit(1) from None
     typer.echo(f"updated integrations/{name}; review the diff, then `bench synth {name} --check`")
+
+
+@app.command()
+def doctor(
+    targets: Annotated[
+        list[str] | None,
+        typer.Argument(help="Integrations or model providers to check (default: all)"),
+    ] = None,
+    env_file: Annotated[
+        Path | None, typer.Option(help="Settings file (default: .env in the repo root)")
+    ] = None,
+) -> None:
+    """Check that the configured accounts and model keys work (read-only calls)."""
+    if env_file is None:
+        try:
+            env_file = scaffold.find_root(Path.cwd()) / ".env"
+        except scaffold.ScaffoldError:
+            env_file = Path(".env")
+    try:
+        env = load_env(env_file)
+        results = anyio.run(doctor_checks.run, env, targets)
+    except (KeyError, ValueError) as exc:
+        raise typer.BadParameter(str(exc.args[0])) from None
+    width = max((len(r.target) for r in results), default=0)
+    for r in results:
+        typer.echo(f"{r.status.upper():<5} {r.target:<{width}}  {r.detail}")
+    failed = sum(r.status == "fail" for r in results)
+    skipped = sum(r.status == "skip" for r in results)
+    typer.echo(f"{len(results) - failed - skipped} ok, {failed} failed, {skipped} skipped")
+    if failed:
+        raise typer.Exit(1)

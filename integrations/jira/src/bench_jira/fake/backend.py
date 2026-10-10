@@ -96,6 +96,9 @@ class JiraFake(FakeBackend):
         self.route("POST", base + "/issue/{key}/comment", scopes=[WRITE])(self._add_comment)
         self.route("GET", base + "/issue/{key}/transitions", scopes=[READ])(self._transitions)
         self.route("POST", base + "/issue/{key}/transitions", scopes=[WRITE])(self._transition)
+        # `bench doctor` only.
+        self.route("GET", base + "/myself")(self._myself)
+        self.route("GET", base + "/project/{key}", scopes=[READ])(self._get_project)
 
     # --- setup ----------------------------------------------------------------------------
 
@@ -295,6 +298,15 @@ class JiraFake(FakeBackend):
         if more:
             body["nextPageToken"] = f"page-{offset + size}"
         return httpx2.Response(200, json=body)
+
+    def _myself(self, r: FakeRequest) -> httpx2.Response:
+        return httpx2.Response(200, json=BOT)
+
+    def _get_project(self, r: FakeRequest) -> httpx2.Response:
+        key = r.params["key"].upper()
+        if key not in self.projects:
+            return _error(404, f"No project could be found with key '{key}'.")
+        return httpx2.Response(200, json={"key": key, "name": self.projects[key]})
 
     def _get_issue(self, r: FakeRequest) -> httpx2.Response:
         issue = self.find(r.params["key"])
