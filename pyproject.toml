@@ -11,6 +11,8 @@ dev = [
     "pytest>=8.4",
     "ruff>=0.13",
     "pyright>=1.1.405",
+    "vcrpy>=8.3",
+    "pytest-recording>=0.14",
 ]
 
 [tool.uv]

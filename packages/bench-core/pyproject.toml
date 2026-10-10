@@ -3,7 +3,9 @@ name = "bench-core"
 version = "0.1.0"
 description = "Shared HTTP, auth, permissions, MCP and testing helpers for integration-bench."
 requires-python = ">=3.13"
-dependencies = []
+dependencies = [
+    "httpx2>=2.13.1",
+]
 
 [build-system]
 requires = ["uv_build>=0.8,<1"]
