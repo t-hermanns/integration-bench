@@ -53,39 +53,63 @@ def _scenario(
 
 # --- Scenarios ----------------------------------------------------------------------------
 
-CRASHES = "crash"
-"""Matches three seeded items, so a page size of 2 gives two pages."""
+CRASHES = "project = BENCH AND summary ~ crash ORDER BY key ASC"
+"""Matches three seeded issues (BENCH-1, -7, -12), so a page size of 2 gives two pages."""
 
 
-async def list_items(client: JiraClient) -> None:
-    first = await client.list_items(query=CRASHES, page_size=2)
-    await client.list_items(query=CRASHES, page_size=2, cursor=first.next_cursor)
+async def search_issues(client: JiraClient) -> None:
+    first = await client.search_issues(CRASHES, page_size=2)
+    await client.search_issues(CRASHES, page_size=2, cursor=first.next_cursor)
 
 
-async def list_no_results(client: JiraClient) -> None:
-    await client.list_items(query="kubernetes")
+async def search_no_results(client: JiraClient) -> None:
+    await client.search_issues("project = BENCH AND summary ~ kubernetes")
 
 
-async def get_item(client: JiraClient) -> None:
-    await client.get_item("1001")
+async def search_invalid_jql(client: JiraClient) -> None:
+    await expect_tool_error(client.search_issues("project = BENCH AND sprint_name = 4"))
 
 
-async def get_item_not_found(client: JiraClient) -> None:
-    await expect_tool_error(client.get_item("9999"))
+async def get_issue(client: JiraClient) -> None:
+    await client.get_issue("BENCH-1")
 
 
-async def create_item(client: JiraClient) -> None:
-    await client.create_item(
-        "Export button does nothing in Firefox", description="Chrome works fine."
+async def get_issue_not_found(client: JiraClient) -> None:
+    await expect_tool_error(client.get_issue("BENCH-999"))
+
+
+async def create_issue(client: JiraClient) -> None:
+    await client.create_issue(
+        "BENCH",
+        "Export button does nothing in Firefox",
+        issue_type="Bug",
+        description="Chrome works fine.\n\n- Firefox 131\n- Windows 11",
+        labels=["export", "firefox"],
     )
 
 
-async def create_item_invalid(client: JiraClient) -> None:
-    await expect_tool_error(client.create_item("x" * 201))
+async def create_issue_invalid(client: JiraClient) -> None:
+    await expect_tool_error(client.create_issue("BENCH", "Wrong type", issue_type="Bugfix"))
 
 
-async def create_item_forbidden(client: JiraClient) -> None:
-    await expect_tool_error(client.create_item("Should not be created"))
+async def create_issue_forbidden(client: JiraClient) -> None:
+    await expect_tool_error(client.create_issue("BENCH", "Should not be created"))
+
+
+async def add_comment(client: JiraClient) -> None:
+    await client.add_comment("BENCH-2", "Design draft is ready for review.")
+
+
+async def transition_issue(client: JiraClient) -> None:
+    """BENCH-4 to In Progress and back, so a live run leaves the sandbox as it was."""
+    for target in ("In Progress", "To Do"):
+        available = await client.transitions("BENCH-4")
+        chosen = next(t for t in available if t.to_status == target)
+        await client.transition_issue("BENCH-4", chosen.id)
+
+
+async def transition_invalid(client: JiraClient) -> None:
+    await expect_tool_error(client.transition_issue("BENCH-4", "999"))
 
 
 def _read_only_token(fake: JiraFake) -> None:
@@ -93,15 +117,19 @@ def _read_only_token(fake: JiraFake) -> None:
 
 
 SCENARIOS: dict[str, Scenario] = {
-    "list_items": _scenario(list_items, "Items matching 'crash', two pages"),
-    "list_no_results": _scenario(list_no_results, "List without hits"),
-    "get_item": _scenario(get_item, "First seeded item"),
-    "get_item_not_found": _scenario(get_item_not_found, "Missing item"),
-    "create_item": _scenario(create_item, "New item with a description"),
-    "create_item_invalid": _scenario(create_item_invalid, "Title over 200 characters"),
-    "create_item_forbidden": _scenario(
-        create_item_forbidden, "Token without the write scope", prepare=_read_only_token
+    "search_issues": _scenario(search_issues, "Summary contains 'crash', two pages"),
+    "search_no_results": _scenario(search_no_results, "Search without hits"),
+    "search_invalid_jql": _scenario(search_invalid_jql, "JQL with an unknown field"),
+    "get_issue": _scenario(get_issue, "BENCH-1 with description and comments"),
+    "get_issue_not_found": _scenario(get_issue_not_found, "Missing issue"),
+    "create_issue": _scenario(create_issue, "New bug with description and labels"),
+    "create_issue_invalid": _scenario(create_issue_invalid, "Unknown issue type"),
+    "create_issue_forbidden": _scenario(
+        create_issue_forbidden, "OAuth token without write:jira-work", prepare=_read_only_token
     ),
+    "add_comment": _scenario(add_comment, "Plain-text comment on BENCH-2"),
+    "transition_issue": _scenario(transition_issue, "BENCH-4 to In Progress and back"),
+    "transition_invalid": _scenario(transition_invalid, "Transition id that does not exist"),
 }
 
 SUITE = CassetteSuite(

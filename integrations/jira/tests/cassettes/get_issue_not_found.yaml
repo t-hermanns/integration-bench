@@ -11,13 +11,14 @@ interactions:
       user-agent:
       - integration-bench
     method: GET
-    uri: https://bench-sandbox.atlassian.net/rest/api/3/items/9999
+    uri: https://bench-sandbox.atlassian.net/rest/api/3/issue/BENCH-999?fields=summary%2Cstatus%2Cissuetype%2Cpriority%2Cassignee%2Clabels%2Ccreated%2Cupdated%2Cproject%2Creporter%2Cdescription%2Ccomment
   response:
     body:
-      string: '{"errorMessages":["Item 9999 does not exist."],"errors":{}}'
+      string: '{"errorMessages":["Issue does not exist or you do not have permission
+        to see it."],"errors":{}}'
     headers:
       content-length:
-      - '59'
+      - '95'
       content-type:
       - application/json
     status:

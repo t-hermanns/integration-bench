@@ -1,13 +1,13 @@
 interactions:
 - request:
-    body: '{"title":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"}'
+    body: '{"transition":{"id":"999"}}'
     headers:
       accept:
       - application/json
       authorization:
       - REDACTED
       content-length:
-      - '213'
+      - '27'
       content-type:
       - application/json
       host:
@@ -15,13 +15,13 @@ interactions:
       user-agent:
       - integration-bench
     method: POST
-    uri: https://bench-sandbox.atlassian.net/rest/api/3/items
+    uri: https://bench-sandbox.atlassian.net/rest/api/3/issue/BENCH-4/transitions
   response:
     body:
-      string: '{"errorMessages":["title is too long (maximum is 200 characters)."],"errors":{}}'
+      string: '{"errorMessages":["Transition id ''999'' is not valid for this issue."],"errors":{}}'
     headers:
       content-length:
-      - '80'
+      - '82'
       content-type:
       - application/json
     status:

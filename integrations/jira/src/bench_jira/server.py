@@ -2,8 +2,9 @@
 
 `create_server` wires the tools, the descriptions variant and the permission filter; the
 lifespan owns one `ApiClient` per client session. Tests pass a fake `transport`; live
-runs pass a credential. `main()` serves over stdio for manual use; it reads
-`JIRA_TOKEN`.
+runs pass a credential plus the site (API token) or the gateway URL (OAuth). `main()`
+serves over stdio for manual use with an API token: it reads `JIRA_SITE` (e.g.
+bench-sandbox), `JIRA_EMAIL` and `JIRA_API_TOKEN`.
 """
 
 import os
@@ -13,12 +14,13 @@ from importlib.resources import files
 
 import httpx2
 
-from bench_core.auth import Credential, StaticToken
+from bench_core.auth import Credential
 from bench_core.clock import Clock
 from bench_core.mcp import BenchServer, build_server, load_descriptions
 from bench_core.permissions import Granted
 
-from bench_jira.client import BASE_URL, PROVIDER, JiraClient, make_api
+from bench_jira.auth import api_token
+from bench_jira.client import BASE_URL, PROVIDER, SITE_URL, JiraClient, make_api, site_api_url
 from bench_jira.scopes import EXPAND
 from bench_jira.tools import TOOLS, JiraState
 
@@ -31,12 +33,14 @@ def create_server(
     transport: httpx2.AsyncBaseTransport | None = None,
     clock: Clock | None = None,
     base_url: str = BASE_URL,
+    site_url: str = SITE_URL,
     granted: Granted = None,
     read_only: bool | None = None,
     variant: str | None = None,
 ) -> BenchServer[JiraState]:
     """`granted` are the credential's scopes (None = unknown, keep all tools).
 
+    `site_url` is where browse links point (the API may go through the gateway).
     `read_only=None` reads `BENCH_READ_ONLY`, `variant=None` reads `BENCH_DESCRIPTIONS`.
     """
     descriptions = load_descriptions(files("bench_jira") / "descriptions", variant)
@@ -45,7 +49,7 @@ def create_server(
     async def lifespan() -> AsyncIterator[JiraState]:
         api = make_api(credential=credential, base_url=base_url, transport=transport, clock=clock)
         async with api:
-            yield JiraState(JiraClient(api))
+            yield JiraState(JiraClient(api, site=site_url))
 
     return build_server(
         NAME,
@@ -59,8 +63,12 @@ def create_server(
 
 
 def main() -> None:
-    token_var = "JIRA_TOKEN"
-    token = os.environ.get(token_var)
-    if not token:
-        raise SystemExit(f"Set {token_var} to run the {PROVIDER} MCP server over stdio.")
-    create_server(credential=StaticToken(NAME, token)).run("stdio")
+    names = ("JIRA_SITE", "JIRA_EMAIL", "JIRA_API_TOKEN")
+    site, email, token = (os.environ.get(name) for name in names)
+    if not site or not email or not token:
+        raise SystemExit(f"Set {', '.join(names)} to run the {PROVIDER} MCP server over stdio.")
+    create_server(
+        credential=api_token(NAME, email=email, token=token),
+        base_url=site_api_url(site),
+        site_url=f"https://{site}.atlassian.net",
+    ).run("stdio")

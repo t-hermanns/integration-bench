@@ -1,0 +1,34 @@
+interactions:
+- request:
+    body: '{"fields":{"project":{"key":"BENCH"},"summary":"Export button does nothing
+      in Firefox","issuetype":{"name":"Bug"},"description":{"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Chrome
+      works fine."}]},{"type":"bulletList","content":[{"type":"listItem","content":[{"type":"paragraph","content":[{"type":"text","text":"Firefox
+      131"}]}]},{"type":"listItem","content":[{"type":"paragraph","content":[{"type":"text","text":"Windows
+      11"}]}]}]}]},"labels":["export","firefox"]}}'
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      content-length:
+      - '512'
+      content-type:
+      - application/json
+      host:
+      - bench-sandbox.atlassian.net
+      user-agent:
+      - integration-bench
+    method: POST
+    uri: https://bench-sandbox.atlassian.net/rest/api/3/issue
+  response:
+    body:
+      string: '{"id":"10013","key":"BENCH-13","self":"https://bench-sandbox.atlassian.net/rest/api/3/issue/10013"}'
+    headers:
+      content-length:
+      - '99'
+      content-type:
+      - application/json
+    status:
+      code: 201
+      message: Created
+version: 1

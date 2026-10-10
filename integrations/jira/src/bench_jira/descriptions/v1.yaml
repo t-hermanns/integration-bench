@@ -1,35 +1,56 @@
-# Baseline tool descriptions (v1). The description experiment compares this against v2.
-# Only text lives here; behaviour and argument types are in tools.py.
+# Baseline tool descriptions (v1): short, in the style of OpenAPI summaries. The
+# description experiment compares this against v2. Only text lives here; behaviour and
+# argument types are in tools.py.
 instructions: >-
-  Tools for Jira items. List results come one page at a time; pass next_cursor
-  back to get the next page.
+  Tools for Jira Cloud issues. Search results come one page at a time; pass
+  next_cursor back to get the next page.
 
 tools:
-  jira_list_items:
-    title: List items
+  jira_search_issues:
+    title: Search issues
     description: >-
-      List items, optionally only those whose title contains a search text.
+      Search for issues using JQL (enhanced search).
     params:
-      query: Text the item title must contain; omit to list all items.
+      jql: JQL query, e.g. 'project = BENCH AND status = "In Progress"'.
       cursor: next_cursor from a previous call to get the next page; omit for page one.
       page_size: Results per page (1-50).
       response_format: >-
-        "concise" (default) for id, title and status; "detailed" adds the description,
-        timestamps and URL.
+        "concise" (default) for key, summary, status and type; "detailed" adds
+        priority, assignee, labels, last update and URL.
 
-  jira_get_item:
-    title: Get item
+  jira_get_issue:
+    title: Get issue
     description: >-
-      Get one item by id, including its description.
+      Get an issue by key, including its description.
     params:
-      item_id: Item id from a list result, e.g. "1001".
+      issue_key: Issue key, e.g. "BENCH-12".
       response_format: >-
-        "concise" (default) for the item itself; "detailed" adds timestamps and URL.
+        "concise" (default) for the issue itself; "detailed" adds reporter, timestamps,
+        URL and the comments.
 
-  jira_create_item:
-    title: Create item
+  jira_create_issue:
+    title: Create issue
     description: >-
-      Create a new item.
+      Create an issue in a project.
     params:
-      title: Item title (at most 200 characters).
-      description: Item description in plain text.
+      project_key: Project key, e.g. "BENCH".
+      summary: One-line summary (at most 255 characters).
+      issue_type: Issue type name, e.g. "Task", "Bug" or "Story".
+      description: Description in plain text.
+      labels: Labels without spaces.
+
+  jira_add_comment:
+    title: Add comment
+    description: >-
+      Add a comment to an issue.
+    params:
+      issue_key: Issue key, e.g. "BENCH-12".
+      body: Comment text in plain text.
+
+  jira_transition_issue:
+    title: Transition issue
+    description: >-
+      Move an issue to another workflow status.
+    params:
+      issue_key: Issue key, e.g. "BENCH-12".
+      status: Target status, e.g. "In Progress" or "Done".

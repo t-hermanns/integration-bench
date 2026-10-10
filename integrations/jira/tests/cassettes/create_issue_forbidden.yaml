@@ -1,0 +1,30 @@
+interactions:
+- request:
+    body: '{"fields":{"project":{"key":"BENCH"},"summary":"Should not be created","issuetype":{"name":"Task"}}}'
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      content-length:
+      - '100'
+      content-type:
+      - application/json
+      host:
+      - bench-sandbox.atlassian.net
+      user-agent:
+      - integration-bench
+    method: POST
+    uri: https://bench-sandbox.atlassian.net/rest/api/3/issue
+  response:
+    body:
+      string: '{"code":401,"message":"Unauthorized; scope does not match"}'
+    headers:
+      content-length:
+      - '59'
+      content-type:
+      - application/json
+    status:
+      code: 401
+      message: Unauthorized
+version: 1

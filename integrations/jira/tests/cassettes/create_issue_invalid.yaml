@@ -1,13 +1,13 @@
 interactions:
 - request:
-    body: '{"title":"Should not be created"}'
+    body: '{"fields":{"project":{"key":"BENCH"},"summary":"Wrong type","issuetype":{"name":"Bugfix"}}}'
     headers:
       accept:
       - application/json
       authorization:
       - REDACTED
       content-length:
-      - '33'
+      - '91'
       content-type:
       - application/json
       host:
@@ -15,16 +15,16 @@ interactions:
       user-agent:
       - integration-bench
     method: POST
-    uri: https://bench-sandbox.atlassian.net/rest/api/3/items
+    uri: https://bench-sandbox.atlassian.net/rest/api/3/issue
   response:
     body:
-      string: '{"errorMessages":["The token lacks the scope for this call."],"errors":{}}'
+      string: '{"errorMessages":[],"errors":{"issuetype":"Specify a valid issue type"}}'
     headers:
       content-length:
-      - '74'
+      - '72'
       content-type:
       - application/json
     status:
-      code: 403
-      message: Forbidden
+      code: 400
+      message: Bad Request
 version: 1

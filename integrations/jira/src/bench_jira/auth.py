@@ -3,12 +3,17 @@
 **User token** (`bench auth login jira`, browser sign-in): the access token expires
 and the refresh token rotates on every use; `RotatingRefresh` stores the new pair before
 the call is retried. Token responses report the granted scopes, so the server can hide
-tools the user did not grant.
+tools the user did not grant. These tokens go to the Atlassian gateway
+(`client.gateway_api_url(cloud_id)`), not to the site.
+
+**API token** (CI): HTTP Basic with the account e-mail and an API token, against the site
+(`client.site_api_url(site)`). Never refreshed; a 401 means it was revoked. It reports no
+scopes, so every tool stays registered and Jira's project permissions decide.
 """
 
 import httpx2
 
-from bench_core.auth import Credential, RotatingRefresh, TokenEndpoint, TokenStore
+from bench_core.auth import Credential, RotatingRefresh, StaticToken, TokenEndpoint, TokenStore
 from bench_core.clock import Clock
 from bench_core.permissions import Granted
 
@@ -38,3 +43,7 @@ async def granted_scopes(credential: Credential) -> Granted:
     await credential.authorization()
     tokens = credential.tokens()
     return tokens.scopes if tokens is not None and tokens.scopes else None
+
+
+def api_token(account: str, *, email: str, token: str) -> StaticToken:
+    return StaticToken.basic(account, email, token)

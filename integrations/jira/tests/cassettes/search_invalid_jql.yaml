@@ -1,0 +1,27 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      host:
+      - bench-sandbox.atlassian.net
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://bench-sandbox.atlassian.net/rest/api/3/search/jql?jql=project+%3D+BENCH+AND+sprint_name+%3D+4&fields=summary%2Cstatus%2Cissuetype%2Cpriority%2Cassignee%2Clabels%2Ccreated%2Cupdated&maxResults=20
+  response:
+    body:
+      string: '{"errorMessages":["Field ''sprint_name'' does not exist or you do not
+        have permission to view it."],"errors":{}}'
+    headers:
+      content-length:
+      - '110'
+      content-type:
+      - application/json
+    status:
+      code: 400
+      message: Bad Request
+version: 1

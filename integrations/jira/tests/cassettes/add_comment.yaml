@@ -1,0 +1,33 @@
+interactions:
+- request:
+    body: '{"body":{"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Design
+      draft is ready for review."}]}]}}'
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      content-length:
+      - '139'
+      content-type:
+      - application/json
+      host:
+      - bench-sandbox.atlassian.net
+      user-agent:
+      - integration-bench
+    method: POST
+    uri: https://bench-sandbox.atlassian.net/rest/api/3/issue/BENCH-2/comment
+  response:
+    body:
+      string: '{"id":"20005","self":"https://bench-sandbox.atlassian.net/rest/api/3/issue/10002/comment/20005","author":{"accountId":"557058:bench-bot","displayName":"Bench
+        Bot","accountType":"atlassian"},"body":{"type":"doc","version":1,"content":[{"type":"paragraph","content":[{"type":"text","text":"Design
+        draft is ready for review."}]}]},"created":"2027-01-15T08:00:00.000+0000","updated":"2027-01-15T08:00:00.000+0000"}'
+    headers:
+      content-length:
+      - '410'
+      content-type:
+      - application/json
+    status:
+      code: 201
+      message: Created
+version: 1

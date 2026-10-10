@@ -1,10 +1,14 @@
 # Kind of every cassette in this directory. `bench synth` writes `synthetic` ones from
 # the in-memory fake; `bench record` replaces them with `recorded` ones from the sandbox.
 cassettes:
-  create_item: synthetic
-  create_item_forbidden: synthetic
-  create_item_invalid: synthetic
-  get_item: synthetic
-  get_item_not_found: synthetic
-  list_items: synthetic
-  list_no_results: synthetic
+  add_comment: synthetic
+  create_issue: synthetic
+  create_issue_forbidden: synthetic
+  create_issue_invalid: synthetic
+  get_issue: synthetic
+  get_issue_not_found: synthetic
+  search_invalid_jql: synthetic
+  search_issues: synthetic
+  search_no_results: synthetic
+  transition_invalid: synthetic
+  transition_issue: synthetic
