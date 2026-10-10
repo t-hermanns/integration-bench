@@ -21,6 +21,10 @@ import keyring
 import keyring.errors
 
 
+def parse_scopes(raw: str | None) -> frozenset[str]:
+    return frozenset(s for s in re.split(r"[\s,]+", raw or "") if s)
+
+
 @dataclass(frozen=True)
 class TokenSet:
     access_token: str | None = None
@@ -189,7 +193,7 @@ class EnvTokenStore:
         return TokenSet(
             access_token=values.get("access_token"),
             refresh_token=values.get("refresh_token"),
-            scopes=frozenset(re.split(r"[\s,]+", scopes.strip())) if scopes else frozenset(),
+            scopes=parse_scopes(scopes),
         )
 
     def load(self, account: str) -> TokenSet | None:

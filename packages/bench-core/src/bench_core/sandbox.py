@@ -8,6 +8,8 @@ not empty is refused (issue numbers would not match the fake).
 
 from collections.abc import Callable, Mapping
 
+from bench_core.doctor import missing
+
 Echo = Callable[[str], None]
 
 
@@ -16,6 +18,5 @@ class SandboxError(Exception):
 
 
 def require(env: Mapping[str, str], *names: str) -> None:
-    absent = [name for name in names if not env.get(name)]
-    if absent:
+    if absent := missing(env, *names):
         raise SandboxError(f"set {', '.join(absent)} (see `bench doctor`)")

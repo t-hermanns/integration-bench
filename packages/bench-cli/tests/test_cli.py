@@ -1,5 +1,6 @@
 """`bench` CLI wiring (the synthesis itself is tested in bench-core)."""
 
+import os
 from pathlib import Path
 
 import httpx2
@@ -32,18 +33,14 @@ def test_unknown_scenario_is_a_usage_error() -> None:
 
 # --- bench doctor --------------------------------------------------------------------------
 
-DOCTOR_VARS = (
-    "GITHUB_APP_ID", "GITHUB_INSTALLATION_ID", "GITHUB_PRIVATE_KEY", "GITHUB_PRIVATE_KEY_PATH",
-    "GITHUB_CLIENT_ID", "GITHUB_CLIENT_SECRET", "JIRA_SITE", "JIRA_EMAIL", "JIRA_API_TOKEN",
-    "JIRA_CLIENT_ID", "JIRA_CLIENT_SECRET", "COHERE_API_KEY", "GEMINI_API_KEY", "GROQ_API_KEY",
-    "BENCH_TOKEN_DIR",
-)  # fmt: skip
-
 
 @pytest.fixture
 def clean_env(monkeypatch: pytest.MonkeyPatch) -> None:
-    for name in DOCTOR_VARS:
-        monkeypatch.delenv(name, raising=False)
+    """Drop every setting a doctor target reads: they are all prefixed `<TARGET>_`."""
+    prefixes = ("BENCH_", *(f"{name.upper()}_" for name in doctor.runners()))
+    for name in list(os.environ):
+        if name.startswith(prefixes):
+            monkeypatch.delenv(name)
 
 
 @pytest.mark.usefixtures("clean_env")

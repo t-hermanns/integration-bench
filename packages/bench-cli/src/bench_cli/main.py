@@ -16,7 +16,7 @@ import typer
 from mcp.server.mcpserver.exceptions import ToolError
 
 from bench_core.auth import LoginError, LoginSpec, OAuthError, default_store, login
-from bench_core.doctor import load_env
+from bench_core.doctor import load_env, missing
 from bench_core.sandbox import SandboxError
 from bench_core.testing import (
     CassetteSuite,
@@ -42,13 +42,18 @@ def main() -> None:
     """Build, test, evaluate and monitor MCP integrations."""
 
 
-def load_suite(name: str) -> CassetteSuite:
+def load_integration(name: str, submodule: str, what: str) -> ModuleType:
+    """`bench_<name>.<submodule>`; `what` completes "no integration 'x'" if absent."""
     try:
-        module = importlib.import_module(f"bench_{name}.scenarios")
+        return importlib.import_module(f"bench_{name}.{submodule}")
     except ModuleNotFoundError as exc:
-        if exc.name not in (f"bench_{name}", f"bench_{name}.scenarios"):
+        if exc.name not in (f"bench_{name}", f"bench_{name}.{submodule}"):
             raise
-        raise typer.BadParameter(f"no integration {name!r} with cassette scenarios") from None
+        raise typer.BadParameter(f"no integration {name!r}{what}") from None
+
+
+def load_suite(name: str) -> CassetteSuite:
+    module = load_integration(name, "scenarios", " with cassette scenarios")
     suite = getattr(module, "SUITE", None)
     if not isinstance(suite, CassetteSuite):
         raise typer.BadParameter(f"bench_{name}.scenarios has no SUITE")
@@ -154,6 +159,11 @@ def update(
     typer.echo(f"updated integrations/{name}; review the diff, then `bench synth {name} --check`")
 
 
+EnvFile = Annotated[
+    Path | None, typer.Option(help="Settings file (default: .env in the repo root)")
+]
+
+
 def env_settings(env_file: Path | None) -> dict[str, str]:
     """Process environment over `.env` (default: the repo root's)."""
     if env_file is None:
@@ -165,20 +175,13 @@ def env_settings(env_file: Path | None) -> dict[str, str]:
 
 
 def load_sandbox(name: str) -> ModuleType:
-    try:
-        return importlib.import_module(f"bench_{name}.sandbox")
-    except ModuleNotFoundError as exc:
-        if exc.name not in (f"bench_{name}", f"bench_{name}.sandbox"):
-            raise
-        raise typer.BadParameter(f"no integration {name!r} with a sandbox module") from None
+    return load_integration(name, "sandbox", " with a sandbox module")
 
 
 @sandbox_app.command("seed")
 def sandbox_seed(
     name: Annotated[str, typer.Argument(help="Integration, e.g. jira")],
-    env_file: Annotated[
-        Path | None, typer.Option(help="Settings file (default: .env in the repo root)")
-    ] = None,
+    env_file: EnvFile = None,
 ) -> None:
     """Create the fake's seed data in the live sandbox (once; reruns change nothing)."""
     module = load_sandbox(name)
@@ -196,9 +199,7 @@ def record(
     only: Annotated[
         list[str] | None, typer.Option("--only", help="Scenario to record; repeatable")
     ] = None,
-    env_file: Annotated[
-        Path | None, typer.Option(help="Settings file (default: .env in the repo root)")
-    ] = None,
+    env_file: EnvFile = None,
 ) -> None:
     """Re-record cassettes by running the scenarios against the live sandbox."""
     suite = load_suite(name)
@@ -227,13 +228,7 @@ def record(
 
 
 def load_login(name: str) -> LoginSpec:
-    try:
-        module = importlib.import_module(f"bench_{name}.auth")
-    except ModuleNotFoundError as exc:
-        if exc.name not in (f"bench_{name}", f"bench_{name}.auth"):
-            raise
-        raise typer.BadParameter(f"no integration {name!r}") from None
-    spec = getattr(module, "LOGIN", None)
+    spec = getattr(load_integration(name, "auth", ""), "LOGIN", None)
     if not isinstance(spec, LoginSpec):
         raise typer.BadParameter(f"bench_{name} has no browser sign-in (auth.LOGIN)")
     return spec
@@ -242,9 +237,7 @@ def load_login(name: str) -> LoginSpec:
 @auth_app.command("login")
 def auth_login(
     name: Annotated[str, typer.Argument(help="Integration, e.g. jira")],
-    env_file: Annotated[
-        Path | None, typer.Option(help="Settings file (default: .env in the repo root)")
-    ] = None,
+    env_file: EnvFile = None,
     browser: Annotated[
         bool, typer.Option(help="Open the browser (else only print the sign-in URL)")
     ] = True,
@@ -253,8 +246,7 @@ def auth_login(
     spec = load_login(name)
     env = env_settings(env_file)
     needed = [spec.client_id_var, *([spec.client_secret_var] if spec.client_secret_var else [])]
-    absent = [var for var in needed if not env.get(var)]
-    if absent:
+    if absent := missing(env, *needed):
         typer.echo(f"error: set {', '.join(absent)} (see docs/SETUP.md)", err=True)
         raise typer.Exit(1)
 
@@ -292,9 +284,7 @@ def doctor(
         list[str] | None,
         typer.Argument(help="Integrations or model providers to check (default: all)"),
     ] = None,
-    env_file: Annotated[
-        Path | None, typer.Option(help="Settings file (default: .env in the repo root)")
-    ] = None,
+    env_file: EnvFile = None,
 ) -> None:
     """Check that the configured accounts and model keys work (read-only calls)."""
     try:

@@ -16,8 +16,6 @@ from collections.abc import Mapping
 from contextlib import chdir
 from pathlib import Path
 
-import copier
-
 NAME_RE = re.compile(r"^[a-z][a-z0-9]{1,14}$")
 TEMPLATE_PATHS = ("copier.yml", "templates/integration")
 LINE_LENGTH = 100
@@ -119,6 +117,8 @@ def generate(
         raise ScaffoldError(f"{dst.relative_to(root).as_posix()} already exists")
     # "HEAD" renders the working tree, but the recorded commit then cannot be updated from.
     ref = "HEAD" if allow_dirty else committed_template(root)
+    import copier  # slow to import; only `bench new` / `bench update` need it
+
     with chdir(root):
         copier.run_copy(
             ".",
@@ -141,6 +141,8 @@ def update(root: Path, name: str, *, vcs_ref: str | None, defaults: bool) -> Non
     if not (dst / ".copier-answers.yml").is_file():
         raise ScaffoldError(f"integrations/{name} was not generated from the template")
     ref = vcs_ref or committed_template(root)
+    import copier
+
     with chdir(root):
         copier.run_update(
             f"integrations/{name}",

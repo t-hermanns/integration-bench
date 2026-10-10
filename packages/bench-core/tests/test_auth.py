@@ -120,6 +120,23 @@ async def test_valid_token_is_used_without_refresh() -> None:
     assert store.saves == 0
 
 
+class CountingStore(MemoryTokenStore):
+    loads = 0
+
+    def load(self, account: str) -> TokenSet | None:
+        self.loads += 1
+        return super().load(account)
+
+
+@pytest.mark.anyio
+async def test_store_is_read_once_not_per_request() -> None:
+    store = CountingStore({"jira": TokenSet(access_token="at-0", refresh_token="rt-0")})
+    _, _, _, api, _ = setup_rotating(store=store)
+    for _ in range(3):
+        assert (await api.get("/myself")).status_code == 200
+    assert store.loads == 1
+
+
 @pytest.mark.anyio
 async def test_401_triggers_refresh_and_single_retry() -> None:
     _, store, provider, api, clock = setup_rotating()

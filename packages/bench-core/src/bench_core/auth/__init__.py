@@ -18,7 +18,7 @@ from bench_core.auth.login import (
     login,
     pkce_pair,
 )
-from bench_core.auth.oauth import OAuthError, TokenEndpoint, parse_scopes
+from bench_core.auth.oauth import OAuthError, TokenEndpoint
 from bench_core.auth.store import (
     EnvTokenStore,
     FileTokenStore,
@@ -28,6 +28,7 @@ from bench_core.auth.store import (
     TokenSet,
     TokenStore,
     default_store,
+    parse_scopes,
 )
 
 __all__ = [

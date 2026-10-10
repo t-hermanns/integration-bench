@@ -6,12 +6,11 @@ for JSON, Slack reports errors as HTTP 200 with `ok: false` and lists scopes com
 separated, and providers that do not rotate refresh tokens omit `refresh_token`.
 """
 
-import re
 from typing import Any, Literal
 
 import httpx2
 
-from bench_core.auth.store import TokenSet
+from bench_core.auth.store import TokenSet, parse_scopes
 from bench_core.clock import Clock
 
 
@@ -27,10 +26,6 @@ class OAuthError(Exception):
         # Slack calls an unusable refresh token `invalid_refresh_token`, GitHub
         # `bad_refresh_token` (sent with HTTP 200).
         return self.error in ("invalid_grant", "invalid_refresh_token", "bad_refresh_token")
-
-
-def parse_scopes(raw: str | None) -> frozenset[str]:
-    return frozenset(s for s in re.split(r"[\s,]+", raw or "") if s)
 
 
 class TokenEndpoint:

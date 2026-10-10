@@ -110,6 +110,23 @@ def _write_text(path: Path, text: str) -> None:
     os.replace(tmp, path)
 
 
+async def _record[T](path: Path, run: Awaitable[T]) -> tuple[T, str]:
+    """Await `run` into a fresh cassette at `path`; returns its result and the text."""
+    target = anyio.Path(path)
+    await target.unlink(missing_ok=True)  # record_mode=all appends to an existing cassette
+    await target.parent.mkdir(parents=True, exist_ok=True)
+    with make_vcr(record_mode=RecordMode.ALL).use_cassette(str(path)):
+        result = await run
+    return result, await target.read_text(encoding="utf-8")
+
+
+def _selected(suite: CassetteSuite, only: Sequence[str] | None) -> Sequence[str]:
+    unknown = sorted(set(only or ()) - set(suite.scenarios))
+    if unknown:
+        raise KeyError(f"{suite.integration}: unknown scenario(s) {', '.join(unknown)}")
+    return only or sorted(suite.scenarios)
+
+
 async def record_scenario(suite: CassetteSuite, name: str, path: Path) -> None:
     """Run one scenario against a fresh fake and write its cassette to `path`."""
     scenario = suite.scenarios[name]
@@ -117,14 +134,10 @@ async def record_scenario(suite: CassetteSuite, name: str, path: Path) -> None:
     fake = suite.fake(clock)
     if scenario.prepare:
         scenario.prepare(fake)
-    target = anyio.Path(path)
-    await target.unlink(missing_ok=True)  # record_mode=all appends to an existing cassette
-    await target.parent.mkdir(parents=True, exist_ok=True)
     async with suite.api(fake.transport(), clock) as api:
-        with make_vcr(record_mode=RecordMode.ALL).use_cassette(str(path)):
-            await scenario.run(api)
+        _, text = await _record(path, scenario.run(api))
     # vcrpy writes with the platform newline; keep cassettes byte-identical across OSes.
-    _write_text(path, await target.read_text(encoding="utf-8"))
+    _write_text(path, text)
 
 
 @dataclass(frozen=True)
@@ -142,13 +155,11 @@ async def synthesize(
     Recorded cassettes are kept unless `force`. Without `only`, cassettes of scenarios
     that no longer exist are removed.
     """
-    unknown = sorted(set(only or ()) - set(suite.scenarios))
-    if unknown:
-        raise KeyError(f"{suite.integration}: unknown scenario(s) {', '.join(unknown)}")
+    names = _selected(suite, only)
     manifest = read_manifest(suite.cassette_dir)
     written: list[str] = []
     skipped: list[str] = []
-    for name in only or sorted(suite.scenarios):
+    for name in names:
         if manifest.get(name) == "recorded" and not force:
             skipped.append(name)
             continue
@@ -204,28 +215,21 @@ async def record_live(
     Every cassette is checked with `find_secrets` before it is kept. The manifest is
     written after each scenario, so an aborted run keeps what it recorded so far.
     """
-    unknown = sorted(set(only or ()) - set(suite.scenarios))
-    if unknown:
-        raise KeyError(f"{suite.integration}: unknown scenario(s) {', '.join(unknown)}")
+    names = _selected(suite, only)
     manifest = read_manifest(suite.cassette_dir)
     recorded: list[str] = []
     skipped: list[str] = []
-    for name in only or sorted(suite.scenarios):
+    for name in names:
         scenario = suite.scenarios[name]
         if scenario.prepare:
             skipped.append(name)
             continue
         path = suite.path(name)
-        target = anyio.Path(path)
-        await target.unlink(missing_ok=True)
-        await target.parent.mkdir(parents=True, exist_ok=True)
-        with make_vcr(record_mode=RecordMode.ALL).use_cassette(str(path)):
-            result = await scenario.run(api)
+        result, text = await _record(path, scenario.run(api))
         if scenario.teardown:
             await scenario.teardown(api, result)
-        text = await target.read_text(encoding="utf-8")
         if leaks := find_secrets(text):
-            await target.unlink()
+            path.unlink()
             raise SecretsFound(f"{name}: cassette matched {', '.join(leaks)}; deleted it")
         _write_text(path, text)
         manifest[name] = "recorded"

@@ -213,7 +213,6 @@ class BenchServer[StateT](MCPServer[StateT]):
     """An `MCPServer` that also remembers which tools were dropped and why."""
 
     selection: Selection
-    descriptions: Descriptions
 
 
 def build_server[StateT](
@@ -264,5 +263,4 @@ def build_server[StateT](
         lifespan=server_lifespan,
     )
     server.selection = selection
-    server.descriptions = descriptions
     return server

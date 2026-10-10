@@ -91,13 +91,15 @@ class _CachedRenewal:
     def __init__(self, account: str, clock: Clock | None) -> None:
         self.account = account
         self.clock: Clock = clock or SystemClock()
-
-    def _current(self) -> TokenSet | None:
-        raise NotImplementedError
+        self._tokens: TokenSet | None = None
 
     def tokens(self) -> TokenSet | None:
         """The tokens in use right now (None before the first renewal)."""
-        return self._current()
+        return self._tokens
+
+    def _latest(self) -> TokenSet | None:
+        """The tokens to renew from, read under the lock."""
+        return self._tokens
 
     async def _renew(self, current: TokenSet | None) -> TokenSet:
         raise NotImplementedError
@@ -111,17 +113,17 @@ class _CachedRenewal:
         return None if header == failed else header
 
     async def authorization(self, *, failed: str | None = None) -> str:
-        header = self._usable(self._current(), failed)
+        header = self._usable(self.tokens(), failed)
         if header is not None:
             return header
         async with _lock(self.account):
-            current = self._current()  # another task may have renewed while we waited
+            current = self._latest()  # another task may have renewed while we waited
             header = self._usable(current, failed)
             if header is not None:
                 return header
-            renewed = await self._renew(current)
-            assert renewed.access_token is not None
-            return _bearer(renewed.access_token)
+            self._tokens = await self._renew(current)
+            assert self._tokens.access_token is not None
+            return _bearer(self._tokens.access_token)
 
 
 class RotatingRefresh(_CachedRenewal):
@@ -137,8 +139,16 @@ class RotatingRefresh(_CachedRenewal):
         self.store = store
         self.endpoint = endpoint
 
-    def _current(self) -> TokenSet | None:
-        return self.store.load(self.account)
+    def tokens(self) -> TokenSet | None:
+        """The stored tokens, read once (a keyring read per request would block the loop)."""
+        if self._tokens is None:
+            self._tokens = self.store.load(self.account)
+        return self._tokens
+
+    def _latest(self) -> TokenSet | None:
+        # Re-read: another process or credential may have rotated the refresh token.
+        self._tokens = self.store.load(self.account)
+        return self._tokens
 
     async def _renew(self, current: TokenSet | None) -> TokenSet:
         if current is None or not current.refresh_token:
@@ -179,19 +189,14 @@ class ClientCredentials(_CachedRenewal):
         super().__init__(account, clock)
         self.endpoint = endpoint
         self.scopes = scopes
-        self._tokens: TokenSet | None = None
-
-    def _current(self) -> TokenSet | None:
-        return self._tokens
 
     async def _renew(self, current: TokenSet | None) -> TokenSet:
         try:
-            self._tokens = await self.endpoint.client_credentials(self.clock, self.scopes)
+            return await self.endpoint.client_credentials(self.clock, self.scopes)
         except OAuthError as e:
             raise AuthError(
                 self.account, f"client credentials grant failed ({e})", "Check client id/secret."
             ) from e
-        return self._tokens
 
 
 class AppInstallation(_CachedRenewal):
@@ -216,10 +221,6 @@ class AppInstallation(_CachedRenewal):
         self.installation_id = installation_id
         self.api_base = api_base.rstrip("/")
         self.transport = transport
-        self._tokens: TokenSet | None = None
-
-    def _current(self) -> TokenSet | None:
-        return self._tokens
 
     def app_jwt(self) -> str:
         now = int(self.clock.time())
@@ -252,12 +253,11 @@ class AppInstallation(_CachedRenewal):
         body: dict[str, Any] = response.json()
         expires = datetime.fromisoformat(body["expires_at"].replace("Z", "+00:00"))
         permissions: dict[str, str] = body.get("permissions") or {}
-        self._tokens = TokenSet(
+        return TokenSet(
             access_token=body["token"],
             expires_at=expires.timestamp(),
             scopes=frozenset(f"{name}:{level}" for name, level in permissions.items()),
         )
-        return self._tokens
 
 
 class CredentialAuth(httpx2.Auth):

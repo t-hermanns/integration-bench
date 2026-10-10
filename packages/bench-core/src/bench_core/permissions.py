@@ -12,12 +12,13 @@ Provider-specific parsing of error responses into `PermissionDenied` /
 """
 
 import os
-import re
 from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass, field
 
 from mcp.server.mcpserver.exceptions import ToolError
 from mcp.types import ToolAnnotations
+
+from bench_core.auth.store import parse_scopes
 
 Granted = frozenset[str] | None
 
@@ -59,9 +60,7 @@ def expand_implied(granted: Iterable[str], implies: Mapping[str, Iterable[str]])
 
 def scopes_from_header(value: str | None) -> Granted:
     """Parse `X-OAuth-Scopes`-style headers (GitHub classic, Slack). Missing header -> None."""
-    if value is None:
-        return None
-    return frozenset(s for s in re.split(r"[\s,]+", value) if s)
+    return None if value is None else parse_scopes(value)
 
 
 # --- Requirements -------------------------------------------------------------------------
