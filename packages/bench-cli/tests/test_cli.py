@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 from typing import ClassVar
 
+import click
 import httpx2
 import pytest
 from typer.testing import CliRunner, Result
@@ -346,10 +347,10 @@ def test_regress_integration_subset_needs_a_baseline_and_never_sets_one(
     log = eval_log(tmp_path / "a.jsonl", dict.fromkeys(DEV_JIRA, "No idea."))
     result = regress(tmp_path, log, "--integration", "jira", "--set-baseline")
     assert result.exit_code == 2
-    assert "drop --integration" in result.output
+    assert "drop --integration" in click.unstyle(result.output)  # CI colours options
     result = regress(tmp_path, log, "--integration", "jira")
     assert result.exit_code == 2
-    assert "no baseline baselines/gemini-v2.json" in result.output
+    assert "no baseline baselines/gemini-v2.json" in click.unstyle(result.output)
     assert not (tree / "history").exists()
     assert published == []
 

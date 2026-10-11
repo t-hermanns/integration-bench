@@ -575,7 +575,7 @@ def regress(
     history = results_file("history", provider, descriptions, "jsonl")
     baseline_path = results_file("baselines", provider, descriptions, "json")
     if integration and not (tree / baseline_path).exists():
-        raise typer.BadParameter(f"no baseline {baseline_path} to compare a subset with")
+        raise typer.BadParameter(f"no baseline {baseline_path} yet")
     (tree / history).parent.mkdir(parents=True, exist_ok=True)
     with (tree / history).open("a", encoding="utf-8", newline="\n") as f:
         f.write(json.dumps(entry, sort_keys=True) + "\n")
