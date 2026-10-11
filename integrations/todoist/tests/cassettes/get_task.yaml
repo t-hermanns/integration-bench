@@ -1,0 +1,122 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      cookie:
+      - REDACTED
+      host:
+      - api.todoist.com
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://api.todoist.com/api/v1/tasks/filter?limit=20&query=search%3A+Crash+when+config+file+is+empty
+  response:
+    body:
+      string: "{\n\t\"results\": [\n\t\t{\n\t\t\t\"user_id\": \"61076455\",\n\t\t\t\"id\":
+        \"6hjQgmgVFcxcPxGV\",\n\t\t\t\"project_id\": \"6hjQcxgwXX8gCf4V\",\n\t\t\t\"section_id\":
+        null,\n\t\t\t\"parent_id\": null,\n\t\t\t\"added_by_uid\": \"61076455\",\n\t\t\t\"assigned_by_uid\":
+        null,\n\t\t\t\"responsible_uid\": null,\n\t\t\t\"labels\": [],\n\t\t\t\"deadline\":
+        null,\n\t\t\t\"duration\": null,\n\t\t\t\"is_collapsed\": false,\n\t\t\t\"checked\":
+        false,\n\t\t\t\"is_deleted\": false,\n\t\t\t\"added_at\": \"2026-10-11T14:28:58.862401Z\",\n\t\t\t\"completed_at\":
+        null,\n\t\t\t\"completed_by_uid\": null,\n\t\t\t\"updated_at\": \"2026-10-11T14:28:58.862424Z\",\n\t\t\t\"due\":
+        null,\n\t\t\t\"priority\": 1,\n\t\t\t\"child_order\": 1,\n\t\t\t\"order_key\":
+        \"a4LyX\",\n\t\t\t\"content\": \"Crash when config file is empty\",\n\t\t\t\"description\":
+        \"An empty config raises KeyError: 'name'.\",\n\t\t\t\"note_count\": 0,\n\t\t\t\"day_order\":
+        -1,\n\t\t\t\"completed_count\": 0,\n\t\t\t\"postponed_count\": 0\n\t\t}\n\t],\n\t\"next_cursor\":
+        null\n}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      connection:
+      - keep-alive
+      content-length:
+      - '833'
+      content-type:
+      - application/json
+      date:
+      - Sun, 11 Oct 2026 14:29:56 GMT
+      referrer-policy:
+      - strict-origin-when-cross-origin
+      server:
+      - gunicorn
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
+      - Accept-Encoding
+      via:
+      - 1.1 3c2c38b11de7f29e091125f84ca68d28.cloudfront.net (CloudFront)
+      x-amz-cf-id:
+      - JFcOufpE2b4QFGwNR7vVXeyRrIYmRRJ_3TDbmFY3-Ve_IzYhfEJ87g==
+      x-amz-cf-pop:
+      - MUC50-P4
+      x-cache:
+      - Miss from cloudfront
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      cookie:
+      - REDACTED
+      host:
+      - api.todoist.com
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://api.todoist.com/api/v1/tasks/6hjQgmgVFcxcPxGV
+  response:
+    body:
+      string: "{\n\t\"user_id\": \"61076455\",\n\t\"id\": \"6hjQgmgVFcxcPxGV\",\n\t\"project_id\":
+        \"6hjQcxgwXX8gCf4V\",\n\t\"section_id\": null,\n\t\"parent_id\": null,\n\t\"added_by_uid\":
+        \"61076455\",\n\t\"assigned_by_uid\": null,\n\t\"responsible_uid\": null,\n\t\"labels\":
+        [],\n\t\"deadline\": null,\n\t\"duration\": null,\n\t\"is_collapsed\": false,\n\t\"checked\":
+        false,\n\t\"is_deleted\": false,\n\t\"added_at\": \"2026-10-11T14:28:58.862401Z\",\n\t\"completed_at\":
+        null,\n\t\"completed_by_uid\": null,\n\t\"updated_at\": \"2026-10-11T14:28:58.862424Z\",\n\t\"due\":
+        null,\n\t\"priority\": 1,\n\t\"child_order\": 1,\n\t\"order_key\": \"a4LyX\",\n\t\"content\":
+        \"Crash when config file is empty\",\n\t\"description\": \"An empty config
+        raises KeyError: 'name'.\",\n\t\"note_count\": 0,\n\t\"day_order\": -1,\n\t\"completed_count\":
+        0,\n\t\"postponed_count\": 0\n}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      connection:
+      - keep-alive
+      content-length:
+      - '730'
+      content-type:
+      - application/json
+      date:
+      - Sun, 11 Oct 2026 14:29:57 GMT
+      referrer-policy:
+      - strict-origin-when-cross-origin
+      server:
+      - gunicorn
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
+      - Accept-Encoding
+      via:
+      - 1.1 3c2c38b11de7f29e091125f84ca68d28.cloudfront.net (CloudFront)
+      x-amz-cf-id:
+      - 85HjCQiTsS0nJSN1ftRiw5BmXQiRjeoAcjfUySWaEY1ynBd84jTlpw==
+      x-amz-cf-pop:
+      - MUC50-P4
+      x-cache:
+      - Miss from cloudfront
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

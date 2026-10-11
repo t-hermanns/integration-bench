@@ -1,13 +1,13 @@
 interactions:
 - request:
-    body: '{"title":"Should not be created"}'
+    body: '{"content":"Should not be created"}'
     headers:
       accept:
       - application/json
       authorization:
       - REDACTED
       content-length:
-      - '33'
+      - '35'
       content-type:
       - application/json
       host:
@@ -15,13 +15,13 @@ interactions:
       user-agent:
       - integration-bench
     method: POST
-    uri: https://api.todoist.com/api/v1/items
+    uri: https://api.todoist.com/api/v1/tasks
   response:
     body:
-      string: '{"message":"The token lacks the scope for this call."}'
+      string: '{"error":"Insufficient token scope","error_code":403,"error_extra":{"retry_after":3},"error_tag":"AUTH_INSUFFICIENT_TOKEN_SCOPE","http_code":403}'
     headers:
       content-length:
-      - '54'
+      - '145'
       content-type:
       - application/json
     status:

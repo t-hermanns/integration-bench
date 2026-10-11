@@ -6,20 +6,46 @@ interactions:
       - application/json
       authorization:
       - REDACTED
+      cookie:
+      - REDACTED
       host:
       - api.todoist.com
       user-agent:
       - integration-bench
     method: GET
-    uri: https://api.todoist.com/api/v1/items?limit=20&q=kubernetes
+    uri: https://api.todoist.com/api/v1/tasks/filter?limit=20&query=search%3A+kubernetes
   response:
     body:
-      string: '{"items":[],"response_metadata":{"next_cursor":""}}'
+      string: "{\n\t\"results\": [],\n\t\"next_cursor\": null\n}\n"
     headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      connection:
+      - keep-alive
       content-length:
-      - '51'
+      - '41'
       content-type:
       - application/json
+      date:
+      - Sun, 11 Oct 2026 14:29:57 GMT
+      referrer-policy:
+      - strict-origin-when-cross-origin
+      server:
+      - gunicorn
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
+      - Accept-Encoding
+      via:
+      - 1.1 3c2c38b11de7f29e091125f84ca68d28.cloudfront.net (CloudFront)
+      x-amz-cf-id:
+      - iq9LxyBBxngTajYL_AoAKgVI1p6pzxI4jD6epujJtpCW76CcXBizNQ==
+      x-amz-cf-pop:
+      - MUC50-P4
+      x-cache:
+      - Miss from cloudfront
+      x-content-type-options:
+      - nosniff
     status:
       code: 200
       message: OK

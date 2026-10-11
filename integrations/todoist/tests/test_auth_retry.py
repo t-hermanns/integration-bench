@@ -18,7 +18,7 @@ from bench_core.testing import FakeClock, Fault
 
 from bench_todoist.auth import granted_scopes
 from bench_todoist.client import PROVIDER, TodoistClient, make_api
-from bench_todoist.fake import TodoistFake, credential, seeded_fake
+from bench_todoist.fake import FIRST_ID, TodoistFake, credential, seeded_fake
 from bench_todoist.scopes import READ, WRITE
 from bench_todoist.server import create_server
 from bench_todoist.tools import TOOL_WAIT_BUDGET
@@ -27,8 +27,8 @@ pytestmark = pytest.mark.anyio
 
 TOKEN = "retry-token"
 ALL = [READ, WRITE]
-GET = "todoist_get_item"
-CREATE = "todoist_create_item"
+GET = "todoist_get_task"
+CREATE = "todoist_create_task"
 
 
 @pytest.fixture
@@ -73,7 +73,7 @@ def text(result: CallToolResult) -> str:
 async def test_revoked_token_is_reported(fake: TodoistFake, client_for: Any) -> None:
     fake.expire_token(TOKEN)
     with pytest.raises(ToolError) as exc:
-        await client_for(credential(TOKEN)).get_item("1001")
+        await client_for(credential(TOKEN)).get_task(FIRST_ID)
     assert "rejected" in str(exc.value)
 
 
@@ -88,7 +88,7 @@ async def test_rate_limit_honours_retry_after(
     fake: TodoistFake, clock: FakeClock, client_for: Any
 ) -> None:
     fake.inject(Fault.rate_limit(retry_after=7), method="GET")
-    assert (await client_for(credential(TOKEN)).get_item("1001")).id == "1001"
+    assert (await client_for(credential(TOKEN)).get_task(FIRST_ID)).id == FIRST_ID
     assert clock.sleeps == [7]
 
 
@@ -97,7 +97,7 @@ async def test_budget_exceeded_on_the_client(
 ) -> None:
     fake.inject(Fault.rate_limit(retry_after=45), method="GET")
     with pytest.raises(RateLimited) as exc:
-        await client_for(credential(TOKEN)).get_item("1001")
+        await client_for(credential(TOKEN)).get_task(FIRST_ID)
     assert exc.value.retry_after == 45
     assert clock.sleeps == []
 
@@ -112,13 +112,13 @@ async def test_wait_budget_is_per_tool_call(fake: TodoistFake, clock: FakeClock)
     )
     fake.inject(Fault.rate_limit(retry_after=TOOL_WAIT_BUDGET + 1), method="GET")
     async with Client(server) as client:
-        result = await client.call_tool(GET, {"item_id": "1001"})
+        result = await client.call_tool(GET, {"task_id": FIRST_ID})
         assert result.is_error
         assert f"{PROVIDER} rate limited" in text(result)
 
         # The next tool call starts with a fresh budget.
         fake.inject(Fault.rate_limit(retry_after=TOOL_WAIT_BUDGET - 1), method="GET")
-        assert not (await client.call_tool(GET, {"item_id": "1001"})).is_error
+        assert not (await client.call_tool(GET, {"task_id": FIRST_ID})).is_error
     assert clock.sleeps == [TOOL_WAIT_BUDGET - 1]
 
 
@@ -130,10 +130,10 @@ async def test_network_errors_on_writes(fake: TodoistFake, clock: FakeClock) -> 
         read_only=False,
         variant="v1",
     )
-    before = len(fake.items)
+    before = len(fake.tasks)
     fake.inject(Fault.network(), method="POST")
     async with Client(server) as client:
         result = await client.call_tool(CREATE, {"title": "x"})
     assert result.is_error
     assert f"Could not reach {PROVIDER} (ConnectError)" in text(result)
-    assert len(fake.items) == before
+    assert len(fake.tasks) == before

@@ -21,7 +21,7 @@ from bench_core.mcp import ResponseFormat, ToolSpec, clip, lifespan_state, omit,
 
 from bench_todoist import scopes
 from bench_todoist.client import PROVIDER, TodoistClient
-from bench_todoist.models import Item
+from bench_todoist.models import Task
 
 TOOL_WAIT_BUDGET = 20.0
 """Seconds one tool call may spend waiting on rate limits before it reports them."""
@@ -49,7 +49,7 @@ class Output(BaseModel):
     pass
 
 
-class ItemHit(Output):
+class TaskHit(Output):
     id: str
     title: str
     status: str
@@ -59,12 +59,12 @@ class ItemHit(Output):
     url: str | None = omit()
 
 
-class ItemList(Output):
-    items: list[ItemHit]
+class TaskList(Output):
+    tasks: list[TaskHit]
     next_cursor: str | None = omit()
 
 
-class ItemOut(Output):
+class TaskOut(Output):
     id: str
     title: str
     status: str
@@ -75,7 +75,7 @@ class ItemOut(Output):
     url: str | None = omit()
 
 
-class CreatedItem(Output):
+class CreatedTask(Output):
     id: str
     title: str
     url: str
@@ -84,33 +84,33 @@ class CreatedItem(Output):
 # --- Conversions --------------------------------------------------------------------------
 
 
-def _hit(item: Item, fmt: ResponseFormat) -> ItemHit:
-    hit = ItemHit(id=item.id, title=item.title, status=item.status)
+def _hit(task: Task, fmt: ResponseFormat) -> TaskHit:
+    hit = TaskHit(id=task.id, title=task.title, status=task.status)
     if fmt == "detailed":
-        description, clipped = clip(item.description, DESCRIPTION_LIMIT["concise"])
+        description, clipped = clip(task.description, DESCRIPTION_LIMIT["concise"])
         hit = hit.model_copy(
             update={
                 "description": description,
                 "description_truncated": clipped,
-                "updated_at": item.updated_at,
-                "url": item.url,
+                "updated_at": task.updated_at,
+                "url": task.url,
             }
         )
     return hit
 
 
-def _item(item: Item, fmt: ResponseFormat) -> ItemOut:
-    description, clipped = clip(item.description, DESCRIPTION_LIMIT[fmt])
-    out = ItemOut(
-        id=item.id,
-        title=item.title,
-        status=item.status,
+def _task(task: Task, fmt: ResponseFormat) -> TaskOut:
+    description, clipped = clip(task.description, DESCRIPTION_LIMIT[fmt])
+    out = TaskOut(
+        id=task.id,
+        title=task.title,
+        status=task.status,
         description=description,
         description_truncated=clipped,
     )
     if fmt == "detailed":
         out = out.model_copy(
-            update={"created_at": item.created_at, "updated_at": item.updated_at, "url": item.url}
+            update={"created_at": task.created_at, "updated_at": task.updated_at, "url": task.url}
         )
     return out
 
@@ -120,38 +120,38 @@ def _item(item: Item, fmt: ResponseFormat) -> ItemOut:
 PageSize = Annotated[int, Field(ge=1, le=50)]
 
 
-async def list_items(
+async def list_tasks(
     ctx: Context[TodoistState],
     query: str | None = None,
     cursor: str | None = None,
     page_size: PageSize = 10,
     response_format: ResponseFormat = "concise",
-) -> ItemList:
+) -> TaskList:
     with _todoist(ctx) as client:
-        page = await client.list_items(query=query, cursor=cursor, page_size=page_size)
-    return ItemList(
-        items=[_hit(i, response_format) for i in page.items], next_cursor=page.next_cursor
+        page = await client.list_tasks(query=query, cursor=cursor, page_size=page_size)
+    return TaskList(
+        tasks=[_hit(i, response_format) for i in page.items], next_cursor=page.next_cursor
     )
 
 
-async def get_item(
-    item_id: str, ctx: Context[TodoistState], response_format: ResponseFormat = "concise"
-) -> ItemOut:
+async def get_task(
+    task_id: str, ctx: Context[TodoistState], response_format: ResponseFormat = "concise"
+) -> TaskOut:
     with _todoist(ctx) as client:
-        item = await client.get_item(item_id)
-    return _item(item, response_format)
+        task = await client.get_task(task_id)
+    return _task(task, response_format)
 
 
-async def create_item(
+async def create_task(
     title: str, ctx: Context[TodoistState], description: str | None = None
-) -> CreatedItem:
+) -> CreatedTask:
     with _todoist(ctx) as client:
-        item = await client.create_item(title, description=description)
-    return CreatedItem(id=item.id, title=item.title, url=item.url)
+        task = await client.create_task(title, description=description)
+    return CreatedTask(id=task.id, title=task.title, url=task.url)
 
 
 TOOLS = [
-    ToolSpec(list_items, scopes.LIST_ITEMS),
-    ToolSpec(get_item, scopes.GET_ITEM),
-    ToolSpec(create_item, scopes.CREATE_ITEM),
+    ToolSpec(list_tasks, scopes.LIST_TASKS),
+    ToolSpec(get_task, scopes.GET_TASK),
+    ToolSpec(create_task, scopes.CREATE_TASK),
 ]

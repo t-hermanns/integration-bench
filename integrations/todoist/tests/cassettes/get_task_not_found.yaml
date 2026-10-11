@@ -1,0 +1,54 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      cookie:
+      - REDACTED
+      host:
+      - api.todoist.com
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://api.todoist.com/api/v1/tasks/6Ccccccccccccccc
+  response:
+    body:
+      string: '{"error":"Task not found","error_code":478,"error_extra":{"event_id":"2845f636261f49c3a0e6f4eedc50cd0f","retry_after":5},"error_tag":"NOT_FOUND","http_code":404}'
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      connection:
+      - keep-alive
+      content-length:
+      - '161'
+      content-type:
+      - application/json
+      date:
+      - Sun, 11 Oct 2026 14:29:57 GMT
+      referrer-policy:
+      - strict-origin-when-cross-origin
+      retry-after:
+      - '5'
+      server:
+      - gunicorn
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
+      - Accept-Encoding
+      via:
+      - 1.1 3c2c38b11de7f29e091125f84ca68d28.cloudfront.net (CloudFront)
+      x-amz-cf-id:
+      - VRvOZW_lSTSjCnY8ufy0FzjkQpQBUkurAMT7AFb8Y-_D3zN5zrKDBw==
+      x-amz-cf-pop:
+      - MUC50-P4
+      x-cache:
+      - Error from cloudfront
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 404
+      message: Not Found
+version: 1

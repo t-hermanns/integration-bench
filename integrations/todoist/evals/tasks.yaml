@@ -6,11 +6,11 @@
 # packages/bench-evals/tests/test_task_files.py.
 integrations: [todoist]
 tasks: []
-#  - id: todoist-read-item
+#  - id: todoist-read-task
 #    category: read
 #    split: dev
-#    prompt: What is the title of item 1001?
+#    prompt: What is the title of task 1001?
 #    expected_calls:
-#      - tool: todoist_get_item
-#        args: {item_id: "1001"}
-#    answer_contains: [<title of item 1001 in the seed>]
+#      - tool: todoist_get_task
+#        args: {task_id: "1001"}
+#    answer_contains: [<title of task 1001 in the seed>]

@@ -1,0 +1,137 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      cookie:
+      - REDACTED
+      host:
+      - api.todoist.com
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://api.todoist.com/api/v1/tasks/filter?limit=2&query=search%3A+crash
+  response:
+    body:
+      string: "{\n\t\"results\": [\n\t\t{\n\t\t\t\"user_id\": \"61076455\",\n\t\t\t\"id\":
+        \"6hjQgmgVFcxcPxGV\",\n\t\t\t\"project_id\": \"6hjQcxgwXX8gCf4V\",\n\t\t\t\"section_id\":
+        null,\n\t\t\t\"parent_id\": null,\n\t\t\t\"added_by_uid\": \"61076455\",\n\t\t\t\"assigned_by_uid\":
+        null,\n\t\t\t\"responsible_uid\": null,\n\t\t\t\"labels\": [],\n\t\t\t\"deadline\":
+        null,\n\t\t\t\"duration\": null,\n\t\t\t\"is_collapsed\": false,\n\t\t\t\"checked\":
+        false,\n\t\t\t\"is_deleted\": false,\n\t\t\t\"added_at\": \"2026-10-11T14:28:58.862401Z\",\n\t\t\t\"completed_at\":
+        null,\n\t\t\t\"completed_by_uid\": null,\n\t\t\t\"updated_at\": \"2026-10-11T14:28:58.862424Z\",\n\t\t\t\"due\":
+        null,\n\t\t\t\"priority\": 1,\n\t\t\t\"child_order\": 1,\n\t\t\t\"order_key\":
+        \"a4LyX\",\n\t\t\t\"content\": \"Crash when config file is empty\",\n\t\t\t\"description\":
+        \"An empty config raises KeyError: 'name'.\",\n\t\t\t\"note_count\": 0,\n\t\t\t\"day_order\":
+        -1,\n\t\t\t\"completed_count\": 0,\n\t\t\t\"postponed_count\": 0\n\t\t},\n\t\t{\n\t\t\t\"user_id\":
+        \"61076455\",\n\t\t\t\"id\": \"6hjQgp2cF3W3FX33\",\n\t\t\t\"project_id\":
+        \"6hjQcxgwXX8gCf4V\",\n\t\t\t\"section_id\": null,\n\t\t\t\"parent_id\": null,\n\t\t\t\"added_by_uid\":
+        \"61076455\",\n\t\t\t\"assigned_by_uid\": null,\n\t\t\t\"responsible_uid\":
+        null,\n\t\t\t\"labels\": [],\n\t\t\t\"deadline\": null,\n\t\t\t\"duration\":
+        null,\n\t\t\t\"is_collapsed\": false,\n\t\t\t\"checked\": false,\n\t\t\t\"is_deleted\":
+        false,\n\t\t\t\"added_at\": \"2026-10-11T14:29:01.491965Z\",\n\t\t\t\"completed_at\":
+        null,\n\t\t\t\"completed_by_uid\": null,\n\t\t\t\"updated_at\": \"2026-10-11T14:29:01.491986Z\",\n\t\t\t\"due\":
+        null,\n\t\t\t\"priority\": 1,\n\t\t\t\"child_order\": 7,\n\t\t\t\"order_key\":
+        \"aAhhe\",\n\t\t\t\"content\": \"Crash on startup without network\",\n\t\t\t\"description\":
+        \"No offline fallback for the update check.\",\n\t\t\t\"note_count\": 0,\n\t\t\t\"day_order\":
+        -1,\n\t\t\t\"completed_count\": 0,\n\t\t\t\"postponed_count\": 0\n\t\t}\n\t],\n\t\"next_cursor\":
+        \"sDZoalFncDJjRjNXM0ZYMzM.hfyIZan5snyb6tu1\"\n}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      connection:
+      - keep-alive
+      content-length:
+      - '1664'
+      content-type:
+      - application/json
+      date:
+      - Sun, 11 Oct 2026 14:29:57 GMT
+      referrer-policy:
+      - strict-origin-when-cross-origin
+      server:
+      - gunicorn
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      transfer-encoding:
+      - chunked
+      vary:
+      - Accept-Encoding
+      via:
+      - 1.1 3c2c38b11de7f29e091125f84ca68d28.cloudfront.net (CloudFront)
+      x-amz-cf-id:
+      - tS7B3elkXFkl9uxGp4-O7AouNoTlFefFSds78N07rzOREBJGtEmhSQ==
+      x-amz-cf-pop:
+      - MUC50-P4
+      x-cache:
+      - Miss from cloudfront
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      cookie:
+      - REDACTED
+      host:
+      - api.todoist.com
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://api.todoist.com/api/v1/tasks/filter?limit=2&query=search%3A+crash&cursor=sDZoalFncDJjRjNXM0ZYMzM.hfyIZan5snyb6tu1
+  response:
+    body:
+      string: "{\n\t\"results\": [\n\t\t{\n\t\t\t\"user_id\": \"61076455\",\n\t\t\t\"id\":
+        \"6hjQgpCvWm4hqff3\",\n\t\t\t\"project_id\": \"6hjQcxgwXX8gCf4V\",\n\t\t\t\"section_id\":
+        null,\n\t\t\t\"parent_id\": null,\n\t\t\t\"added_by_uid\": \"61076455\",\n\t\t\t\"assigned_by_uid\":
+        null,\n\t\t\t\"responsible_uid\": null,\n\t\t\t\"labels\": [],\n\t\t\t\"deadline\":
+        null,\n\t\t\t\"duration\": null,\n\t\t\t\"is_collapsed\": false,\n\t\t\t\"checked\":
+        false,\n\t\t\t\"is_deleted\": false,\n\t\t\t\"added_at\": \"2026-10-11T14:29:04.394884Z\",\n\t\t\t\"completed_at\":
+        null,\n\t\t\t\"completed_by_uid\": null,\n\t\t\t\"updated_at\": \"2026-10-11T14:29:04.394904Z\",\n\t\t\t\"due\":
+        null,\n\t\t\t\"priority\": 1,\n\t\t\t\"child_order\": 12,\n\t\t\t\"order_key\":
+        \"aFjZ3\",\n\t\t\t\"content\": \"Crash when saving a report twice\",\n\t\t\t\"description\":
+        \"Second save hits a stale file handle.\",\n\t\t\t\"note_count\": 0,\n\t\t\t\"day_order\":
+        -1,\n\t\t\t\"completed_count\": 0,\n\t\t\t\"postponed_count\": 0\n\t\t}\n\t],\n\t\"next_cursor\":
+        null\n}\n"
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      connection:
+      - keep-alive
+      content-length:
+      - '832'
+      content-type:
+      - application/json
+      date:
+      - Sun, 11 Oct 2026 14:29:58 GMT
+      referrer-policy:
+      - strict-origin-when-cross-origin
+      server:
+      - gunicorn
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
+      - Accept-Encoding
+      via:
+      - 1.1 3c2c38b11de7f29e091125f84ca68d28.cloudfront.net (CloudFront)
+      x-amz-cf-id:
+      - OeMEnGyi3egQNAfEv4E5E2Cr3d2S8I032X-tl0f3c-7dTVIw-sKNbA==
+      x-amz-cf-pop:
+      - MUC50-P4
+      x-cache:
+      - Miss from cloudfront
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -19,20 +19,21 @@ from bench_core.auth import Credential, CredentialAuth
 from bench_core.clock import Clock
 from bench_core.http import (
     ApiClient,
+    BodyTokenPaginator,
     SlackRetryPolicy,
-    cursor,
     fetch_page,
 )
 from bench_core.permissions import NotFoundOrNoAccess, PermissionDenied
 
-from bench_todoist.models import Item, Page
+from bench_todoist.models import Page, Task
 
 PROVIDER = "Todoist"
 BASE_URL = "https://api.todoist.com/api/v1"
 USER_AGENT = "integration-bench"
 MAX_PAGE_SIZE = 100
 PAGE_SIZE_PARAM = "limit"
-PAGINATION = cursor()
+# `{"results": [...], "next_cursor": "..." | null}`, sent back as `cursor`.
+PAGINATION = BodyTokenPaginator(kind="cursor", token_path=("next_cursor",), param="cursor")
 
 
 def make_api(
@@ -54,13 +55,25 @@ def make_api(
 
 # --- Argument validation ------------------------------------------------------------------
 
-_ITEM_ID = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
+_TASK_ID = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 
 
-def item_path(item_id: str) -> str:
-    if not _ITEM_ID.match(item_id):
-        raise ToolError(f"Invalid item id {item_id!r}: use the id from a list result, e.g. '1001'.")
-    return f"/items/{item_id}"
+def task_path(task_id: str) -> str:
+    if not _TASK_ID.match(task_id):
+        raise ToolError(f"Invalid task id {task_id!r}: use the id from a list result.")
+    return f"/tasks/{task_id}"
+
+
+# Todoist's filter language treats & | ! ( ) , and more as operators.
+_SEARCH_TEXT = re.compile(r"^[\w .'-]{1,100}$")
+
+
+def search_filter(query: str) -> str:
+    if not _SEARCH_TEXT.match(query):
+        raise ToolError(
+            f"Invalid search text {query!r}: use words, spaces, dots, hyphens or apostrophes."
+        )
+    return f"search: {query}"
 
 
 def _positive(name: str, value: int) -> int:
@@ -81,22 +94,15 @@ def _body(response: httpx2.Response) -> Mapping[str, Any]:
 
 
 def error_text(response: httpx2.Response) -> str:
-    """`{"message": "...", "errors": [{"field", "code", "message"} | "..."]}`."""
+    """`{"error": "...", "error_tag": "...", "error_extra": {"argument", "expected"}}`."""
     body = _body(response)
-    parts: list[str] = []
-    for error in body.get("errors") or []:
-        if isinstance(error, str):
-            parts.append(error)
-        elif isinstance(error, Mapping):
-            text = error.get("message") or " ".join(
-                str(error[k]) for k in ("field", "code") if error.get(k)
-            )
-            if text:
-                parts.append(str(text))
-    message = body.get("message")
-    if not parts and isinstance(message, str) and message:
-        parts.append(message)
-    return "; ".join(parts) or response.reason_phrase
+    error = body.get("error")
+    text = error if isinstance(error, str) and error else response.reason_phrase
+    extra = body.get("error_extra")
+    if isinstance(extra, Mapping) and extra.get("argument"):
+        text += f" ({extra['argument']}"
+        text += f": {extra['expected']})" if extra.get("expected") else ")"
+    return text
 
 
 def raise_for_status(response: httpx2.Response, *, action: str, what: str) -> None:
@@ -138,33 +144,32 @@ class TodoistClient:
     def __init__(self, api: ApiClient) -> None:
         self.api = api
 
-    async def list_items(
+    async def list_tasks(
         self, *, query: str | None = None, cursor: str | None = None, page_size: int = 20
-    ) -> Page[Item]:
-        """Items whose title contains `query`, one page at a time."""
+    ) -> Page[Task]:
+        """Tasks whose title contains `query`, one page at a time."""
         params: dict[str, Any] = {
             PAGE_SIZE_PARAM: min(_positive("page_size", page_size), MAX_PAGE_SIZE)
         }
+        path = "/tasks"
         if query:
-            params["q"] = query
-        page = await fetch_page(self.api, "/items", PAGINATION, cursor=cursor, params=params)
-        raise_for_status(page.response, action="list items", what="The item list")
-        data = _body(page.response).get("items") or []
-        return Page[Item](
-            items=[Item.model_validate(item) for item in data], next_cursor=page.next_cursor
+            path, params["query"] = "/tasks/filter", search_filter(query)
+        page = await fetch_page(self.api, path, PAGINATION, cursor=cursor, params=params)
+        raise_for_status(page.response, action="list tasks", what="The task list")
+        data = _body(page.response).get("results") or []
+        return Page[Task](
+            items=[Task.model_validate(task) for task in data], next_cursor=page.next_cursor
         )
 
-    async def get_item(self, item_id: str) -> Item:
-        response = await self.api.get(item_path(item_id))
-        raise_for_status(response, action="read the item", what=f"Item {item_id}")
-        return Item.model_validate(response.json())
+    async def get_task(self, task_id: str) -> Task:
+        response = await self.api.get(task_path(task_id))
+        raise_for_status(response, action="read the task", what=f"Task {task_id}")
+        return Task.model_validate(response.json())
 
-    async def create_item(self, title: str, *, description: str | None = None) -> Item:
-        if not title.strip():
-            raise ToolError("The item title must not be empty.")
-        payload: dict[str, Any] = {"title": title}
+    async def create_task(self, title: str, *, description: str | None = None) -> Task:
+        payload: dict[str, Any] = {"content": title}
         if description:
             payload["description"] = description
-        response = await self.api.post("/items", json=payload)
-        raise_for_status(response, action="create an item", what="The item list")
-        return Item.model_validate(response.json())
+        response = await self.api.post("/tasks", json=payload)
+        raise_for_status(response, action="create a task", what="The task list")
+        return Task.model_validate(response.json())

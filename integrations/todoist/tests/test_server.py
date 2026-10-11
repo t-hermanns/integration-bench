@@ -9,7 +9,8 @@ from mcp.types import CallToolResult, TextContent
 
 from bench_core.testing import FakeClock
 
-from bench_todoist.fake import TodoistFake, credential, seeded_fake
+from bench_todoist.fake import FIRST_ID, TodoistFake, credential, seeded_fake
+from bench_todoist.scenarios import MISSING_ID
 from bench_todoist.scopes import READ, WRITE
 from bench_todoist.server import create_server
 from bench_todoist.tools import DESCRIPTION_LIMIT
@@ -17,9 +18,9 @@ from bench_todoist.tools import DESCRIPTION_LIMIT
 pytestmark = pytest.mark.anyio
 
 TOKEN = "server-token"
-LIST = "todoist_list_items"
-GET = "todoist_get_item"
-CREATE = "todoist_create_item"
+LIST = "todoist_list_tasks"
+GET = "todoist_get_task"
+CREATE = "todoist_create_task"
 TOOL_NAMES = {LIST, GET, CREATE}
 
 
@@ -66,7 +67,7 @@ async def test_tools_descriptions_and_annotations(client: Client) -> None:
     assert set(tools) == TOOL_NAMES
     listing = tools[LIST]
     assert listing.description is not None
-    assert listing.description.startswith("List items")
+    assert listing.description.startswith("List tasks")
     assert "ctx" not in listing.input_schema["properties"]
     assert listing.input_schema["properties"]["page_size"]["maximum"] == 50
     assert listing.output_schema is not None
@@ -92,49 +93,49 @@ async def test_missing_scopes_hide_tools(fake: TodoistFake) -> None:
 # --- Tools --------------------------------------------------------------------------------
 
 
-async def test_list_items_pages_with_cursor(client: Client) -> None:
+async def test_list_tasks_pages_with_cursor(client: Client) -> None:
     first = await call(client, LIST, query="crash", page_size=2)
-    assert len(first["items"]) == 2
-    assert set(first["items"][0]) == {"id", "title", "status"}
+    assert len(first["tasks"]) == 2
+    assert set(first["tasks"][0]) == {"id", "title", "status"}
     second = await call(client, LIST, query="crash", page_size=2, cursor=first["next_cursor"])
-    assert len(second["items"]) == 1
+    assert len(second["tasks"]) == 1
     assert "next_cursor" not in second
 
 
-async def test_list_items_detailed(client: Client) -> None:
+async def test_list_tasks_detailed(client: Client) -> None:
     page = await call(client, LIST, page_size=1, response_format="detailed")
-    hit = page["items"][0]
+    hit = page["tasks"][0]
     assert {"description", "updated_at", "url"} <= set(hit)
 
 
-async def test_get_item_concise_and_detailed(client: Client) -> None:
-    concise = await call(client, GET, item_id="1001")
+async def test_get_task_concise_and_detailed(client: Client) -> None:
+    concise = await call(client, GET, task_id=FIRST_ID)
     assert concise["title"] == "Crash when config file is empty"
     assert "url" not in concise
-    detailed = await call(client, GET, item_id="1001", response_format="detailed")
+    detailed = await call(client, GET, task_id=FIRST_ID, response_format="detailed")
     assert {"created_at", "updated_at", "url"} <= set(detailed)
 
 
 async def test_long_descriptions_are_clipped(client: Client, fake: TodoistFake) -> None:
-    item = fake.add_item("Long", description="x" * 5_000)
-    result = await call(client, GET, item_id=item["id"])
+    task = fake.add_task("Long", description="x" * 5_000)
+    result = await call(client, GET, task_id=task["id"])
     assert len(result["description"]) == DESCRIPTION_LIMIT["concise"]
     assert result["description_truncated"] is True
 
 
-async def test_create_item_then_get_it(client: Client) -> None:
+async def test_create_task_then_get_it(client: Client) -> None:
     created = await call(client, CREATE, title="New", description="Details")
-    fetched = await call(client, GET, item_id=created["id"])
+    fetched = await call(client, GET, task_id=created["id"])
     assert (fetched["title"], fetched["description"]) == ("New", "Details")
 
 
 async def test_errors_reach_the_model_as_tool_errors(client: Client) -> None:
-    missing = await client.call_tool(GET, {"item_id": "9999"})
+    missing = await client.call_tool(GET, {"task_id": MISSING_ID})
     assert missing.is_error
     assert "not found" in text(missing)
-    invalid = await client.call_tool(GET, {"item_id": "../etc"})
+    invalid = await client.call_tool(GET, {"task_id": "../etc"})
     assert invalid.is_error
-    assert "Invalid item id" in text(invalid)
+    assert "Invalid task id" in text(invalid)
     too_big = await client.call_tool(LIST, {"page_size": 500})
     assert too_big.is_error
     assert "page_size" in text(too_big)

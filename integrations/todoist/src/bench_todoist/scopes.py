@@ -9,9 +9,9 @@ from bench_core.permissions import ToolAccess, no_expansion, requires
 
 EXPAND = no_expansion
 
-READ = "items:read"
-WRITE = "items:write"
+READ = "data:read"
+WRITE = "data:read_write"
 
-LIST_ITEMS = ToolAccess("todoist_list_items", requires(READ))
-GET_ITEM = ToolAccess("todoist_get_item", requires(READ))
-CREATE_ITEM = ToolAccess("todoist_create_item", requires(WRITE), write=True)
+LIST_TASKS = ToolAccess("todoist_list_tasks", requires(READ))
+GET_TASK = ToolAccess("todoist_get_task", requires(READ))
+CREATE_TASK = ToolAccess("todoist_create_task", requires(WRITE), write=True)

@@ -1,0 +1,60 @@
+interactions:
+- request:
+    body: '{"content":"   "}'
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      content-length:
+      - '17'
+      content-type:
+      - application/json
+      cookie:
+      - REDACTED
+      host:
+      - api.todoist.com
+      user-agent:
+      - integration-bench
+    method: POST
+    uri: https://api.todoist.com/api/v1/tasks
+  response:
+    body:
+      string: '{"error":"Item content is empty","error_code":61,"error_extra":{"event_id":"3e514130badb4853acac14e451bdc73b","retry_after":3},"error_tag":"ITEM_CONTENT_EMPTY","http_code":400}'
+    headers:
+      alt-svc:
+      - h3=":443"; ma=86400
+      cache-control:
+      - no-cache
+      connection:
+      - keep-alive
+      content-length:
+      - '176'
+      content-type:
+      - application/json
+      date:
+      - Sun, 11 Oct 2026 14:29:56 GMT
+      referrer-policy:
+      - strict-origin-when-cross-origin
+      retry-after:
+      - '3'
+      server:
+      - gunicorn
+      strict-transport-security:
+      - max-age=31536000; includeSubDomains; preload
+      vary:
+      - Accept-Encoding
+      via:
+      - 1.1 3c2c38b11de7f29e091125f84ca68d28.cloudfront.net (CloudFront)
+      x-amz-cf-id:
+      - KL65gWEEaHwtK2oye7_TU-lpiODluhAEnOuO0xGj8ppICvQB0MARoA==
+      x-amz-cf-pop:
+      - MUC50-P4
+      x-cache:
+      - Error from cloudfront
+      x-content-type-options:
+      - nosniff
+    status:
+      code: 400
+      message: Bad Request
+version: 1

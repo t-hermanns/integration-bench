@@ -1,10 +1,10 @@
 # Kind of every cassette in this directory. `bench synth` writes `synthetic` ones from
 # the in-memory fake; `bench record` replaces them with `recorded` ones from the sandbox.
 cassettes:
-  create_item: synthetic
-  create_item_forbidden: synthetic
-  create_item_invalid: synthetic
-  get_item: synthetic
-  get_item_not_found: synthetic
-  list_items: synthetic
-  list_no_results: synthetic
+  create_task: recorded
+  create_task_forbidden: synthetic
+  create_task_invalid: recorded
+  get_task: recorded
+  get_task_not_found: recorded
+  list_no_results: recorded
+  list_tasks: recorded

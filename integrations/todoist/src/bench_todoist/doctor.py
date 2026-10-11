@@ -1,8 +1,7 @@
 """`bench doctor todoist`: does the live account answer?
 
 Reads the settings from `.env` (see `sandbox.SETTINGS`) and calls `PROBE`, a cheap
-authenticated read. Extend it to check the sandbox too, once `bench sandbox seed todoist`
-exists.
+authenticated read.
 """
 
 from collections.abc import Mapping
@@ -18,8 +17,7 @@ from bench_todoist.client import make_api
 from bench_todoist.sandbox import SETTINGS, live_credential
 
 TARGET = "todoist"
-PROBE = "/"
-"""Replace with a cheap authenticated endpoint (e.g. "current user")."""
+PROBE = "/tasks?limit=1"
 
 
 async def checks(

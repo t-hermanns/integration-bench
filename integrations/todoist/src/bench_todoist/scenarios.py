@@ -3,7 +3,7 @@
 Each scenario drives `TodoistClient` against the sandbox. Expected tool errors are caught,
 so the cassette holds the error response the tests then replay. Scenarios with `prepare`
 shape the fake and can only be synthesized; a `teardown` undoes what a live run created
-(it gets the run's result, e.g. the created item).
+(it gets the run's result, e.g. the created task).
 """
 
 from collections.abc import Awaitable, Callable
@@ -59,38 +59,51 @@ def _scenario(
 # --- Scenarios ----------------------------------------------------------------------------
 
 CRASHES = "crash"
-"""Matches three seeded items, so a page size of 2 gives two pages."""
+"""Matches three seeded tasks, so a page size of 2 gives two pages."""
 
 
-async def list_items(client: TodoistClient) -> None:
-    first = await client.list_items(query=CRASHES, page_size=2)
-    await client.list_items(query=CRASHES, page_size=2, cursor=first.next_cursor)
+async def list_tasks(client: TodoistClient) -> None:
+    first = await client.list_tasks(query=CRASHES, page_size=2)
+    await client.list_tasks(query=CRASHES, page_size=2, cursor=first.next_cursor)
 
 
 async def list_no_results(client: TodoistClient) -> None:
-    await client.list_items(query="kubernetes")
+    await client.list_tasks(query="kubernetes")
 
 
-async def get_item(client: TodoistClient) -> None:
-    await client.get_item("1001")
+FIRST_TASK = "Crash when config file is empty"
+MISSING_ID = "6Ccccccccccccccc"
+"""Well-formed but unused: Todoist answers 404 (a malformed id gets 400)."""
 
 
-async def get_item_not_found(client: TodoistClient) -> None:
-    await expect_tool_error(client.get_item("9999"))
+async def get_task(client: TodoistClient) -> None:
+    # Live ids are not known in advance, so look the seeded task up first.
+    page = await client.list_tasks(query=FIRST_TASK)
+    await client.get_task(page.items[0].id)
 
 
-async def create_item(client: TodoistClient) -> None:
-    await client.create_item(
+async def get_task_not_found(client: TodoistClient) -> None:
+    await expect_tool_error(client.get_task(MISSING_ID))
+
+
+async def create_task(client: TodoistClient) -> Any:
+    return await client.create_task(
         "Export button does nothing in Firefox", description="Chrome works fine."
     )
 
 
-async def create_item_invalid(client: TodoistClient) -> None:
-    await expect_tool_error(client.create_item("x" * 201))
+async def create_task_invalid(client: TodoistClient) -> None:
+    # Todoist accepts long titles; only a blank one is rejected.
+    await expect_tool_error(client.create_task("   "))
 
 
-async def create_item_forbidden(client: TodoistClient) -> None:
-    await expect_tool_error(client.create_item("Should not be created"))
+async def _close_created(api: ApiClient, task: Any) -> None:
+    # Close instead of delete: the live list only shows open tasks, and closing is undoable.
+    (await api.post(f"/tasks/{task.id}/close")).raise_for_status()
+
+
+async def create_task_forbidden(client: TodoistClient) -> None:
+    await expect_tool_error(client.create_task("Should not be created"))
 
 
 def _read_only_token(fake: TodoistFake) -> None:
@@ -98,14 +111,14 @@ def _read_only_token(fake: TodoistFake) -> None:
 
 
 SCENARIOS: dict[str, Scenario] = {
-    "list_items": _scenario(list_items, "Items matching 'crash', two pages"),
+    "list_tasks": _scenario(list_tasks, "Tasks matching 'crash', two pages"),
     "list_no_results": _scenario(list_no_results, "List without hits"),
-    "get_item": _scenario(get_item, "First seeded item"),
-    "get_item_not_found": _scenario(get_item_not_found, "Missing item"),
-    "create_item": _scenario(create_item, "New item with a description"),
-    "create_item_invalid": _scenario(create_item_invalid, "Title over 200 characters"),
-    "create_item_forbidden": _scenario(
-        create_item_forbidden, "Token without the write scope", prepare=_read_only_token
+    "get_task": _scenario(get_task, "First seeded task"),
+    "get_task_not_found": _scenario(get_task_not_found, "Missing task"),
+    "create_task": _scenario(create_task, "New task with a description", teardown=_close_created),
+    "create_task_invalid": _scenario(create_task_invalid, "Blank title"),
+    "create_task_forbidden": _scenario(
+        create_task_forbidden, "Token without the write scope", prepare=_read_only_token
     ),
 }
 
