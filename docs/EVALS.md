@@ -103,5 +103,7 @@ k=1). A failing `bench doctor` or a crashed run also files an `eval-infra` issue
 `baselines/<provider>-<variant>.json` in the `bench-results` branch (outcomes, commit, model ID); the
 first run sets it and it only moves with `--set-baseline`, so slow drift adds up instead of hiding.
 Every judged run is appended to `history/<provider>-<variant>.jsonl` there; the full logs are workflow
-artifacts. The schedule only runs while the repo variable `NIGHTLY_ENABLED` is `true`.
+artifacts. The schedule only runs while the repo variable `NIGHTLY_ENABLED` is `true`. `--integration NAME`
+(dispatch input `integration`) checks only the tasks that use one integration against the full
+baseline, for a cheap rerun after a change to that integration; it never sets a baseline.
 `.github/workflows/eval.yml` runs `bench eval` by hand (provider, integration, variant, split, k).

@@ -526,6 +526,10 @@ def regress(
     provider: Annotated[str, typer.Argument(help="Model provider")] = "gemini",
     descriptions: Annotated[str, typer.Option(help="Tool descriptions variant")] = "v2",
     split: Annotated[str, typer.Option(help="dev, test or all")] = "all",
+    integration: Annotated[
+        str | None,
+        typer.Option(help="Only tasks that use this integration (compared, never a baseline)"),
+    ] = None,
     log: Annotated[
         Path | None, typer.Option(help="Judge this JSONL log instead of running the tasks")
     ] = None,
@@ -541,9 +545,11 @@ def regress(
         raise typer.BadParameter(f"unknown provider {provider!r}")
     if split not in ("dev", "test", "all"):
         raise typer.BadParameter(f"unknown split {split!r}")
+    if integration and set_baseline:
+        raise typer.BadParameter("a baseline covers all integrations, drop --integration")
     logging.getLogger("httpx2").setLevel(logging.WARNING)
     root = repo_root()
-    tasks = pick_tasks(all_tasks(), split, None)
+    tasks = pick_tasks(all_tasks(), split, None, integration)
     by_id = {t.id: t for t in tasks}
     env = env_settings(env_file)
     stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
@@ -568,6 +574,8 @@ def regress(
     tree = results_branch.checkout(root)
     history = results_file("history", provider, descriptions, "jsonl")
     baseline_path = results_file("baselines", provider, descriptions, "json")
+    if integration and not (tree / baseline_path).exists():
+        raise typer.BadParameter(f"no baseline {baseline_path} to compare a subset with")
     (tree / history).parent.mkdir(parents=True, exist_ok=True)
     with (tree / history).open("a", encoding="utf-8", newline="\n") as f:
         f.write(json.dumps(entry, sort_keys=True) + "\n")

@@ -339,6 +339,36 @@ def test_regress_confirms_then_files_and_later_comments(
     assert f"https://github.com/me/bench/compare/{head[:7]}...{head[:7]}" in FakeIssues.filed[0][2]
 
 
+def test_regress_integration_subset_needs_a_baseline_and_never_sets_one(
+    tmp_path: Path, results: tuple[Path, list[str]]
+) -> None:
+    tree, published = results
+    log = eval_log(tmp_path / "a.jsonl", dict.fromkeys(DEV_JIRA, "No idea."))
+    result = regress(tmp_path, log, "--integration", "jira", "--set-baseline")
+    assert result.exit_code == 2
+    assert "drop --integration" in result.output
+    result = regress(tmp_path, log, "--integration", "jira")
+    assert result.exit_code == 2
+    assert "no baseline baselines/gemini-v2.json" in result.output
+    assert not (tree / "history").exists()
+    assert published == []
+
+
+def test_regress_integration_subset_is_compared_with_the_baseline(
+    tmp_path: Path, results: tuple[Path, list[str]]
+) -> None:
+    tree, published = results
+    outcomes = dict.fromkeys(DEV_JIRA, False) | {"other-task": True}
+    baseline = {"commit": "c0", "date": "x", "model": "m0", "outcomes": outcomes}
+    (tree / "baselines").mkdir()
+    (tree / "baselines" / "gemini-v2.json").write_text(json.dumps(baseline), encoding="utf-8")
+    log = eval_log(tmp_path / "a.jsonl", dict.fromkeys(DEV_JIRA, "No idea."))
+    result = regress(tmp_path, log, "--integration", "jira")
+    assert result.exit_code == 0, result.output
+    assert "no regression" in result.output
+    assert published[0].startswith("nightly: gemini v2 at ")
+
+
 def test_regress_reports_model_errors_as_infra(
     tmp_path: Path, results: tuple[Path, list[str]]
 ) -> None:
