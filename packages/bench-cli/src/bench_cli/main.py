@@ -420,7 +420,8 @@ def eval_(
         typer.echo(f"stopped: {exc}", err=True)
         if not out.exists():
             raise typer.Exit(1) from None
-    typer.echo(f"solved: {show_rate(rate(outcomes_of(out, tasks, verbose=True)))}")
+    # all tasks: a log extended with --out may also hold runs of tasks not picked now
+    typer.echo(f"solved: {show_rate(rate(outcomes_of(out, all_tasks(), verbose=True)))}")
 
 
 @app.command()
