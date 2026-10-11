@@ -70,7 +70,9 @@ bench eval gemini --split dev --descriptions v2
 runs the tasks live against the sandbox (writes leave `{run_id}` objects behind), appends
 one JSON line per run to `.bench/results/` and prints the score. `--k 3` repeats every
 task, `--task ID` picks single tasks. `bench score a.jsonl b.jsonl` scores saved logs and
-compares b against a (exact McNemar).
+compares b against a (exact McNemar). `bench report` writes [REPORT.md](../REPORT.md)
+from `.bench/results/exp-<provider>-<v1|v2>-test.jsonl` (plus
+`baseline-<provider>-v2-all.jsonl`) and `evals/REPORT.template.md`.
 
 ## Call budget
 
