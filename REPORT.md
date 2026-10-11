@@ -10,7 +10,30 @@ numbers are not comparable with each other and this is not a ranking.
 
 ## Summary
 
-With the v2 tool descriptions, Cohere Command A solves 19 of 25 test tasks instead of 13 (exact McNemar p = 0.031, significant at the 5% level). Gemini 3.5 Flash Lite and Qwen3.8 27B on Groq move in the same direction; neither change is significant on its own (sections below).
+- **Cohere Command A:** v2 raises solved test tasks from 13 to 19 of 25 (52% → 76%, +24 points): 6 gained, 0 lost, exact McNemar p = 0.031, significant at the 5% level.
+  Gained tasks by category: arguments 2, pagination 2, read 2.
+- **Cohere Command A, post hoc:** tasks solved in all 3 runs rise from 11 to 18 of 25, so v2 also makes it more consistent (section below).
+- **Gemini 3.5 Flash Lite and Qwen3.8 27B on Groq:** same direction, not significant on their own (ceiling effect, see Limitations).
+
+## What v2 fixed (Command A)
+
+From the logs of the six tasks Command A solves only with v2; v1 failed the same way in
+all three runs:
+
+- **Where an ID comes from (Slack, 3 tasks):** with v1 it passed the channel name
+  `#bench-sandbox` as `channel_id`. The server rejected it and pointed to
+  `slack_list_channels`, but the model gave up. v2 says the ID comes from the channel
+  listing, and the model lists channels first.
+- **What a read tool returns (Jira, 1 task):** with v1 it reported the status but said
+  it had no tool for the platform. v2 says `jira_get_issue` returns the full description
+  with environment details, where the platform is.
+- **Paging (Drive, 1 task):** with v1 the request for the second page failed, so the
+  answer missed a file; with v2 it fetched the second page. The logs do not show why the
+  v1 request was rejected.
+- **The right tool for the question (Drive, 1 task):** asked for a file's MIME type,
+  with v1 it read it off the search result instead of calling `gdrive_get_file_metadata`,
+  the tool for file details that the task checks. v2 says which of the two tools fits,
+  and the model calls the metadata tool.
 
 ## Method
 
@@ -32,6 +55,8 @@ With the v2 tool descriptions, Cohere Command A solves 19 of 25 test tasks inste
 
 ## Cohere Command A
 
+**v2 raises solved test tasks from 13 to 19 of 25 (52% → 76%, +24 points): 6 gained, 0 lost, exact McNemar p = 0.031, significant at the 5% level.**
+
 Model `command-a-03-2025`, 25 test tasks, 3 runs per task and variant.
 
 | | v1 | v2 |
@@ -42,12 +67,14 @@ Model `command-a-03-2025`, 25 test tasks, 3 runs per task and variant.
 
 Paired on 25 tasks: v2 solves 6 that v1 does not, v1 solves 0 that v2 does not; exact McNemar p = 0.031.
 
-- Solved only with v2: `gdrive-args-mime-type`, `gdrive-page-weekly-syncs`, `jira-read-status-and-platform`, `slack-args-history-page-size`, `slack-page-history`, `slack-read-standup`
+- Solved only with v2: `gdrive-args-mime-type` (arguments), `gdrive-page-weekly-syncs` (pagination), `jira-read-status-and-platform` (read), `slack-args-history-page-size` (arguments), `slack-page-history` (pagination), `slack-read-standup` (read)
 - Solved only with v1: none
 
 Baseline (v2, all 63 tasks incl. dev, 1 run): 51/63 (81%, 95% CI 70%-89%) solved.
 
 ## Gemini 3.5 Flash Lite
+
+**v2 raises solved test tasks from 20 to 23 of 25 (80% → 92%, +12 points): 4 gained, 1 lost, exact McNemar p = 0.375, not significant at the 5% level.**
 
 Model `gemini-3.5-flash-lite`, 25 test tasks, 3 runs per task and variant.
 
@@ -59,12 +86,14 @@ Model `gemini-3.5-flash-lite`, 25 test tasks, 3 runs per task and variant.
 
 Paired on 25 tasks: v2 solves 4 that v1 does not, v1 solves 1 that v2 does not; exact McNemar p = 0.375.
 
-- Solved only with v2: `jira-abstain-delete`, `jira-page-done`, `slack-confuse-answer-question`, `slack-write-post-owner`
-- Solved only with v1: `slack-abstain-missing-details`
+- Solved only with v2: `jira-abstain-delete` (abstention), `jira-page-done` (pagination), `slack-confuse-answer-question` (confusable), `slack-write-post-owner` (multi_step_write)
+- Solved only with v1: `slack-abstain-missing-details` (abstention)
 
 Baseline (v2, all 63 tasks incl. dev, 1 run): 59/62 (95%, 95% CI 87%-98%) solved; 1 task(s) without a valid run.
 
 ## Qwen3.8 27B on Groq
+
+**v2 raises solved test tasks from 22 to 24 of 25 (88% → 96%, +8 points): 2 gained, 0 lost, exact McNemar p = 0.500, not significant at the 5% level.**
 
 Model `qwen/qwen3.8-27b`, 25 test tasks, 1 run per task and variant.
 
@@ -76,7 +105,7 @@ Model `qwen/qwen3.8-27b`, 25 test tasks, 1 run per task and variant.
 
 Paired on 25 tasks: v2 solves 2 that v1 does not, v1 solves 0 that v2 does not; exact McNemar p = 0.500.
 
-- Solved only with v2: `slack-abstain-missing-details`, `slack-confuse-answer-question`
+- Solved only with v2: `slack-abstain-missing-details` (abstention), `slack-confuse-answer-question` (confusable)
 - Solved only with v1: none
 
 ## Secondary, post hoc: reliability (pass^3)

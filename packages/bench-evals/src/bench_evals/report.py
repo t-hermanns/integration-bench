@@ -5,9 +5,9 @@ table across models. The template (`evals/REPORT.template.md`) holds the prose a
 `$placeholders` for the generated parts.
 """
 
-from collections import defaultdict
-from collections.abc import Iterable, Sequence
-from dataclasses import dataclass
+from collections import Counter, defaultdict
+from collections.abc import Iterable, Mapping, Sequence
+from dataclasses import dataclass, field
 from statistics import mean
 from string import Template
 from typing import Any
@@ -33,6 +33,7 @@ class ModelReport:
     reliability: Paired | None  # pass^k, post hoc; None for k = 1
     baseline: Rate | None  # v2 on all tasks, k = 1
     baseline_tasks: int
+    categories: Mapping[str, str] = field(default_factory=dict[str, str])  # task -> category
 
 
 def runs_per_task(scores: Iterable[Score]) -> int:
@@ -84,6 +85,7 @@ def model_report(
         reliability=compare(pass_k(s1, k), pass_k(s2, k)) if k > 1 else None,
         baseline=rate(task_outcomes(base)) if base is not None else None,
         baseline_tasks=len({s.task for s in base}) if base is not None else 0,
+        categories={t.id: t.category for t in tasks},
     )
 
 
@@ -101,8 +103,39 @@ def show_calls(c: float | None) -> str:
     return "n/a" if c is None else f"{c:.1f}"
 
 
-def tasks_line(label: str, tasks: Sequence[str]) -> str:
-    return f"- {label}: " + (", ".join(f"`{t}`" for t in tasks) if tasks else "none")
+def pct(r: Rate) -> str:
+    return "n/a" if r.value is None else f"{r.value:.0%}"
+
+
+def direction(p: Paired) -> int:
+    return (p.only_b > p.only_a) - (p.only_b < p.only_a)
+
+
+def significance(p: float) -> str:
+    return ("significant" if p < ALPHA else "not significant") + f" at the {ALPHA:.0%} level"
+
+
+def headline(m: ModelReport) -> str:
+    """The v1 -> v2 change of the headline metric in one sentence (no final period)."""
+    s = m.solved
+    verb = {1: "raises", 0: "leaves", -1: "lowers"}[direction(s)]
+    points = "" if s.difference is None else f", {s.difference * 100:+.0f} points"
+    return (
+        f"v2 {verb} solved test tasks from {s.a.successes} to {s.b.successes} of {s.n} "
+        f"({pct(s.a)} → {pct(s.b)}{points}): {s.only_b} gained, {s.only_a} lost, "
+        f"exact McNemar {show_p(s.p_value)}, {significance(s.p_value)}"
+    )
+
+
+def by_category(tasks: Sequence[str], categories: Mapping[str, str]) -> str:
+    counts = Counter(categories.get(t, "?") for t in tasks)
+    return ", ".join(f"{c} {n}" for c, n in sorted(counts.items(), key=lambda x: (-x[1], x[0])))
+
+
+def tasks_line(label: str, tasks: Sequence[str], categories: Mapping[str, str]) -> str:
+    if not tasks:
+        return f"- {label}: none"
+    return f"- {label}: " + ", ".join(f"`{t}` ({categories.get(t, '?')})" for t in tasks)
 
 
 def runs(k: int) -> str:
@@ -114,6 +147,8 @@ def section(m: ModelReport) -> str:
     rule = "majority of " + runs(m.k) if m.k > 1 else runs(m.k)
     lines = [
         f"## {m.title}",
+        "",
+        f"**{headline(m)}.**",
         "",
         f"Model `{m.model}`, {m.tasks} test tasks, {runs(m.k)} per task and variant.",
         "",
@@ -128,8 +163,8 @@ def section(m: ModelReport) -> str:
         + (f"; {s.unpaired} task(s) unpaired" if s.unpaired else "")
         + ".",
         "",
-        tasks_line("Solved only with v2", m.only_v2),
-        tasks_line("Solved only with v1", m.only_v1),
+        tasks_line("Solved only with v2", m.only_v2, m.categories),
+        tasks_line("Solved only with v1", m.only_v1, m.categories),
     ]
     if m.baseline is not None:
         lines += [
@@ -145,36 +180,38 @@ def section(m: ModelReport) -> str:
     return "\n".join(lines)
 
 
-def direction(p: Paired) -> int:
-    return (p.only_b > p.only_a) - (p.only_b < p.only_a)
-
-
 def summary(models: Sequence[ModelReport]) -> str:
+    """Bullets: the headline model in full, the others only by direction."""
     head, rest = models[0], models[1:]
-    s = head.solved
-    lines = [
-        f"With the v2 tool descriptions, {head.title} solves {s.b.successes} of {s.n} "
-        f"test tasks instead of {s.a.successes} (exact McNemar {show_p(s.p_value)}, "
-        + ("significant" if s.p_value < ALPHA else "not significant")
-        + f" at the {ALPHA:.0%} level)."
-    ]
+    lines = [f"- **{head.title}:** {headline(head)}."]
+    if head.only_v2:
+        lines.append(f"  Gained tasks by category: {by_category(head.only_v2, head.categories)}.")
+    r = head.reliability
+    if r is not None:
+        lines.append(
+            f"- **{head.title}, post hoc:** tasks solved in all {head.k} runs rise from "
+            f"{r.a.successes} to {r.b.successes} of {r.n}, so v2 also makes it more "
+            "consistent (section below)."
+            if direction(r) > 0
+            else f"- **{head.title}, post hoc:** tasks solved in all {head.k} runs: "
+            f"{r.a.successes} → {r.b.successes} of {r.n} (section below)."
+        )
     if rest:
-        same = [m for m in rest if direction(m.solved) == direction(s)]
-        significant = [m for m in rest if m.solved.p_value < ALPHA]
+        same = all(direction(m.solved) == direction(head.solved) for m in rest)
+        significant = [m.title for m in rest if m.solved.p_value < ALPHA]
         names = " and ".join(m.title for m in rest)
-        if len(same) == len(rest):
-            lines.append(
-                f"{names} move in the same direction; "
-                + (
-                    "neither change is significant on its own"
-                    if not significant
-                    else "significant: " + ", ".join(m.title for m in significant)
-                )
-                + " (sections below)."
-            )
+        if not same:
+            lines.append(f"- **{names}:** not all in the same direction (sections below).")
         else:
-            lines.append(f"{names} do not all move in the same direction (sections below).")
-    return " ".join(lines)
+            lines.append(
+                f"- **{names}:** same direction, "
+                + (
+                    "not significant on their own (ceiling effect, see Limitations)."
+                    if not significant
+                    else "significant for " + ", ".join(significant) + "."
+                )
+            )
+    return "\n".join(lines)
 
 
 def reliability(models: Sequence[ModelReport]) -> str:

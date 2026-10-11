@@ -12,6 +12,26 @@ numbers are not comparable with each other and this is not a ranking.
 
 $summary
 
+## What v2 fixed (Command A)
+
+From the logs of the six tasks Command A solves only with v2; v1 failed the same way in
+all three runs:
+
+- **Where an ID comes from (Slack, 3 tasks):** with v1 it passed the channel name
+  `#bench-sandbox` as `channel_id`. The server rejected it and pointed to
+  `slack_list_channels`, but the model gave up. v2 says the ID comes from the channel
+  listing, and the model lists channels first.
+- **What a read tool returns (Jira, 1 task):** with v1 it reported the status but said
+  it had no tool for the platform. v2 says `jira_get_issue` returns the full description
+  with environment details, where the platform is.
+- **Paging (Drive, 1 task):** with v1 the request for the second page failed, so the
+  answer missed a file; with v2 it fetched the second page. The logs do not show why the
+  v1 request was rejected.
+- **The right tool for the question (Drive, 1 task):** asked for a file's MIME type,
+  with v1 it read it off the search result instead of calling `gdrive_get_file_metadata`,
+  the tool for file details that the task checks. v2 says which of the two tools fits,
+  and the model calls the metadata tool.
+
 ## Method
 
 - **Variants:** `descriptions/v1.yaml` (short, OpenAPI-summary style) and
