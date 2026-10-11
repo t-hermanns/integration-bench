@@ -13,6 +13,7 @@ from bench_core.http.pagination import (
     fetch_page,
     iter_pages,
     link_header,
+    next_cursor,
     next_page_token,
     page_token,
 )
@@ -45,6 +46,7 @@ __all__ = [
     "fetch_page",
     "iter_pages",
     "link_header",
+    "next_cursor",
     "next_page_token",
     "page_token",
     "parse_retry_after",

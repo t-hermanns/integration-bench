@@ -63,6 +63,7 @@ pagination:
     nextPageToken plus isLast in the body (Jira): next_page_token
     nextPageToken in the body, pageToken parameter (Google): page_token
     response_metadata.next_cursor in the body (Slack): cursor
+    next_cursor in the body, null on the last page (Todoist): next_cursor
   default: link_header
 
 retry:
@@ -83,6 +84,7 @@ error_format:
     'HTTP status with {"errorMessages": [...], "errors": {...}} (Jira)': jira
     'HTTP status with {"error": {"code", "message", "errors"}} (Google)': google
     'HTTP 200 with {"ok": false, "error": ...} (Slack)': slack
+    'HTTP status with {"error": "..."} (Todoist, OAuth servers)': error
   default: message
 
 # Computed values (never asked, not stored in the answers file).

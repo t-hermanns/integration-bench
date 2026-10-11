@@ -29,9 +29,9 @@ be updated later).
 | `base_url` | `https://...`, may carry a path prefix | `ApiClient` base URL; fake routes include the prefix |
 | `auth` | `oauth_refresh`, `client_credentials`, `bearer`, `basic` | `auth.py`, token endpoint in the fake, auth tests |
 | `token_url` | only for the two OAuth kinds | `TokenEndpoint` URL |
-| `pagination` | `link_header`, `next_page_token`, `page_token`, `cursor` | `bench_core.http` paginator, list shape in the fake |
+| `pagination` | `link_header`, `next_page_token`, `page_token`, `cursor`, `next_cursor` | `bench_core.http` paginator, list shape in the fake |
 | `retry` | `slack`, `jira`, `gdrive`, `github` | `bench_core.http` retry policy |
-| `error_format` | `message`, `jira`, `google`, `slack` | `raise_for_status` and the fake's error bodies |
+| `error_format` | `message`, `jira`, `google`, `slack`, `error` | `raise_for_status` and the fake's error bodies |
 
 ## What it generates
 
@@ -43,7 +43,7 @@ After `bench synth <name>` the package is green; then replace "items" with the r
 
 ## Checking template changes
 
-The `generator` CI job renders four combinations that together use every answer, then
+The `generator` CI job renders five combinations that together use every answer, then
 runs ruff (check and format), pyright and pytest on each. Locally: commit, render into
 `integrations/` with `bench new`, check, then remove the package and reset `pyproject.toml`
 and `uv.lock`. The template must render code that is already formatted, so keep lines

@@ -121,6 +121,11 @@ def cursor() -> BodyTokenPaginator:
     )
 
 
+def next_cursor() -> BodyTokenPaginator:
+    """`{"results": [...], "next_cursor": "..." | null}`, sent back as `cursor` (Todoist)."""
+    return BodyTokenPaginator(kind="next_cursor", token_path=("next_cursor",), param="cursor")
+
+
 # --- Opaque cursors for the model ---------------------------------------------------------
 
 

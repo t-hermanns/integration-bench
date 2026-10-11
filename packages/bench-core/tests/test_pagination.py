@@ -16,6 +16,7 @@ from bench_core.http import (
     fetch_page,
     iter_pages,
     link_header,
+    next_cursor,
     next_page_token,
     page_token,
 )
@@ -88,11 +89,17 @@ def slack(request: httpx2.Request) -> httpx2.Response:
     return httpx2.Response(200, json={"ok": True, "messages": items, "response_metadata": meta})
 
 
+def todoist(request: httpx2.Request) -> httpx2.Response:
+    offset = int(request.url.params.get("cursor") or 0)
+    items, nxt = _slice(offset)
+    return httpx2.Response(200, json={"results": items, "next_cursor": nxt and str(nxt)})
+
+
 def items_of(response: httpx2.Response) -> list[str]:
     body = response.json()
     if isinstance(body, list):
         return body
-    return next(v for k, v in body.items() if k in ("issues", "files", "messages"))
+    return next(v for k, v in body.items() if k in ("issues", "files", "messages", "results"))
 
 
 STYLES: list[tuple[str, Callable[[], Paginator], Handler, str]] = [
@@ -100,6 +107,7 @@ STYLES: list[tuple[str, Callable[[], Paginator], Handler, str]] = [
     ("next_page_token", next_page_token, jira, "/rest/api/3/search/jql"),
     ("page_token", page_token, drive, "/drive/v3/files"),
     ("cursor", cursor, slack, "/api/conversations.history"),
+    ("next_cursor", next_cursor, todoist, "/api/v1/tasks"),
 ]
 style_params = pytest.mark.parametrize(
     ("paginator", "handler", "url"),

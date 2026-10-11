@@ -38,7 +38,7 @@ MAX_TITLE = 200
 TEST_EMAIL = "bench@example.invalid"
 {%- endif %}
 {%- if pagination != 'link_header' %}
-TOKEN_PARAM = "{{ {'next_page_token': 'nextPageToken', 'page_token': 'pageToken', 'cursor': 'cursor'}[pagination] }}"
+TOKEN_PARAM = "{{ {'next_page_token': 'nextPageToken', 'page_token': 'pageToken', 'cursor': 'cursor', 'next_cursor': 'cursor'}[pagination] }}"
 {%- endif %}
 
 
@@ -150,6 +150,8 @@ class {{ cls }}Fake(FakeBackend):
         return httpx2.Response(status, json={"message": message, **extra})
 {%- elif error_format == 'jira' %}
         return httpx2.Response(status, json={"errorMessages": [message], "errors": {}, **extra})
+{%- elif error_format == 'error' %}
+        return httpx2.Response(status, json={"error": message, "error_tag": code, **extra})
 {%- elif error_format == 'google' %}
         error = {"code": status, "message": message, "errors": [{"reason": code, **extra}]}
         return httpx2.Response(status, json={"error": error})
@@ -294,6 +296,8 @@ class {{ cls }}Fake(FakeBackend):
         if more:
             body["nextPageToken"] = f"o{offset + size}"
         return self._ok(body)
+{%- elif pagination == 'next_cursor' %}
+        return self._ok({"items": chunk, "next_cursor": f"o{offset + size}" if more else None})
 {%- else %}
         next_cursor = f"o{offset + size}" if more else ""
         return self._ok({"items": chunk, "response_metadata": {"next_cursor": next_cursor}})

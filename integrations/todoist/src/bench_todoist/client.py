@@ -19,9 +19,9 @@ from bench_core.auth import Credential, CredentialAuth
 from bench_core.clock import Clock
 from bench_core.http import (
     ApiClient,
-    BodyTokenPaginator,
     SlackRetryPolicy,
     fetch_page,
+    next_cursor,
 )
 from bench_core.permissions import NotFoundOrNoAccess, PermissionDenied
 
@@ -32,8 +32,7 @@ BASE_URL = "https://api.todoist.com/api/v1"
 USER_AGENT = "integration-bench"
 MAX_PAGE_SIZE = 100
 PAGE_SIZE_PARAM = "limit"
-# `{"results": [...], "next_cursor": "..." | null}`, sent back as `cursor`.
-PAGINATION = BodyTokenPaginator(kind="cursor", token_path=("next_cursor",), param="cursor")
+PAGINATION = next_cursor()
 
 
 def make_api(

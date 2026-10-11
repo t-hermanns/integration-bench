@@ -33,7 +33,7 @@ PROVIDER = "{{ provider }}"
 BASE_URL = "{{ base_url }}"
 USER_AGENT = "integration-bench"
 MAX_PAGE_SIZE = 100
-{%- set size_param = {'link_header': 'per_page', 'next_page_token': 'maxResults', 'page_token': 'pageSize', 'cursor': 'limit'}[pagination] %}
+{%- set size_param = {'link_header': 'per_page', 'next_page_token': 'maxResults', 'page_token': 'pageSize', 'cursor': 'limit', 'next_cursor': 'limit'}[pagination] %}
 PAGE_SIZE_PARAM = "{{ size_param }}"
 PAGINATION = {{ pagination }}()
 
@@ -118,6 +118,12 @@ def error_text(response: httpx2.Response) -> str:
         return error["message"]
     return response.reason_phrase
 
+{%- elif error_format == 'error' -%}
+def error_text(response: httpx2.Response) -> str:
+    """`{"error": "...", "error_description": "..."}` (both optional)."""
+    body = _body(response)
+    parts = [str(body[k]) for k in ("error", "error_description") if body.get(k)]
+    return ": ".join(parts) or response.reason_phrase
 {%- elif error_format == 'slack' -%}
 def error_text(response: httpx2.Response) -> str:
     """`{"ok": false, "error": "code", "response_metadata": {"messages": ["..."]}}`."""

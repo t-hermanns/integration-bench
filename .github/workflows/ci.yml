@@ -69,6 +69,8 @@ jobs:
             args: >-
               -d auth=client_credentials -d pagination=page_token -d retry=github
               -d error_format=google -d "provider=Very Long Provider Name Thirty"
+          - name: bearernext
+            args: -d auth=bearer -d pagination=next_cursor -d error_format=error
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5

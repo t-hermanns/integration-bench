@@ -56,7 +56,7 @@ def test_doctor_without_settings_skips_everything(tmp_path: Path) -> None:
     assert any(line.startswith("SKIP  jira api token") for line in lines)
     assert any(line.startswith("SKIP  groq model") and "GROQ_API_KEY" in line for line in lines)
     assert any(line.startswith("SKIP  slack bot") for line in lines)
-    assert lines[-1] == "0 ok, 0 failed, 10 skipped"
+    assert lines[-1] == "0 ok, 0 failed, 11 skipped"
 
 
 @pytest.mark.usefixtures("clean_env")
