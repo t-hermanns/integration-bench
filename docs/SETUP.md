@@ -11,7 +11,7 @@ in the OS keyring, or in JSON files under `BENCH_TOKEN_DIR` if that is set.
 Provider UIs change often; the paths below are the ones that worked in October 2026.
 
 Sections: [Jira](#jira-atlassian) · [GitHub](#github) · [Google Drive](#google-drive) ·
-[Slack](#slack) · [Model keys](#model-keys) · [Check and seed](#check-and-seed) ·
+[Slack](#slack) · [Todoist](#todoist) · [Model keys](#model-keys) · [Check and seed](#check-and-seed) ·
 [CI secrets](#ci-secrets)
 
 ## Jira (Atlassian)
@@ -117,6 +117,17 @@ settings:
 ```dotenv
 SLACK_BOT_TOKEN=
 SLACK_CLIENT_ID=               # bench-dev → Basic Information
+```
+
+## Todoist
+
+The fifth integration, added with `bench new` (see
+[ADDING_AN_INTEGRATION.md](ADDING_AN_INTEGRATION.md)). Sign up for the free plan at
+app.todoist.com, then copy the API token from Settings → Integrations → Developer. The
+token has full access to the account, so use one that holds nothing but the seed tasks.
+
+```dotenv
+TODOIST_TOKEN=
 ```
 
 ## Model keys
