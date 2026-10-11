@@ -1,0 +1,46 @@
+"""Default data for the fake, shaped like the live sandbox.
+
+`bench sandbox seed` (later) creates the same items in the real test account, so the
+scenarios and their assertions hold for synthetic and recorded cassettes alike. Keep both
+in sync when changing this data.
+"""
+
+from datetime import UTC, datetime, timedelta
+
+from bench_core.clock import Clock
+from bench_core.testing import FakeClock
+
+from bench_todoist.fake.backend import TodoistFake
+
+_START = datetime(2026, 9, 1, 9, 0, tzinfo=UTC)
+
+# (title, status, description)
+ITEMS: list[tuple[str, str, str | None]] = [
+    ("Crash when config file is empty", "open", "An empty config raises KeyError: 'name'."),
+    ("Add dark mode to the dashboard", "open", "Users asked for a dark theme."),
+    ("Timeout when exporting large reports", "open", "Exports over 10k rows time out."),
+    ("Document the plugin API", "open", None),
+    ("Login fails with SSO", "closed", "Fixed by renewing the IdP certificate."),
+    ("Upgrade to the new HTTP client", "closed", None),
+    ("Crash on startup without network", "open", "No offline fallback for the update check."),
+    ("Translate the settings page", "open", "German and French first."),
+    ("Flaky export test", "closed", "Fixed the clock in the test."),
+    ("Report totals off by one", "open", "The last row is not counted."),
+    ("Add CSV import", "open", None),
+    ("Crash when saving a report twice", "open", "Second save hits a stale file handle."),
+]
+
+
+def at(hours: int) -> str:
+    return (_START + timedelta(hours=hours)).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
+def seed(fake: TodoistFake) -> None:
+    for hour, (title, status, description) in enumerate(ITEMS):
+        fake.add_item(title, description=description, status=status, created_at=at(hour * 5))
+
+
+def seeded_fake(clock: Clock | None = None, *, require_auth: bool = True) -> TodoistFake:
+    fake = TodoistFake(require_auth=require_auth, clock=clock or FakeClock())
+    seed(fake)
+    return fake

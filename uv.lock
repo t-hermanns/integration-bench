@@ -19,6 +19,7 @@ members = [
     "bench-github",
     "bench-jira",
     "bench-slack",
+    "bench-todoist",
     "integration-bench",
 ]
 
@@ -162,6 +163,17 @@ requires-dist = [{ name = "bench-core", editable = "packages/bench-core" }]
 name = "bench-slack"
 version = "0.1.0"
 source = { editable = "integrations/slack" }
+dependencies = [
+    { name = "bench-core" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "bench-core", editable = "packages/bench-core" }]
+
+[[package]]
+name = "bench-todoist"
+version = "0.1.0"
+source = { editable = "integrations/todoist" }
 dependencies = [
     { name = "bench-core" },
 ]
@@ -445,6 +457,7 @@ dependencies = [
     { name = "bench-github" },
     { name = "bench-jira" },
     { name = "bench-slack" },
+    { name = "bench-todoist" },
 ]
 
 [package.dev-dependencies]
@@ -465,6 +478,7 @@ requires-dist = [
     { name = "bench-github", editable = "integrations/github" },
     { name = "bench-jira", editable = "integrations/jira" },
     { name = "bench-slack", editable = "integrations/slack" },
+    { name = "bench-todoist", editable = "integrations/todoist" },
 ]
 
 [package.metadata.requires-dev]

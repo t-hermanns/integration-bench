@@ -1,0 +1,35 @@
+# Baseline tool descriptions (v1). The description experiment compares this against v2.
+# Only text lives here; behaviour and argument types are in tools.py.
+instructions: >-
+  Tools for Todoist items. List results come one page at a time; pass next_cursor
+  back to get the next page.
+
+tools:
+  todoist_list_items:
+    title: List items
+    description: >-
+      List items, optionally only those whose title contains a search text.
+    params:
+      query: Text the item title must contain; omit to list all items.
+      cursor: next_cursor from a previous call to get the next page; omit for page one.
+      page_size: Results per page (1-50).
+      response_format: >-
+        "concise" (default) for id, title and status; "detailed" adds the description,
+        timestamps and URL.
+
+  todoist_get_item:
+    title: Get item
+    description: >-
+      Get one item by id, including its description.
+    params:
+      item_id: Item id from a list result, e.g. "1001".
+      response_format: >-
+        "concise" (default) for the item itself; "detailed" adds timestamps and URL.
+
+  todoist_create_item:
+    title: Create item
+    description: >-
+      Create a new item.
+    params:
+      title: Item title (at most 200 characters).
+      description: Item description in plain text.

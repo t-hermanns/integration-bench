@@ -12,6 +12,7 @@ dependencies = [
     "bench-github",
     "bench-jira",
     "bench-slack",
+    "bench-todoist",
 ]
 
 [dependency-groups]
@@ -37,6 +38,7 @@ bench-gdrive = { workspace = true }
 bench-github = { workspace = true }
 bench-jira = { workspace = true }
 bench-slack = { workspace = true }
+bench-todoist = { workspace = true }
 
 [tool.ruff]
 line-length = 100

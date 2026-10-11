@@ -1,0 +1,10 @@
+# Changes here will be overwritten by Copier; do not edit manually.
+_commit: 81b753f
+_src_path: .
+auth: bearer
+base_url: https://api.todoist.com/api/v1
+error_format: message
+name: todoist
+pagination: cursor
+provider: Todoist
+retry: slack

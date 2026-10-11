@@ -1,0 +1,16 @@
+[project]
+name = "bench-todoist"
+version = "0.1.0"
+description = "Todoist MCP server for integration-bench."
+requires-python = ">=3.13"
+dependencies = ["bench-core"]
+
+[project.scripts]
+bench-todoist = "bench_todoist.server:main"
+
+[tool.uv.sources]
+bench-core = { workspace = true }
+
+[build-system]
+requires = ["uv_build>=0.8,<1"]
+build-backend = "uv_build"

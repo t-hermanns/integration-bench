@@ -1,0 +1,32 @@
+interactions:
+- request:
+    body: '{"title":"Export button does nothing in Firefox","description":"Chrome
+      works fine."}'
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      content-length:
+      - '84'
+      content-type:
+      - application/json
+      host:
+      - api.todoist.com
+      user-agent:
+      - integration-bench
+    method: POST
+    uri: https://api.todoist.com/api/v1/items
+  response:
+    body:
+      string: '{"id":"1013","title":"Export button does nothing in Firefox","status":"open","description":"Chrome
+        works fine.","created_at":"2027-01-15T08:00:00Z","updated_at":"2027-01-15T08:00:00Z","url":"https://api.todoist.com/api/v1/items/1013"}'
+    headers:
+      content-length:
+      - '234'
+      content-type:
+      - application/json
+    status:
+      code: 201
+      message: Created
+version: 1

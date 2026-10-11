@@ -1,0 +1,26 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      host:
+      - api.todoist.com
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://api.todoist.com/api/v1/items?limit=20&q=kubernetes
+  response:
+    body:
+      string: '{"items":[],"response_metadata":{"next_cursor":""}}'
+    headers:
+      content-length:
+      - '51'
+      content-type:
+      - application/json
+    status:
+      code: 200
+      message: OK
+version: 1

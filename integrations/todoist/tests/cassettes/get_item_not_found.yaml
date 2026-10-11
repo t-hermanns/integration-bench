@@ -1,0 +1,26 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - application/json
+      authorization:
+      - REDACTED
+      host:
+      - api.todoist.com
+      user-agent:
+      - integration-bench
+    method: GET
+    uri: https://api.todoist.com/api/v1/items/9999
+  response:
+    body:
+      string: '{"message":"Item 9999 does not exist."}'
+    headers:
+      content-length:
+      - '39'
+      content-type:
+      - application/json
+    status:
+      code: 404
+      message: Not Found
+version: 1
